@@ -1,0 +1,533 @@
+---
+title: Conversation Management
+description: Advanced techniques for managing, analyzing, and optimizing conversations
+---
+
+## Overview
+
+Forge provides powerful conversation management features that allow you to track, resume, analyze, and optimize your AI interactions. Each conversation maintains its own context, history, and state.
+
+## Conversation Basics
+
+### Automatic Conversation Creation
+
+By default, Forge creates a new conversation for each session:
+
+```bash
+forge "Implement user authentication"
+# Creates new conversation automatically
+```
+
+### Explicit Conversation ID
+
+You can specify a conversation ID to continue an existing conversation:
+
+```bash
+# Using --conversation-id flag
+forge --conversation-id abc123def456 "Continue implementation"
+
+# Short form
+forge -c abc123def456 "Add error handling"
+```
+
+## Conversation Commands
+
+### List Conversations
+
+View all conversations in the current workspace:
+
+```bash
+# Interactive list (allows selection)
+forge conversation list
+
+# Machine-readable format
+forge conversation list --porcelain
+```
+
+Output shows:
+- Conversation ID
+- Title (generated from content)
+- Last updated time
+- Message count
+- Token usage
+
+### Create New Conversation
+
+Explicitly start a fresh conversation:
+
+```bash
+forge conversation new
+```
+
+Use this when you want to ensure a clean context without any prior history.
+
+### Resume Conversation
+
+Continue an existing conversation in interactive mode:
+
+```bash
+forge conversation resume <conversation-id>
+```
+
+This:
+- Loads the full conversation history
+- Switches to interactive mode
+- Allows you to continue the conversation naturally
+
+### Show Conversation
+
+Display the last assistant message from a conversation:
+
+```bash
+# Rendered output
+forge conversation show <conversation-id>
+
+# Raw markdown
+forge conversation show <conversation-id> --md
+```
+
+Useful for:
+- Reviewing what was last discussed
+- Getting quick reminders
+- Extracting information from past conversations
+
+### Conversation Info
+
+Get detailed information about a conversation:
+
+```bash
+forge conversation info <conversation-id>
+```
+
+Shows:
+- Conversation metadata
+- Creation and update timestamps
+- Model used
+- Configuration settings
+- Related conversations
+
+### Conversation Statistics
+
+View usage statistics for a conversation:
+
+```bash
+# Human-readable format
+forge conversation stats <conversation-id>
+
+# Machine-readable format
+forge conversation stats <conversation-id> --porcelain
+```
+
+Displays:
+- Total messages (user and assistant)
+- Input tokens used
+- Output tokens generated
+- Total cost
+- Cache performance (hits/misses)
+
+## Advanced Features
+
+### Dump Conversation
+
+Export conversation data for archival or analysis:
+
+```bash
+# Export as JSON
+forge conversation dump <conversation-id> > conversation.json
+
+# Export as HTML
+forge conversation dump <conversation-id> --html > conversation.html
+```
+
+JSON format includes:
+- All messages with full content
+- Tool calls and results
+- Metadata and timestamps
+- Token usage per message
+
+HTML format provides:
+- Human-readable conversation view
+- Syntax highlighting for code
+- Formatted markdown rendering
+
+### Compact Conversation
+
+Reduce token usage by compacting conversation history:
+
+```bash
+forge conversation compact <conversation-id>
+```
+
+This:
+- Summarizes older messages
+- Preserves recent context
+- Reduces token count
+- Maintains conversation coherence
+
+<Warning>
+**Compaction is Irreversible**
+
+Compacted messages cannot be restored to their original form. Consider dumping the conversation first if you want to preserve the full history.
+</Warning>
+
+### Clone Conversation
+
+Create a copy of a conversation with a new ID:
+
+```bash
+# Clone conversation
+forge conversation clone <conversation-id>
+
+# Machine-readable output
+forge conversation clone <conversation-id> --porcelain
+```
+
+Useful for:
+- Branching from a specific point
+- Creating templates
+- Experimenting with different approaches
+- A/B testing prompts
+
+### Retry Last Message
+
+Retry the last assistant turn without modifying context:
+
+```bash
+forge conversation retry <conversation-id>
+```
+
+This:
+- Keeps the same conversation context
+- Generates a new response
+- Useful when the previous response was incomplete or unsatisfactory
+
+### Delete Conversation
+
+Permanently remove a conversation:
+
+```bash
+forge conversation delete <conversation-id>
+```
+
+<Warning>
+**Deletion is Permanent**
+
+Deleted conversations cannot be recovered. Consider exporting important conversations before deletion.
+</Warning>
+
+## Programmatic Usage
+
+### Generate Conversation ID
+
+Generate a new conversation ID without creating a conversation:
+
+```bash
+forge conversation new --generate-id
+```
+
+Use this to:
+- Pre-allocate IDs for workflows
+- Create ID references before starting
+- Integrate with external systems
+
+### Run with Conversation ID
+
+Start Forge with a specific conversation:
+
+```bash
+# Non-interactive mode
+forge run --conversation-id <id> "Continue the implementation"
+
+# Interactive mode
+forge --conversation-id <id>
+```
+
+## Conversation Workflows
+
+### Long-Running Project Workflow
+
+<Steps>
+
+### Initialize Project Conversation
+
+```bash
+forge "Analyze this codebase and create a refactoring plan"
+# Note the conversation ID from output
+```
+
+### Work in Sessions
+
+```bash
+# Day 1
+forge --conversation-id <id> "Implement phase 1 of the plan"
+
+# Day 2
+forge --conversation-id <id> "Continue with phase 2"
+
+# Day 3
+forge conversation show <id>  # Review progress
+forge --conversation-id <id> "Complete final phase"
+```
+
+### Review and Archive
+
+```bash
+forge conversation stats <id>
+forge conversation dump <id> --html > project-summary.html
+```
+
+</Steps>
+
+### Experimentation Workflow
+
+<Steps>
+
+### Create Base Conversation
+
+```bash
+forge "Design a new API endpoint for user management"
+# Save conversation ID: abc123
+```
+
+### Try Different Approaches
+
+```bash
+# Clone for approach A
+forge conversation clone abc123
+# Returns: def456
+forge --conversation-id def456 "Use REST architecture"
+
+# Clone for approach B  
+forge conversation clone abc123
+# Returns: ghi789
+forge --conversation-id ghi789 "Use GraphQL architecture"
+```
+
+### Compare Results
+
+```bash
+forge conversation show def456 > approach-a.md
+forge conversation show ghi789 > approach-b.md
+diff approach-a.md approach-b.md
+```
+
+</Steps>
+
+### Cost Optimization Workflow
+
+<Steps>
+
+### Monitor Usage
+
+```bash
+# Check conversation stats regularly
+forge conversation stats <id> --porcelain
+```
+
+### Compact When Needed
+
+```bash
+# If token count is high, compact
+forge conversation dump <id> > backup.json
+forge conversation compact <id>
+```
+
+### Review Impact
+
+```bash
+# Compare stats before and after
+forge conversation stats <id>
+```
+
+</Steps>
+
+## Context Management
+
+### Understanding Context Windows
+
+Forge automatically manages context:
+- Recent messages are always included
+- Older messages are summarized when necessary
+- Tool results are managed for relevance
+- Context window adapts to model limits
+
+### Manual Context Control
+
+Control context size through compaction:
+
+```bash
+# Compact to reduce tokens
+forge conversation compact <id>
+
+# Or start fresh when context is no longer relevant
+forge conversation new
+```
+
+### Context Preservation
+
+Important context is preserved through:
+- Automatic summarization
+- Smart message selection
+- Tool result caching
+- Conversation metadata
+
+## Integration with Other Features
+
+### With Sandboxes
+
+```bash
+# Start conversation in sandbox
+forge --sandbox experiment "Try new approach"
+# Note conversation ID
+
+# Resume in same sandbox
+forge --sandbox experiment --conversation-id <id>
+```
+
+### With Custom Agents
+
+```bash
+# Use agent with specific conversation
+forge --conversation-id <id> agent test-generator "Add more tests"
+```
+
+### With Data Processing
+
+```bash
+# Continue data processing in existing conversation
+forge data process --conversation-id <id> input.jsonl schema.json
+```
+
+## Configuration
+
+### Maximum Conversations
+
+Control how many conversations are shown in lists:
+
+```bash
+# .env
+FORGE_MAX_CONVERSATIONS=100  # Default is 100
+```
+
+### Conversation Storage
+
+Conversations are stored in:
+- Local workspace: `.forge/conversations/`
+- User directory: `~/.config/forge/conversations/`
+
+Storage format:
+- SQLite database for metadata
+- JSON files for message history
+
+## Best Practices
+
+### Naming and Organization
+
+While conversation IDs are auto-generated, you can organize through:
+- Consistent commit messages
+- Clear initial prompts (used for title generation)
+- Regular cleanup of unused conversations
+
+### When to Start New Conversations
+
+Create a new conversation when:
+- Starting a completely different task
+- Context from previous conversation isn't relevant
+- Token usage is too high
+- You want to try a different approach
+
+### When to Continue Conversations
+
+Resume an existing conversation when:
+- Building on previous work
+- Context is still relevant
+- Following a multi-step plan
+- Iterating on a solution
+
+### Regular Maintenance
+
+```bash
+# Monthly cleanup script
+#!/bin/bash
+
+# List all conversations
+forge conversation list --porcelain > conversations.txt
+
+# Review and delete old ones
+while read -r conv_id; do
+    echo "Review: $conv_id"
+    forge conversation info "$conv_id"
+    read -p "Delete? (y/n) " -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        forge conversation delete "$conv_id"
+    fi
+done < conversations.txt
+```
+
+## Troubleshooting
+
+### "Conversation not found"
+
+Check that:
+- Conversation ID is correct
+- You're in the right workspace
+- Conversation wasn't deleted
+
+```bash
+forge conversation list --porcelain | grep <id>
+```
+
+### High Token Usage
+
+Reduce token consumption:
+
+```bash
+# Compact the conversation
+forge conversation compact <id>
+
+# Or start fresh
+forge conversation new
+```
+
+### Lost Conversation
+
+Find conversations:
+
+```bash
+# List all conversations
+forge conversation list
+
+# Search by recent activity
+forge conversation list --porcelain | head -10
+```
+
+## Performance Optimization
+
+### Cache Usage
+
+Forge uses caching to reduce costs:
+- Conversation metadata is cached
+- Tool results are cached when applicable
+- Model responses use prompt caching when available
+
+Monitor cache performance:
+
+```bash
+forge conversation stats <id> --porcelain | grep cache
+```
+
+### Token Reduction Strategies
+
+1. **Regular compaction**: Compact long conversations
+2. **Focused prompts**: Be specific to reduce back-and-forth
+3. **Tool usage**: Let tools provide context instead of long explanations
+4. **New conversations**: Start fresh when context shifts
+
+<Warning>
+**Conversation Limits**
+
+While conversations have unlimited context through automatic summarization:
+- Very long conversations may become slower
+- Token costs increase with conversation length
+- Regular compaction is recommended for active conversations
+</Warning>

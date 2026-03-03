@@ -1,0 +1,356 @@
+---
+title: Creating Custom Agents
+description: Build specialized agents with custom prompts, tools, and behaviors
+---
+
+## Overview
+
+Forge allows you to create custom agents tailored to specific tasks. Custom agents can have specialized system prompts, tool configurations, and behaviors that make them experts in particular domains.
+
+## Agent Structure
+
+Custom agents in Forge are defined using a template structure that includes:
+
+- **System Information**: Context about the environment and available tools
+- **Tool Usage Instructions**: How the agent should use tools
+- **Custom Rules**: Project-specific guidelines
+- **Non-negotiable Rules**: Core behaviors that must be followed
+
+## Creating a Custom Agent
+
+<Steps>
+
+### Define the Agent Template
+
+Create a new Markdown template file for your agent:
+
+```markdown
+<system_information>
+{{> forge-partial-system-info.md }}
+</system_information>
+
+{{#if (not tool_supported)}}
+<available_tools>
+{{tool_information}}
+</available_tools>
+{{/if}}
+
+<agent_role>
+You are a specialized agent for [specific purpose].
+Your primary responsibilities include:
+- [Responsibility 1]
+- [Responsibility 2]
+- [Responsibility 3]
+</agent_role>
+
+<tool_usage_instructions>
+- Use tools to accomplish tasks step-by-step
+- Always verify your work using the appropriate tools
+- [Custom tool usage guidelines]
+</tool_usage_instructions>
+
+{{#if custom_rules}}
+<project_guidelines>
+{{custom_rules}}
+</project_guidelines>
+{{/if}}
+
+<non_negotiable_rules>
+- [Core rule 1]
+- [Core rule 2]
+- Always cite code references using `filepath:line` format
+</non_negotiable_rules>
+```
+
+### Configure Custom Rules in forge.yaml
+
+Add project-specific guidelines that all agents should follow:
+
+```yaml
+# forge.yaml
+custom_rules: |
+  1. Always add comprehensive error handling to any code you write.
+  2. Include unit tests for all new functions.
+  3. Follow our team's naming convention: camelCase for variables, PascalCase for classes.
+  4. Use our company's logging framework for all log statements.
+```
+
+### Register the Agent
+
+Add your custom agent to Forge's agent registry:
+
+```rust
+// In agent_registry.rs
+pub fn register_custom_agents(registry: &mut AgentRegistry) {
+    registry.register(
+        "my-custom-agent",
+        AgentDefinition {
+            name: "my-custom-agent",
+            description: "Specialized agent for specific tasks",
+            template: include_str!("templates/my-custom-agent.md"),
+            tools: vec!["read", "write", "bash"],
+        },
+    );
+}
+```
+
+### Use the Custom Agent
+
+Invoke your custom agent through the CLI or programmatically:
+
+```bash
+forge agent my-custom-agent "Task description"
+```
+
+</Steps>
+
+## Template Variables
+
+Forge provides several template variables you can use in your agent definitions:
+
+| Variable | Description |
+|----------|-------------|
+| `{{tool_information}}` | List of available tools and their descriptions |
+| `{{custom_rules}}` | Custom rules from forge.yaml |
+| `{{> forge-partial-system-info.md}}` | Standard system information partial |
+| `{{#if tool_supported}}` | Conditional for native tool support |
+| `{{#if custom_rules}}` | Conditional for custom rules presence |
+
+## Agent Configuration Options
+
+### Tool Access Control
+
+Limit which tools an agent can access:
+
+```rust
+AgentDefinition {
+    name: "read-only-agent",
+    description: "Agent that can only read files",
+    template: include_str!("templates/read-only-agent.md"),
+    tools: vec!["read", "glob", "grep"], // Only read operations
+}
+```
+
+### Model Selection
+
+Specify which model an agent should use:
+
+```yaml
+# forge.yaml
+model: "claude-3.7-sonnet"  # Default for all agents
+temperature: 0.2  # Lower for more deterministic agents
+```
+
+### Custom Commands
+
+Define shortcuts for common agent tasks:
+
+```yaml
+# forge.yaml
+commands:
+  - name: "security-review"
+    description: "Perform security analysis"
+    prompt: "Review the codebase for security vulnerabilities, focusing on authentication, authorization, and data validation"
+  
+  - name: "refactor"
+    description: "Refactor selected code"
+    prompt: "Refactor this code to improve readability, performance, and maintainability"
+```
+
+## Example: Test Generation Agent
+
+```markdown
+<system_information>
+{{> forge-partial-system-info.md }}
+</system_information>
+
+**Agent Role:**
+You are a specialized test generation agent for Rust codebases.
+
+Your responsibilities:
+- Generate comprehensive test cases for Rust functions and modules
+- Follow the three-step test pattern: setup, execute, assert
+- Use pretty_assertions for better error messages
+- Create reusable fixtures
+- Ensure tests are deterministic and isolated
+
+**Testing Guidelines:**
+1. Always use the three-step pattern:
+   ```rust
+   use pretty_assertions::assert_eq;
+   
+   fn test_foo() {
+       let fixture = ...; // Setup
+       let actual = ...; // Execute
+       let expected = ...; // Define expected
+       assert_eq!(actual, expected); // Assert
+   }
+   ```
+
+2. Use descriptive variable names: `fixture`, `actual`, `expected`
+3. Prefer `assert_eq!` on full objects rather than individual fields
+4. Use `unwrap()` in tests unless error details are needed
+5. Create generic, reusable fixtures
+6. Use `derive_setters::Setters` for test data builders
+
+**Tool Usage Instructions:**
+- Read source code to understand what needs testing
+- Analyze existing tests to match the project's style
+- Use `grep` to find similar test patterns in the codebase
+- Write tests inline in the same file as the source code
+
+\{\{#if custom_rules\}\}
+**Project Guidelines:**
+\{\{custom_rules\}\}
+\{\{/if\}\}
+
+**Non-Negotiable Rules:**
+- Always write tests in the same file as the code being tested
+- Use pretty_assertions for all equality checks
+- Follow the three-step test pattern without exception
+- Never use placeholders in tests - write complete, runnable code
+```
+
+Use this agent:
+
+```bash
+forge agent test-generator "Generate tests for src/utils/parser.rs"
+```
+
+## Example: Documentation Agent
+
+```markdown
+<agent_role>
+You are a technical documentation specialist.
+
+Your responsibilities:
+- Write clear, concise Rust documentation
+- Document all public APIs with /// comments
+- Include # Arguments and # Errors sections
+- Focus on functionality, not examples (docs are for LLMs)
+</agent_role>
+
+<documentation_standards>
+- Use `///` for public item documentation
+- Use `//!` for module-level documentation
+- Document parameters with `# Arguments` section
+- Document possible errors with `# Errors` section
+- Be concise - focus on what the code does, not how
+- Do NOT include code examples
+</documentation_standards>
+
+<non_negotiable_rules>
+- Always document public functions, structs, enums, and traits
+- Never include code examples in documentation
+- Keep documentation focused and concise
+</non_negotiable_rules>
+```
+
+## Best Practices
+
+### 1. Single Responsibility
+
+Each agent should have a clear, focused purpose:
+
+```markdown
+<agent_role>
+You are a security auditor specialized in authentication and authorization.
+</agent_role>
+```
+
+### 2. Clear Instructions
+
+Provide explicit, actionable guidelines:
+
+```markdown
+<guidelines>
+- Always check for SQL injection vulnerabilities
+- Verify proper input sanitization
+- Ensure authentication tokens are validated
+</guidelines>
+```
+
+### 3. Tool Restrictions
+
+Limit tools to what the agent actually needs:
+
+```rust
+tools: vec!["read", "grep", "glob"] // Read-only for analysis agents
+```
+
+### 4. Error Prevention
+
+Include rules to prevent common mistakes:
+
+```markdown
+<non_negotiable_rules>
+- Never commit sensitive data
+- Always run tests before marking work complete
+- Use the Read tool before editing files
+</non_negotiable_rules>
+```
+
+<Warning>
+**Agent Design Considerations**
+
+- Agents inherit base behaviors from Forge's system prompt
+- Custom rules in forge.yaml apply to all agents
+- Tool access cannot override security restrictions
+- Agent templates use Handlebars syntax for templating
+</Warning>
+
+## Managing Agents
+
+### List Available Agents
+
+```bash
+forge agent list
+```
+
+### View Agent Details
+
+```bash
+forge agent info my-custom-agent
+```
+
+## Advanced Techniques
+
+### Multi-Agent Workflows
+
+Combine multiple specialized agents:
+
+```bash
+# First agent: analyze code
+forge agent analyzer "Find performance bottlenecks in src/"
+
+# Second agent: optimize
+forge agent optimizer "Optimize the identified bottlenecks"
+
+# Third agent: test
+forge agent test-generator "Generate performance tests"
+```
+
+### Contextual Agents
+
+Create agents that adapt to project structure:
+
+```markdown
+{{#if (eq project_type "rust")}}
+<rust_specific_rules>
+- Use cargo test for running tests
+- Follow Rust naming conventions
+</rust_specific_rules>
+{{/if}}
+```
+
+### Dynamic Tool Selection
+
+Allow agents to use different tools based on context:
+
+```rust
+let tools = if is_readonly {
+    vec!["read", "grep", "glob"]
+} else {
+    vec!["read", "write", "edit", "grep", "glob"]
+};
+```

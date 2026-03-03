@@ -1,0 +1,408 @@
+---
+title: Git Worktree Sandboxes
+description: Create isolated development environments using git worktrees for safe experimentation
+---
+
+## Overview
+
+Forge's sandbox feature leverages git worktrees to create isolated development environments. This allows you to experiment with changes, test new features, or work on multiple branches simultaneously without affecting your main working directory.
+
+## What are Git Worktrees?
+
+Git worktrees allow you to have multiple working directories attached to the same repository. Each worktree:
+
+- Has its own checked-out branch
+- Shares the same git history and objects
+- Can be modified independently
+- Doesn't affect other worktrees or the main directory
+
+## Creating a Sandbox
+
+### Using the --sandbox Flag
+
+Create a sandbox when starting Forge:
+
+```bash
+# Create a sandbox named "experiment"
+forge --sandbox experiment
+
+# Create sandbox and specify directory
+forge --sandbox feature-test --directory /path/to/work
+```
+
+### What Happens
+
+<Steps>
+
+### Verification
+
+Forge checks if you're in a git repository:
+- Runs `git rev-parse --is-inside-work-tree`
+- Gets the repository root with `git rev-parse --show-toplevel`
+- Validates the parent directory exists
+
+### Directory Creation
+
+The worktree is created in the parent directory of your git repository:
+```
+parent-directory/
+├── my-project/          # Original repository
+└── experiment/          # Sandbox worktree
+```
+
+### Branch Handling
+
+Forge handles branch creation intelligently:
+- If a branch with the sandbox name exists, it checks it out
+- If not, a new branch is created from the current HEAD
+- The worktree is linked to this branch
+
+### Environment Setup
+
+Forge automatically:
+- Changes the working directory to the new worktree
+- Displays a confirmation message
+- Starts the session in the isolated environment
+
+</Steps>
+
+## Usage Examples
+
+### Experiment with Refactoring
+
+```bash
+# Create a sandbox for refactoring work
+forge --sandbox refactor-auth
+
+# Inside Forge, make changes freely
+"Refactor the authentication module to use async/await"
+
+# Changes only affect the worktree, not your main branch
+```
+
+### Test a Risky Change
+
+```bash
+# Create sandbox for testing
+forge --sandbox test-new-db
+
+# Try out database migration
+"Update the database schema to use UUIDs for primary keys"
+
+# If it works, merge back; if not, just delete the worktree
+```
+
+### Parallel Development
+
+```bash
+# Terminal 1: Work on feature A
+forge --sandbox feature-a
+
+# Terminal 2: Work on feature B
+forge --sandbox feature-b
+
+# Each sandbox is completely independent
+```
+
+## Reusing Sandboxes
+
+If a sandbox already exists, Forge will reuse it:
+
+```bash
+# First time - creates the worktree
+forge --sandbox experiment
+# Output: Worktree [Created] /path/to/experiment
+
+# Second time - reuses existing worktree
+forge --sandbox experiment  
+# Output: Worktree [Reused] /path/to/experiment
+```
+
+<Warning>
+**Sandbox Reuse Check**
+
+Forge verifies the directory is a valid git worktree before reusing:
+- Checks for `.git` file (worktree marker)
+- Runs `git rev-parse --is-inside-work-tree`
+- Fails if directory exists but isn't a git worktree
+
+If you see an error, you may need to manually remove the conflicting directory.
+</Warning>
+
+## Managing Sandboxes
+
+### List All Worktrees
+
+```bash
+cd /path/to/main/repo
+git worktree list
+```
+
+Output:
+```
+/path/to/main/repo      abc1234 [main]
+/path/to/experiment     def5678 [experiment]
+/path/to/feature-test   ghi9012 [feature-test]
+```
+
+### Remove a Sandbox
+
+```bash
+# Remove the worktree
+git worktree remove experiment
+
+# Or manually delete and prune
+rm -rf /path/to/experiment
+git worktree prune
+```
+
+### Clean Up All Sandboxes
+
+```bash
+# List worktrees
+git worktree list
+
+# Remove each one
+git worktree remove <worktree-path>
+```
+
+## Advanced Usage
+
+### Sandbox with Specific Directory
+
+Combine sandbox with directory flag:
+
+```bash
+# Create sandbox and work in specific subdirectory
+forge --sandbox api-refactor --directory src/api
+
+# Worktree is created, then Forge changes to src/api within it
+```
+
+### Working on Existing Branches
+
+Create a sandbox from an existing branch:
+
+```bash
+# If branch "feature-x" already exists:
+forge --sandbox feature-x
+
+# Forge checks out the existing branch in the worktree
+```
+
+### Integration with Conversations
+
+Sandboxes work seamlessly with conversation management:
+
+```bash
+# Start work in sandbox
+forge --sandbox experiment "Implement new feature"
+
+# Later, resume the same conversation in the same sandbox
+forge --sandbox experiment --conversation <conversation-id>
+```
+
+## Common Workflows
+
+### Safe Experimentation Workflow
+
+<Steps>
+
+### Create Sandbox
+
+```bash
+forge --sandbox try-new-approach
+```
+
+### Make Changes
+
+```bash
+# Inside Forge session
+"Try implementing feature X using approach Y"
+"Run tests to verify it works"
+```
+
+### Review Results
+
+```bash
+# In the sandbox worktree
+git diff
+git log
+```
+
+### Merge or Discard
+
+If successful:
+```bash
+# Commit in sandbox
+git add .
+git commit -m "Implement feature X"
+
+# Switch to main and merge
+cd /path/to/main/repo
+git merge try-new-approach
+```
+
+If unsuccessful:
+```bash
+# Just remove the worktree
+git worktree remove try-new-approach
+```
+
+</Steps>
+
+### Multi-Feature Development
+
+<Steps>
+
+### Create Sandboxes for Each Feature
+
+```bash
+forge --sandbox feature-1 "Implement user authentication"
+# In another terminal
+forge --sandbox feature-2 "Add payment processing"
+```
+
+### Work Independently
+
+Each terminal works in isolation:
+- No conflicts between features
+- Different conversation contexts
+- Independent git histories
+
+### Merge When Ready
+
+Merge features in any order:
+```bash
+cd /path/to/main/repo
+git merge feature-1
+git merge feature-2
+```
+
+</Steps>
+
+## Troubleshooting
+
+### "Not in a git repository"
+
+Ensure you're starting Forge from within a git repository:
+
+```bash
+cd /path/to/git/repo
+forge --sandbox mysandbox
+```
+
+### "Directory exists but is not a git worktree"
+
+A non-worktree directory has the same name:
+
+```bash
+# Remove the conflicting directory
+rm -rf /path/to/parent/mysandbox
+
+# Try again
+forge --sandbox mysandbox
+```
+
+### "Cannot create worktree in parent directory"
+
+Repository is at filesystem root:
+- This is a limitation of the worktree approach
+- Move your repository to a non-root location
+
+### Worktree Shows as "locked"
+
+```bash
+# Check worktree status
+git worktree list
+
+# Unlock if needed
+git worktree unlock <worktree-name>
+```
+
+## Best Practices
+
+### Naming Conventions
+
+Use descriptive sandbox names:
+
+```bash
+# Good
+forge --sandbox refactor-database
+forge --sandbox test-performance
+forge --sandbox fix-bug-123
+
+# Avoid
+forge --sandbox temp
+forge --sandbox test
+forge --sandbox x
+```
+
+### Clean Up Regularly
+
+Remove unused sandboxes:
+
+```bash
+# Weekly cleanup
+git worktree list
+git worktree remove <unused-worktrees>
+```
+
+### Commit Before Removing
+
+If the sandbox has valuable work:
+
+```bash
+# Commit in the sandbox
+cd /path/to/sandbox
+git add .
+git commit -m "Work from sandbox"
+
+# Now safe to remove the worktree
+cd /path/to/main/repo
+git worktree remove /path/to/sandbox
+```
+
+### Use for Isolated Testing
+
+Sandboxes are perfect for:
+- Trying new dependencies
+- Testing destructive operations
+- Experimenting with major refactors
+- Working on proof-of-concepts
+
+<Warning>
+**Important Limitations**
+
+- Sandboxes require a git repository
+- Parent directory must be writable
+- Cannot create sandbox at filesystem root
+- Shared git objects mean disk space savings but also shared history
+- Uncommitted changes in sandbox are lost if worktree is removed
+</Warning>
+
+## Integration with Other Features
+
+### With Conversation Management
+
+```bash
+# Start conversation in sandbox
+forge --sandbox feature-x "Start working on feature"
+
+# Resume later in same sandbox
+forge --sandbox feature-x --conversation-id <id>
+```
+
+### With Custom Agents
+
+```bash
+# Use custom agent in sandbox
+forge --sandbox security-review agent security-auditor "Review authentication"
+```
+
+### With MCP Servers
+
+MCP servers work normally in sandboxes:
+```bash
+forge --sandbox browser-test "Use the browser MCP server to test the UI"
+```

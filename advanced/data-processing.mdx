@@ -1,0 +1,540 @@
+---
+title: JSONL Data Processing
+description: Process structured data using AI with batch operations and schema validation
+---
+
+## Overview
+
+Forge's data processing feature allows you to apply AI-powered transformations to large datasets in JSONL (JSON Lines) format. This is particularly useful for:
+
+- Data enrichment and augmentation
+- Batch classification tasks
+- Content generation at scale
+- Dataset validation and cleaning
+- Synthetic data generation
+
+## Basic Usage
+
+### Command Structure
+
+```bash
+forge data process <input.jsonl> <schema.json> [options]
+```
+
+### Required Files
+
+<Steps>
+
+### Input File (JSONL)
+
+A JSONL file where each line is a valid JSON object:
+
+```jsonl
+{"id": 1, "text": "First item"}
+{"id": 2, "text": "Second item"}
+{"id": 3, "text": "Third item"}
+```
+
+### Schema File (JSON)
+
+A JSON Schema defining the expected output structure:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "number" },
+    "text": { "type": "string" },
+    "sentiment": { 
+      "type": "string",
+      "enum": ["positive", "negative", "neutral"]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "required": ["id", "text", "sentiment", "confidence"]
+}
+```
+
+</Steps>
+
+### Example
+
+```bash
+forge data process input.jsonl schema.json \
+  --system-prompt prompts/system.txt \
+  --user-prompt prompts/user.txt \
+  --concurrency 5
+```
+
+## Configuration Options
+
+### System Prompt
+
+Define the AI's behavior and role:
+
+```bash
+forge data process input.jsonl schema.json \
+  --system-prompt system.txt
+```
+
+`system.txt`:
+```
+You are a sentiment analysis expert. Analyze the provided text and 
+classify its sentiment as positive, negative, or neutral. 
+Provide a confidence score between 0 and 1.
+```
+
+### User Prompt Template
+
+Define how each data item is presented:
+
+```bash
+forge data process input.jsonl schema.json \
+  --user-prompt user.txt
+```
+
+`user.txt`:
+```
+Analyze the following text:
+
+Text: {{text}}
+
+Provide sentiment classification and confidence score.
+```
+
+The `{{text}}` placeholder is replaced with data from the input JSONL.
+
+### Concurrency Control
+
+Process multiple items in parallel:
+
+```bash
+forge data process input.jsonl schema.json --concurrency 10
+```
+
+- Default: `5`
+- Higher values: Faster processing, more API load
+- Lower values: Slower processing, more conservative
+
+## Common Use Cases
+
+### Sentiment Analysis
+
+**Input (reviews.jsonl):**
+```jsonl
+{"id": 1, "review": "This product is amazing!"}
+{"id": 2, "review": "Terrible quality, waste of money."}
+{"id": 3, "review": "It's okay, nothing special."}
+```
+
+**Schema (sentiment-schema.json):**
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "number" },
+    "review": { "type": "string" },
+    "sentiment": {
+      "type": "string",
+      "enum": ["positive", "negative", "neutral"]
+    },
+    "score": { "type": "number", "minimum": -1, "maximum": 1 }
+  },
+  "required": ["id", "sentiment", "score"]
+}
+```
+
+**Command:**
+```bash
+forge data process reviews.jsonl sentiment-schema.json \
+  --system-prompt "Analyze sentiment of product reviews" \
+  --user-prompt "Review: {{review}}"
+```
+
+### Data Enrichment
+
+**Input (companies.jsonl):**
+```jsonl
+{"name": "Acme Corp", "industry": "Technology"}
+{"name": "TechStart Inc", "industry": "Software"}
+```
+
+**Schema (enrichment-schema.json):**
+```json
+{
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "industry": { "type": "string" },
+    "description": { "type": "string" },
+    "typical_services": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "market_position": {
+      "type": "string",
+      "enum": ["startup", "growing", "established", "enterprise"]
+    }
+  },
+  "required": ["name", "description", "typical_services", "market_position"]
+}
+```
+
+**Command:**
+```bash
+forge data process companies.jsonl enrichment-schema.json \
+  --system-prompt "Enrich company data with additional information" \
+  --user-prompt "Company: {{name}}, Industry: {{industry}}"
+```
+
+### Text Classification
+
+**Input (support-tickets.jsonl):**
+```jsonl
+{"ticket_id": "T001", "message": "I can't log into my account"}
+{"ticket_id": "T002", "message": "How do I cancel my subscription?"}
+{"ticket_id": "T003", "message": "The app crashes when I upload files"}
+```
+
+**Schema (classification-schema.json):**
+```json
+{
+  "type": "object",
+  "properties": {
+    "ticket_id": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["authentication", "billing", "technical", "general"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "urgent"]
+    },
+    "suggested_team": { "type": "string" }
+  },
+  "required": ["ticket_id", "category", "priority", "suggested_team"]
+}
+```
+
+**Command:**
+```bash
+forge data process support-tickets.jsonl classification-schema.json \
+  --system-prompt "Classify support tickets by category and priority" \
+  --user-prompt "Ticket {{ticket_id}}: {{message}}" \
+  --concurrency 10
+```
+
+### Synthetic Data Generation
+
+**Input (templates.jsonl):**
+```jsonl
+{"id": 1, "category": "product_review", "tone": "positive"}
+{"id": 2, "category": "product_review", "tone": "negative"}
+{"id": 3, "category": "support_inquiry", "tone": "confused"}
+```
+
+**Schema (generation-schema.json):**
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": { "type": "number" },
+    "category": { "type": "string" },
+    "tone": { "type": "string" },
+    "generated_text": { "type": "string", "minLength": 50 },
+    "word_count": { "type": "number" }
+  },
+  "required": ["id", "generated_text", "word_count"]
+}
+```
+
+**System Prompt (generate-system.txt):**
+```
+You are a content generator. Create realistic, diverse text samples 
+based on the category and tone specified. Make each sample unique 
+and natural-sounding.
+```
+
+**User Prompt (generate-user.txt):**
+```
+Generate a {{category}} with a {{tone}} tone.
+```
+
+**Command:**
+```bash
+forge data process templates.jsonl generation-schema.json \
+  --system-prompt generate-system.txt \
+  --user-prompt generate-user.txt \
+  --concurrency 3
+```
+
+## Advanced Features
+
+### Conversation Context
+
+Continue processing in an existing conversation:
+
+```bash
+forge data process input.jsonl schema.json \
+  --conversation-id <id>
+```
+
+This maintains context from previous processing runs.
+
+### Template Variables
+
+Use any field from the input JSON in your prompts:
+
+**Input:**
+```jsonl
+{"name": "Alice", "age": 30, "city": "New York"}
+```
+
+**User Prompt:**
+```
+Create a profile for {{name}}, who is {{age}} years old 
+and lives in {{city}}.
+```
+
+### Schema Validation
+
+Forge validates output against your schema:
+- Type checking (string, number, boolean, array, object)
+- Required fields enforcement
+- Enum validation
+- Range validation (minimum, maximum)
+- Pattern matching (regex)
+- Custom constraints
+
+Invalid outputs are rejected and retried automatically.
+
+## Output Format
+
+Processed data is written to stdout in JSONL format:
+
+```bash
+forge data process input.jsonl schema.json > output.jsonl
+```
+
+Each output line contains:
+- All original fields from input
+- New fields generated by the AI
+- Fields validated against the schema
+
+**Example Output:**
+```jsonl
+{"id":1,"text":"First item","sentiment":"neutral","confidence":0.7}
+{"id":2,"text":"Second item","sentiment":"positive","confidence":0.9}
+{"id":3,"text":"Third item","sentiment":"negative","confidence":0.85}
+```
+
+## Performance Optimization
+
+### Optimal Concurrency
+
+Choose concurrency based on:
+
+```bash
+# Small datasets (< 100 items): Low concurrency
+forge data process small.jsonl schema.json --concurrency 3
+
+# Medium datasets (100-1000 items): Medium concurrency  
+forge data process medium.jsonl schema.json --concurrency 5
+
+# Large datasets (> 1000 items): High concurrency
+forge data process large.jsonl schema.json --concurrency 10
+```
+
+<Warning>
+**Rate Limits**
+
+High concurrency may hit API rate limits. If you see rate limit errors:
+- Reduce concurrency value
+- Add retry logic
+- Consider batching your data
+</Warning>
+
+### Batch Processing
+
+For very large datasets, process in batches:
+
+```bash
+# Split large file
+split -l 1000 huge-dataset.jsonl batch-
+
+# Process each batch
+for batch in batch-*; do
+  forge data process "$batch" schema.json >> output.jsonl
+  sleep 60  # Rate limit cooldown
+done
+```
+
+### Monitoring Progress
+
+Forge displays progress during processing:
+
+```
+Processing: 45/100 items (45%)
+Completed: 42, Failed: 3
+Estimated time remaining: 2m 30s
+```
+
+## Error Handling
+
+### Schema Validation Errors
+
+If output doesn't match schema:
+- Forge automatically retries
+- After 3 retries, the item is skipped
+- Error is logged to stderr
+
+### API Errors
+
+For API failures:
+- Automatic retry with exponential backoff
+- Configurable retry attempts (see Environment Variables)
+- Failed items can be reprocessed
+
+### Resume Processing
+
+If processing is interrupted:
+
+```bash
+# Save progress
+forge data process input.jsonl schema.json > output.jsonl 2> errors.log
+
+# Resume from failures
+grep "Failed" errors.log > failed-items.jsonl
+forge data process failed-items.jsonl schema.json >> output.jsonl
+```
+
+## Best Practices
+
+### Schema Design
+
+Create clear, specific schemas:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["A", "B", "C"],  // Use enums for classifications
+      "description": "Product category"  // Add descriptions
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100  // Set clear bounds
+    }
+  },
+  "required": ["category", "score"],  // Specify required fields
+  "additionalProperties": false  // Prevent unexpected fields
+}
+```
+
+### Prompt Engineering
+
+Write clear, specific prompts:
+
+**Good:**
+```
+Analyze the sentiment of this customer review and classify it as 
+positive, negative, or neutral. Consider:
+- Overall tone
+- Specific complaints or praise
+- Language intensity
+```
+
+**Avoid:**
+```
+What's the sentiment?
+```
+
+### Input Validation
+
+Validate input data before processing:
+
+```bash
+# Check JSONL format
+jq -c '.' input.jsonl > /dev/null && echo "Valid JSONL"
+
+# Count records
+wc -l input.jsonl
+
+# Sample data
+head -3 input.jsonl | jq .
+```
+
+### Cost Management
+
+Estimate costs before large runs:
+
+```bash
+# Test with small sample
+head -10 large-dataset.jsonl > sample.jsonl
+forge data process sample.jsonl schema.json
+
+# Check token usage
+forge conversation stats <id>
+
+# Calculate total cost
+# (sample cost / 10) * total_records
+```
+
+## Integration Examples
+
+### With Shell Scripts
+
+```bash
+#!/bin/bash
+# Process and filter results
+
+forge data process input.jsonl schema.json | \
+  jq 'select(.confidence > 0.8)' > high-confidence.jsonl
+```
+
+### With Python
+
+```python
+import subprocess
+import json
+
+# Run Forge data processing
+result = subprocess.run(
+    ["forge", "data", "process", "input.jsonl", "schema.json"],
+    capture_output=True,
+    text=True
+)
+
+# Parse results
+for line in result.stdout.split('\n'):
+    if line.strip():
+        data = json.loads(line)
+        print(f"Processed: {data['id']}")
+```
+
+### With Data Pipelines
+
+```bash
+# ETL pipeline
+cat raw-data.csv | \
+  csvtojson | \
+  jq -c '.' | \
+  forge data process /dev/stdin schema.json | \
+  jq 'select(.valid == true)' > clean-data.jsonl
+```
+
+<Warning>
+**Data Privacy**
+
+- Data is sent to the configured AI provider
+- Avoid processing sensitive or PII data without proper safeguards
+- Consider data anonymization before processing
+- Review your provider's data retention policies
+</Warning>

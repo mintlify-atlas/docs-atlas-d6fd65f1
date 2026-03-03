@@ -1,0 +1,296 @@
+---
+title: Agent System
+description: Understand how Forge's agent system enables specialized AI capabilities
+---
+
+# Agent System
+
+Forge uses a flexible agent system where each agent is a specialized AI entity with specific capabilities, tools, and instructions. Agents can work independently or collaborate to solve complex problems.
+
+## What is an Agent?
+
+An agent in Forge is a configured AI instance with:
+
+- **Unique identity** - Each agent has an ID and optional title
+- **Model configuration** - Which LLM provider and model to use
+- **System prompt** - Instructions that define the agent's behavior and expertise
+- **Tool access** - Which tools the agent can use
+- **Custom rules** - Guidelines specific to this agent's domain
+
+## Agent Anatomy
+
+Here's what defines an agent in Forge:
+
+```yaml
+id: code-reviewer
+title: Code Review Specialist
+description: Reviews code for quality, security, and best practices
+model: claude-3.7-sonnet
+tools:
+  - read
+  - grep
+  - glob
+system_prompt: |
+  You are a senior code reviewer focused on:
+  - Security vulnerabilities
+  - Performance issues
+  - Code maintainability
+  - Best practices compliance
+custom_rules: |
+  Always check for:
+  1. SQL injection vulnerabilities
+  2. Proper error handling
+  3. Input validation
+temperature: 0.3
+max_tokens: 4000
+```
+
+## Built-in Agents
+
+Forge comes with three built-in agents:
+
+### Forge Agent
+
+The default general-purpose agent that handles most coding tasks.
+
+```rust
+AgentId::FORGE
+```
+
+Best for: General development tasks, debugging, refactoring, and feature implementation.
+
+### Muse Agent
+
+A creative agent optimized for exploring ideas and generating solutions.
+
+```rust
+AgentId::MUSE
+```
+
+Best for: Brainstorming, architecture design, and creative problem-solving.
+
+### Sage Agent
+
+A knowledge-focused agent that excels at explaining concepts and answering questions.
+
+```rust
+AgentId::SAGE
+```
+
+Best for: Code understanding, documentation, and learning new technologies.
+
+## Agent Configuration
+
+### Model Settings
+
+Control how the agent generates responses:
+
+```yaml
+temperature: 0.7  # 0.0 (focused) to 2.0 (creative)
+top_p: 0.9        # Nucleus sampling
+top_k: 50         # Token selection diversity
+max_tokens: 4000  # Maximum response length
+```
+
+<Note>
+Lower temperature (0.0-0.3) produces more deterministic, focused responses. Higher temperature (0.7-2.0) generates more creative, diverse outputs.
+</Note>
+
+### Tool Configuration
+
+Specify which tools an agent can use:
+
+```yaml
+tools:
+  - read        # Read files
+  - write       # Write files
+  - edit        # Edit existing files
+  - bash        # Execute shell commands
+  - grep        # Search file contents
+  - glob        # Find files by pattern
+```
+
+<Warning>
+Only grant agents the tools they need. Limiting tool access improves security and reduces the chance of unintended actions.
+</Warning>
+
+### Turn Limits
+
+Prevent infinite loops by setting turn limits:
+
+```yaml
+max_turns: 50
+max_tool_failure_per_turn: 3
+max_requests_per_turn: 50
+```
+
+## Custom Agents
+
+You can create custom agents for specialized tasks. For example, a database migration agent:
+
+```yaml
+id: db-migrator
+title: Database Migration Specialist
+description: Creates and manages database migrations
+model: claude-3.7-sonnet
+tools:
+  - read
+  - write
+  - bash
+system_prompt: |
+  You are a database migration expert. When creating migrations:
+  1. Always include rollback procedures
+  2. Use transactions where possible
+  3. Add descriptive comments
+  4. Test migrations with sample data
+  5. Follow the existing migration naming convention
+custom_rules: |
+  - Never drop tables without explicit confirmation
+  - Always backup data before destructive operations
+  - Use parameterized queries to prevent SQL injection
+temperature: 0.2
+max_tokens: 3000
+```
+
+## Agent Templates
+
+Agents can use templates for dynamic prompts:
+
+```yaml
+id: test-generator
+system_prompt: |
+  You are a test writing expert for {{language}} using {{test_framework}}.
+  Generate comprehensive tests that cover:
+  - Happy path scenarios
+  - Edge cases
+  - Error conditions
+user_prompt: |
+  Generate tests for: {{code_snippet}}
+```
+
+## Reasoning Configuration
+
+Some models support extended reasoning capabilities:
+
+```yaml
+reasoning:
+  enabled: true
+  effort: medium      # low, medium, or high
+  max_tokens: 2048    # Thinking budget
+  exclude: false      # Show reasoning process
+```
+
+<Info>
+Reasoning configuration is supported by providers like OpenRouter, Anthropic, and Forge Services. It enables deeper analysis at the cost of additional tokens.
+</Info>
+
+## Context Compaction
+
+Automatically manage conversation length:
+
+```yaml
+compact:
+  token_threshold: 100000      # Compact when exceeding this
+  message_threshold: 100       # Or this many messages
+  turn_threshold: 50          # Or this many turns
+  retention_window: 10        # Keep last N messages
+  eviction_window: 0.5        # Compact up to 50% of messages
+  model: claude-3-haiku       # Use cheaper model for compaction
+```
+
+Compaction summarizes old conversation parts to keep context manageable while preserving important information.
+
+## Agent Lifecycle
+
+When an agent is invoked:
+
+1. **Initialization** - Agent loads with its configuration
+2. **Context Building** - System prompt and user prompt are rendered with context
+3. **Execution** - Agent processes the request using available tools
+4. **Tool Calls** - Agent can call tools multiple times in a single turn
+5. **Response** - Agent provides the final response
+6. **Compaction** (if needed) - Conversation is compacted based on settings
+
+## Provider and Model Selection
+
+Agents can specify their provider and model:
+
+```yaml
+provider: anthropic
+model: claude-3.7-sonnet
+```
+
+If not specified, agents inherit from the workflow configuration or use the default provider.
+
+## Best Practices
+
+### Specialize Your Agents
+
+Create agents with focused expertise:
+
+- ✅ `security-auditor` - Security-focused code review
+- ✅ `docs-writer` - Technical documentation generation
+- ❌ `do-everything` - Jack of all trades, master of none
+
+### Write Clear System Prompts
+
+Your system prompt is the agent's "programming". Be explicit:
+
+```yaml
+system_prompt: |
+  You are a frontend performance expert.
+  
+  When analyzing code, always check:
+  1. Unnecessary re-renders in React components
+  2. Unoptimized images
+  3. Large bundle sizes
+  4. Blocking network requests
+  
+  Provide specific, actionable recommendations with code examples.
+```
+
+### Limit Tool Access
+
+Only grant necessary tools:
+
+```yaml
+# Good: Documentation agent only needs read access
+tools:
+  - read
+  - grep
+  - glob
+
+# Bad: Giving write access unnecessarily
+tools:
+  - read
+  - write  # Not needed for documentation!
+  - bash
+```
+
+### Use Temperature Wisely
+
+- **0.0-0.3**: Code generation, refactoring, precise tasks
+- **0.4-0.7**: Balanced tasks, problem-solving
+- **0.8-2.0**: Creative tasks, brainstorming, exploration
+
+<Accordion title="FAQ">
+  <AccordionItem title="Can agents call other agents?">
+    Yes! When using multi-agent workflows, agents can invoke other agents as tools. Each sub-agent runs in its own conversation context.
+  </AccordionItem>
+  
+  <AccordionItem title="How do I debug agent behavior?">
+    Use the `--verbose` flag to see detailed information about agent decisions and tool calls. You can also review saved conversation files to understand the agent's reasoning.
+  </AccordionItem>
+  
+  <AccordionItem title="Can I use different models for different agents?">
+    Absolutely! Each agent can specify its own model and provider. This lets you use powerful models for complex agents and faster/cheaper models for simpler tasks.
+  </AccordionItem>
+  
+  <AccordionItem title="What happens when an agent reaches max_turns?">
+    The agent stops execution and returns whatever progress it has made. You can then decide to continue manually or adjust the turn limit.
+  </AccordionItem>
+  
+  <AccordionItem title="How do custom rules differ from system prompts?">
+    System prompts define the agent's overall behavior and expertise. Custom rules are specific guidelines that augment the base instructions. Rules from workflow configuration are merged with agent-specific rules.
+  </AccordionItem>
+</Accordion>

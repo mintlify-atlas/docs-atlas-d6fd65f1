@@ -1,0 +1,163 @@
+---
+title: Configuration Overview
+description: Learn how to configure Forge to customize your AI-enhanced terminal development environment
+---
+
+Forge provides multiple layers of configuration to customize your development experience. This guide covers the main configuration options and how they work together.
+
+## Configuration Hierarchy
+
+Forge uses a hierarchical configuration system:
+
+1. **Environment Variables** - System-level settings for runtime behavior
+2. **Provider Credentials** - AI provider API keys and authentication
+3. **forge.yaml** - Project-specific workflow configuration
+4. **Command-Line Options** - Execution-time overrides
+
+## Quick Start
+
+The minimal setup requires only provider credentials:
+
+```bash
+# Interactive provider setup
+forge provider login
+
+# Start Forge
+forge
+```
+
+## Configuration Files
+
+### forge.yaml
+
+The main configuration file for customizing Forge's behavior. Place it in your project root:
+
+```yaml
+# forge.yaml
+model: claude-3.7-sonnet
+max_requests_per_turn: 100
+temperature: 0.7
+
+custom_rules: |
+  1. Always add comprehensive error handling
+  2. Include unit tests for all new functions
+```
+
+See the [forge.yaml reference](/configuration/forge-yaml) for all available options.
+
+### .env File
+
+Environment variables can be set in a `.env` file in your project root or globally in your shell:
+
+```bash
+# .env
+FORGE_HTTP_READ_TIMEOUT=900
+FORGE_MAX_CONVERSATIONS=100
+```
+
+See the [environment variables reference](/configuration/environment-variables) for all available options.
+
+## Configuration Precedence
+
+When multiple configuration sources are present, Forge applies them in this order:
+
+1. Command-line arguments (highest priority)
+2. Environment variables
+3. forge.yaml in current directory
+4. Default values (lowest priority)
+
+## Common Configuration Tasks
+
+<CardGroup cols={2}>
+  <Card title="Provider Setup" icon="key" href="/configuration/providers">
+    Configure AI provider credentials and authentication
+  </Card>
+  <Card title="Workflow Settings" icon="sliders" href="/configuration/forge-yaml">
+    Customize model behavior, limits, and rules
+  </Card>
+  <Card title="Environment Variables" icon="code" href="/configuration/environment-variables">
+    Fine-tune runtime behavior and performance
+  </Card>
+  <Card title="Custom Rules" icon="list-check" href="/configuration/custom-rules">
+    Define project-specific coding guidelines
+  </Card>
+</CardGroup>
+
+## Configuration Examples
+
+### Performance Tuning
+
+```yaml
+# forge.yaml - Optimized for speed
+model: anthropic/claude-sonnet-4
+max_requests_per_turn: 50
+temperature: 0.3
+top_p: 0.8
+max_tokens: 4096
+
+compact:
+  token_threshold: 100000
+  retention_window: 6
+  eviction_window: 0.2
+```
+
+### Team Standards
+
+```yaml
+# forge.yaml - Enforce team conventions
+custom_rules: |
+  1. Use camelCase for variables, PascalCase for classes
+  2. All functions must have JSDoc comments
+  3. Maximum line length is 100 characters
+  4. Prefer functional components in React
+
+commands:
+  - name: review
+    description: Review code for team standards
+    prompt: "Review this code against our team standards"
+```
+
+### Research and Exploration
+
+```yaml
+# forge.yaml - Creative mode for exploration
+temperature: 0.9
+top_p: 0.95
+max_requests_per_turn: 150
+
+custom_rules: |
+  1. Suggest multiple alternative approaches
+  2. Explain trade-offs for each solution
+  3. Include links to relevant documentation
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start Simple">
+    Begin with minimal configuration and add settings as needed. The defaults work well for most use cases.
+  </Accordion>
+  
+  <Accordion title="Version Control">
+    Commit your `forge.yaml` to version control so the team shares the same configuration.
+  </Accordion>
+  
+  <Accordion title="Environment-Specific Settings">
+    Use environment variables for machine-specific settings like timeouts and API URLs.
+  </Accordion>
+  
+  <Accordion title="Document Custom Rules">
+    Keep custom rules clear and concise. Update them as team standards evolve.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Provider Configuration" icon="arrow-right" href="/configuration/providers">
+    Set up your AI provider credentials
+  </Card>
+  <Card title="forge.yaml Reference" icon="arrow-right" href="/configuration/forge-yaml">
+    Explore all configuration options
+  </Card>
+</CardGroup>

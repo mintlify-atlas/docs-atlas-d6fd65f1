@@ -1,0 +1,357 @@
+---
+title: Refactoring Code
+description: Use Forge to modernize and improve your codebase through intelligent refactoring
+---
+
+# Refactoring Code
+
+Forge assists with code refactoring, helping you improve code quality, modernize legacy code, and maintain clean architecture principles.
+
+## Basic Refactoring
+
+Request refactoring for any piece of code:
+
+```
+> Help me refactor this class-based component to use React Hooks
+```
+
+Forge will:
+- Analyze the existing code structure
+- Propose a modernized version
+- Explain the changes and benefits
+- Implement the refactoring with your approval
+
+<Tip>
+Forge can help modernize your codebase by walking you through refactoring steps and implementing them with your approval.
+</Tip>
+
+## Refactoring Workflows
+
+### Step-by-Step Refactoring
+
+<Steps>
+  <Step title="Identify refactoring needs">
+    Point out code that needs improvement:
+    ```
+    > This function is too complex and hard to test. How should I refactor it?
+    ```
+  </Step>
+  
+  <Step title="Review suggestions">
+    Forge will suggest refactoring approaches, such as:
+    - Breaking down large functions
+    - Extracting reusable components
+    - Applying design patterns
+    - Improving naming and structure
+  </Step>
+  
+  <Step title="Implement changes">
+    Approve the refactoring plan and let Forge implement it incrementally.
+  </Step>
+  
+  <Step title="Verify behavior">
+    Test that functionality remains unchanged after refactoring.
+  </Step>
+</Steps>
+
+### Large-Scale Refactoring
+
+For significant architectural changes:
+
+<Steps>
+  <Step title="Define the goal">
+    ```
+    > I want to refactor our monolithic application into a modular architecture
+    ```
+  </Step>
+  
+  <Step title="Get a refactoring plan">
+    Forge will analyze your codebase and propose a step-by-step migration plan.
+  </Step>
+  
+  <Step title="Implement incrementally">
+    Work through the plan one module at a time, ensuring tests pass at each step.
+  </Step>
+</Steps>
+
+<Tip>
+For large refactorings, always work in small, testable increments. Forge can help you break down the work into manageable chunks.
+</Tip>
+
+## Common Refactoring Patterns
+
+### Modernizing Legacy Code
+
+Update old code to use current best practices:
+
+```
+> Modernize this ES5 JavaScript code to use ES6+ features
+```
+
+Forge will convert:
+- `var` to `const`/`let`
+- Callbacks to Promises/async-await
+- `function` to arrow functions where appropriate
+- String concatenation to template literals
+
+### Improving Code Structure
+
+Enhance organization and maintainability:
+
+```
+> This file has grown to 1000+ lines. How should I organize it better?
+```
+
+Forge suggests:
+- Extracting functions or classes into separate files
+- Creating logical modules or components
+- Applying separation of concerns
+- Organizing imports and dependencies
+
+### Simplifying Complex Logic
+
+Make code more readable and maintainable:
+
+```
+> Simplify this nested conditional logic
+```
+
+Forge can:
+- Flatten nested conditions using early returns
+- Extract complex conditions into named functions
+- Apply guard clauses
+- Use lookup tables or strategy patterns
+
+## Real-World Refactoring Scenarios
+
+### Scenario 1: Converting Class Components to Hooks
+
+**Before**: Class-based React component with lifecycle methods
+
+<Steps>
+  <Step title="Request conversion">
+    ```
+    > Convert this class component to a functional component with hooks
+    ```
+  </Step>
+  
+  <Step title="Review changes">
+    Forge converts:
+    - `componentDidMount` → `useEffect`
+    - `this.state` → `useState`
+    - `this.props` → function parameters
+    - Class methods → function definitions
+  </Step>
+  
+  <Step title="Test thoroughly">
+    Verify all functionality works as expected with the new structure.
+  </Step>
+</Steps>
+
+### Scenario 2: Extracting Reusable Logic
+
+**Problem**: Duplicated code across multiple files
+
+```
+> I have similar data fetching logic in 5 different components. Help me extract it into a reusable hook/utility.
+```
+
+Forge will:
+- Identify the common patterns
+- Create a shared utility or custom hook
+- Update all instances to use the extracted logic
+- Ensure error handling and edge cases are covered
+
+### Scenario 3: Applying Design Patterns
+
+**Problem**: Code is hard to extend and maintain
+
+```
+> This switch statement handles 10 different cases and keeps growing. What pattern should I use?
+```
+
+Forge suggests:
+- Strategy pattern with polymorphism
+- Command pattern for encapsulating actions
+- Factory pattern for object creation
+- Implements the chosen pattern with explanation
+
+## Database Schema Refactoring
+
+Forge can help design and refactor database schemas:
+
+```
+> I need to design a database schema for a blog with users, posts, comments, and categories
+```
+
+Forge will:
+- Suggest appropriate schema design
+- Define tables/collections with proper types
+- Recommend relationships and foreign keys
+- Suggest indexes for performance
+- Consider your existing database technology
+
+<Tip>
+When refactoring database schemas, Forge can help you plan migration strategies that minimize downtime.
+</Tip>
+
+## Refactoring for Performance
+
+### Optimizing Algorithms
+
+```
+> This sorting function is slow with large datasets. How can I optimize it?
+```
+
+Forge analyzes:
+- Current algorithm complexity (O(n²), O(n log n), etc.)
+- More efficient algorithms for your use case
+- Memory vs. speed trade-offs
+- Built-in optimized alternatives
+
+### Reducing Redundancy
+
+```
+> I'm making multiple API calls when one would suffice. Help me refactor this.
+```
+
+Forge helps:
+- Batch related API calls
+- Implement caching strategies
+- Use GraphQL for efficient data fetching
+- Add proper memoization
+
+## Refactoring for Testability
+
+Make code easier to test through refactoring:
+
+```
+> This function is hard to test because it has many dependencies. How should I refactor it?
+```
+
+Forge suggests:
+- Dependency injection patterns
+- Breaking functions into smaller, pure functions
+- Extracting side effects
+- Using interfaces for better mocking
+
+<Steps>
+  <Step title="Identify testing pain points">
+    Explain what makes the code hard to test.
+  </Step>
+  
+  <Step title="Apply testability patterns">
+    Forge refactors using dependency injection, pure functions, and clear interfaces.
+  </Step>
+  
+  <Step title="Write tests">
+    With improved structure, writing tests becomes straightforward.
+  </Step>
+</Steps>
+
+## Type Safety Refactoring
+
+Add or improve type safety in your code:
+
+```
+> Add TypeScript types to this JavaScript module
+```
+
+Forge will:
+- Analyze existing code to infer types
+- Add appropriate type annotations
+- Use generics where beneficial
+- Create type definitions for complex objects
+- Suggest stricter type checking options
+
+## Architecture Refactoring
+
+### Service Layer Pattern
+
+Refactor to follow clean architecture principles:
+
+```
+> Help me separate business logic from API routes
+```
+
+Forge implements service layer patterns:
+- Extract business logic into service classes
+- Keep controllers thin
+- Define clear interfaces
+- Apply dependency injection
+
+### Module Organization
+
+```
+> Reorganize this codebase into logical modules
+```
+
+Forge suggests structure based on:
+- Domain-driven design principles
+- Feature-based organization
+- Layered architecture (presentation, business, data)
+- Microservices boundaries (if applicable)
+
+## Best Practices for Refactoring
+
+1. **Test first**: Ensure you have tests before refactoring
+2. **Small steps**: Refactor incrementally, not all at once
+3. **Preserve behavior**: Functionality should remain unchanged
+4. **Commit frequently**: Create checkpoints you can return to
+5. **Review changes**: Ask Forge to review refactored code
+6. **Document reasons**: Note why refactoring was needed
+
+<Tip>
+When doing large refactorings, create a new branch and commit after each successful step. This makes it easier to track progress and roll back if needed.
+</Tip>
+
+## Refactoring Checklist
+
+Before starting a refactoring:
+
+- [ ] Tests exist and pass for current functionality
+- [ ] You understand why the refactoring is needed
+- [ ] You have a clear goal for the refactored code
+- [ ] Changes can be made incrementally
+- [ ] You've created a backup/branch
+
+After refactoring:
+
+- [ ] All tests still pass
+- [ ] Code is more readable and maintainable
+- [ ] Performance is improved or unchanged
+- [ ] Documentation is updated
+- [ ] Team members can review the changes
+
+## Common Refactoring Commands
+
+| Task | Example Prompt |
+|------|---------------|
+| Simplify logic | `Simplify this complex function` |
+| Extract code | `Extract this repeated code into a utility` |
+| Modernize | `Update this to use modern JavaScript` |
+| Improve structure | `Better organize this large file` |
+| Add types | `Add TypeScript types to this module` |
+| Design pattern | `Apply a better pattern to this code` |
+
+## Integration with Testing
+
+Refactoring and testing go hand-in-hand:
+
+```
+> Refactor this function and add unit tests for it
+```
+
+Forge will:
+1. Refactor the code for better structure
+2. Make it more testable
+3. Write comprehensive unit tests
+4. Ensure tests cover edge cases
+
+See the [Testing guide](/guides/testing) for more details on writing tests with Forge.
+
+## Next Steps
+
+- Learn about [Writing Tests](/guides/testing) for your refactored code
+- Explore [Code Review](/guides/code-review) workflows
+- Review [Best Practices](/guides/best-practices) for development

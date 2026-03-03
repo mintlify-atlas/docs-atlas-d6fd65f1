@@ -1,0 +1,375 @@
+---
+title: AWS Bedrock Setup
+description: Configure AWS Bedrock to access Claude, Llama, and other models through Amazon's managed service
+---
+
+AWS Bedrock provides serverless access to foundation models from Anthropic, Meta, Amazon, Cohere, and other providers. It offers enterprise-grade security, compliance, and integration with AWS services.
+
+## Available Models
+
+### Anthropic Claude on Bedrock
+
+#### Claude 4 Series (Latest)
+- **anthropic.claude-opus-4-6-v1:0** - Most capable (200K context)
+- **anthropic.claude-opus-4-1-20250805-v1:0** - Enhanced flagship (200K)
+- **anthropic.claude-sonnet-4-5-20250929-v1:0** - Balanced (200K)
+- **anthropic.claude-sonnet-4-20250514-v1:0** - Efficient (200K)
+- **anthropic.claude-haiku-4-5-20251001-v1:0** - Fast (200K)
+
+#### Claude 3 Series
+- **anthropic.claude-3-7-sonnet-20250219-v1:0** - Enhanced (200K)
+- **anthropic.claude-3-5-sonnet-20241022-v2:0** - Intelligent (200K)
+- **anthropic.claude-3-5-haiku-20241022-v1:0** - Fast (200K)
+- **anthropic.claude-3-opus-20240229-v1:0** - Powerful (200K)
+
+### Amazon Nova (Latest)
+- **us.amazon.nova-premier-v1:0** - Premier multimodal (300K)
+- **us.amazon.nova-pro-v1:0** - High-capability (300K)
+- **us.amazon.nova-lite-v1:0** - Fast and cost-effective (300K)
+- **us.amazon.nova-micro-v1:0** - Ultra-fast text-only (128K)
+
+### Meta Llama
+- **meta.llama3-1-405b-instruct-v1:0** - Largest open model (128K)
+- **meta.llama3-1-70b-instruct-v1:0** - Powerful (128K)
+- **meta.llama3-2-90b-instruct-v1:0** - Multimodal (128K)
+- **meta.llama3-2-11b-instruct-v1:0** - Multimodal (128K)
+
+### Other Providers
+- **Cohere Command R/R+** - RAG-optimized (128K)
+- **Mistral Large/Small** - European AI (32K)
+- **Amazon Titan** - Amazon's models (8K-300K)
+
+All Claude and Nova models support tool calling and multimodal input.
+
+## Prerequisites
+
+<Warning>
+  AWS Bedrock requires setting up infrastructure. This is more complex than direct API access.
+</Warning>
+
+Before using Bedrock with Forge:
+
+1. **AWS Account**: Active account with billing enabled
+2. **Model Access**: Request access to models in Bedrock console
+3. **Bedrock Access Gateway**: Deploy gateway infrastructure
+4. **API Gateway**: CloudFormation stack with API key
+
+## Setup Steps
+
+### Step 1: Deploy Bedrock Access Gateway
+
+AWS Bedrock doesn't provide a simple REST API. You need to deploy the [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway):
+
+<Steps>
+  <Step title="Clone the Repository">
+    ```bash
+    git clone https://github.com/aws-samples/bedrock-access-gateway.git
+    cd bedrock-access-gateway
+    ```
+  </Step>
+
+  <Step title="Create API Key in Secrets Manager">
+    1. Go to [AWS Secrets Manager](https://console.aws.amazon.com/secretsmanager/)
+    2. Create a new secret
+    3. Choose "Other type of secret"
+    4. Add key-value pair: `apiKey` = your chosen API key
+    5. Name it (e.g., `bedrock-api-key`)
+    6. Note the ARN for next step
+  </Step>
+
+  <Step title="Deploy CloudFormation Stack">
+    Follow the instructions in the gateway repository to:
+    1. Package the Lambda function
+    2. Deploy the CloudFormation template
+    3. Pass your Secrets Manager ARN
+    4. Wait for stack creation to complete
+  </Step>
+
+  <Step title="Get API Base URL">
+    After deployment completes:
+    1. Go to [CloudFormation Console](https://console.aws.amazon.com/cloudformation/)
+    2. Select your stack
+    3. Go to "Outputs" tab
+    4. Copy the `ApiUrl` value (your API base URL)
+  </Step>
+</Steps>
+
+### Step 2: Request Model Access
+
+<Steps>
+  <Step title="Open Bedrock Console">
+    Navigate to [AWS Bedrock](https://console.aws.amazon.com/bedrock/) in your region.
+  </Step>
+
+  <Step title="Request Model Access">
+    1. Go to "Model access" in the left sidebar
+    2. Click "Manage model access"
+    3. Select the models you want to use:
+       - Anthropic Claude models
+       - Amazon Nova models
+       - Meta Llama models
+       - Others as needed
+    4. Click "Request model access"
+    5. Wait for approval (usually instant for most models)
+  </Step>
+</Steps>
+
+### Step 3: Configure Forge
+
+<Steps>
+  <Step title="Run Provider Login">
+    ```bash
+    forge provider login
+    ```
+  </Step>
+
+  <Step title="Select OpenAI-Compatible Provider">
+    Since Bedrock Gateway provides OpenAI-compatible API:
+    1. Select "OpenAI-Compatible" from the list
+    2. Enter your API base URL from Step 1
+    3. Enter the API key from Secrets Manager
+  </Step>
+
+  <Step title="Configure Model">
+    Set your default model in `forge.yaml`:
+    ```yaml
+    model: anthropic.claude-sonnet-4-20250514
+    ```
+    
+    Note: Use the full Bedrock model ID (with vendor prefix)
+  </Step>
+
+  <Step title="Verify Connection">
+    ```bash
+    forge
+    ```
+    
+    Try a prompt:
+    ```
+    > Explain how AWS Bedrock works
+    ```
+  </Step>
+</Steps>
+
+## Configuration
+
+### API Endpoint
+
+Your Bedrock Access Gateway URL format:
+```
+https://{api-id}.execute-api.{region}.amazonaws.com/prod
+```
+
+### Model IDs
+
+Use the full Bedrock model identifier:
+- `anthropic.claude-sonnet-4-20250514-v1:0`
+- `us.amazon.nova-pro-v1:0`
+- `meta.llama3-1-70b-instruct-v1:0`
+
+List available models in Forge:
+```
+/model
+```
+
+## Model Selection
+
+### For Coding and Agents
+
+**Best Performance**:
+- `anthropic.claude-opus-4-6-v1:0` - Most capable
+- `anthropic.claude-sonnet-4-5-20250929-v1:0` - Balanced
+
+**Budget-Friendly**:
+- `anthropic.claude-haiku-4-5-20251001-v1:0` - Fast and cheap
+- `us.amazon.nova-lite-v1:0` - Cost-effective
+
+### For Maximum Context
+
+- **300K**: Amazon Nova models
+- **200K**: Claude 3 and 4 models
+- **128K**: Llama 3.1/3.2, Cohere Command R
+
+### For Multimodal Tasks
+
+- **Claude 4** - Excellent vision capabilities
+- **Amazon Nova Pro/Premier** - High-quality multimodal
+- **Llama 3.2 90B/11B** - Open-source multimodal
+
+### Switching Models
+
+```
+/model anthropic.claude-opus-4-6-v1:0
+```
+
+## Regional Deployment
+
+Bedrock is available in multiple AWS regions:
+
+**US Regions**:
+- `us-east-1` (N. Virginia) - Most models
+- `us-west-2` (Oregon) - Most models
+
+**Europe**:
+- `eu-west-1` (Ireland)
+- `eu-central-1` (Frankfurt)
+
+**Asia Pacific**:
+- `ap-southeast-1` (Singapore)
+- `ap-northeast-1` (Tokyo)
+
+<Warning>
+  Model availability varies by region. Check the [Bedrock documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html) for details.
+</Warning>
+
+## Features
+
+### Enterprise Security
+
+- **VPC Endpoints**: Private connectivity
+- **IAM Policies**: Fine-grained access control  
+- **CloudTrail**: Full audit logging
+- **KMS Encryption**: Customer-managed keys
+
+### Compliance
+
+- SOC 2
+- HIPAA
+- GDPR
+- PCI DSS
+- FedRAMP (select regions)
+
+### AWS Integration
+
+- **CloudWatch**: Monitoring and metrics
+- **S3**: Data storage and retrieval
+- **Lambda**: Serverless integration
+- **SageMaker**: ML pipeline integration
+
+## Best Practices
+
+### Security
+
+<Warning>
+  Store API keys in AWS Secrets Manager, never in code or environment variables.
+</Warning>
+
+**Access Control**:
+- Use IAM roles with least privilege
+- Rotate API keys regularly
+- Enable CloudTrail logging
+- Use VPC endpoints for private access
+
+### Cost Optimization
+
+**Model Selection**:
+- Use Haiku/Nova Lite for simple tasks
+- Use Sonnet for balanced workloads
+- Reserve Opus/Premier for complex tasks
+
+**Infrastructure**:
+- Use Lambda provisioned concurrency if needed
+- Monitor API Gateway costs
+- Set up billing alerts
+
+**Token Management**:
+- Minimize context size
+- Cache common prompts
+- Use streaming for long responses
+
+### Rate Limits
+
+Bedrock has:
+- **Requests per minute**: Varies by model and region
+- **Tokens per minute**: Varies by model
+- **Concurrent requests**: Service quotas apply
+
+Request quota increases through [AWS Support](https://console.aws.amazon.com/support/).
+
+## Troubleshooting
+
+### Gateway Deployment Fails
+
+If CloudFormation deployment fails:
+1. Check you have sufficient IAM permissions
+2. Verify Secrets Manager ARN is correct
+3. Check CloudFormation events for specific errors
+4. Ensure Lambda execution role has Bedrock access
+
+### Model Access Denied
+
+If you can't access a model:
+1. Verify model access was granted in Bedrock console
+2. Check you're using the correct model ID
+3. Ensure your region supports the model
+4. Wait a few minutes after granting access
+
+### API Key Authentication Failed
+
+If authentication fails:
+1. Verify API key matches Secrets Manager
+2. Check API Gateway is deployed correctly
+3. Test the gateway URL directly
+4. Review CloudWatch logs for errors
+
+### Quota Exceeded
+
+If you hit limits:
+1. Check current quotas in [Service Quotas Console](https://console.aws.amazon.com/servicequotas/)
+2. Request quota increase
+3. Implement exponential backoff
+4. Distribute load across regions
+
+### Region Not Supported
+
+If model isn't available:
+1. Check [model availability by region](https://docs.aws.amazon.com/bedrock/latest/userguide/models-regions.html)
+2. Switch to a supported region
+3. Redeploy gateway in new region
+4. Update Forge configuration
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility with the gateway:
+
+```bash
+# .env
+OPENAI_API_KEY=your-bedrock-gateway-api-key
+OPENAI_URL=your-bedrock-gateway-base-url
+```
+
+```yaml
+# forge.yaml
+model: anthropic.claude-sonnet-4-20250514
+```
+
+## Cost Comparison
+
+Bedrock pricing varies by model:
+
+**Claude Models**:
+- Similar pricing to direct Anthropic API
+- No additional Bedrock fees
+- API Gateway costs apply ($3.50/million requests)
+- Lambda costs apply (minimal for this use case)
+
+**Amazon Nova**:
+- Competitive pricing
+- No API Gateway fees when using direct SDK
+
+**Meta Llama**:
+- Open-source models, lower cost
+- Pay only for infrastructure
+
+See [Bedrock Pricing](https://aws.amazon.com/bedrock/pricing/) for details.
+
+## Next Steps
+
+- Review [Bedrock documentation](https://docs.aws.amazon.com/bedrock/)
+- Set up [CloudWatch monitoring](https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring.html)
+- Configure [VPC endpoints](https://docs.aws.amazon.com/bedrock/latest/userguide/vpc-interface-endpoints.html) for production
+- Explore [Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html) for advanced workflows

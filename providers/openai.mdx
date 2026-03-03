@@ -1,0 +1,262 @@
+---
+title: OpenAI Setup
+description: Configure OpenAI's GPT models including GPT-4, GPT-5, and O-series reasoning models
+---
+
+OpenAI provides some of the most advanced language models available, including GPT-4, GPT-5, and specialized reasoning models like O1 and O3. Forge supports all OpenAI models with full feature compatibility.
+
+## Available Models
+
+### O-Series (Reasoning Models)
+- **o1** - Advanced reasoning with 200K context
+- **o3** - Enhanced reasoning capabilities  
+- **o3-mini** - Compact reasoning model
+- **o4-mini** - Next-generation compact reasoning
+
+### GPT-5 Series (Latest)
+- **gpt-5** - Flagship model with 200K context
+- **gpt-5-mini** - Compact version
+- **gpt-5-nano** - Ultra-compact version
+- **gpt-5.1** - Enhanced GPT-5
+- **gpt-5.2** - Latest iteration
+- **gpt-5.3-codex** - Optimized for coding (400K context)
+
+### GPT-4 Series
+- **gpt-4.1** - Enhanced GPT-4
+- **gpt-4o** - Multimodal flagship (128K context)
+- **gpt-4o-mini** - Fast and affordable
+- **gpt-4-turbo** - Enhanced GPT-4
+- **chatgpt-4o-latest** - Latest ChatGPT model
+
+### GPT-3.5 Series
+- **gpt-3.5-turbo** - Fast and affordable (16K context)
+
+All models support:
+- Tool calling and parallel execution
+- Vision capabilities (GPT-4 and newer)
+- Structured outputs
+- Function calling
+
+## Setup Steps
+
+<Steps>
+  <Step title="Get Your API Key">
+    1. Visit [OpenAI Platform](https://platform.openai.com/)
+    2. Sign up or log in to your account
+    3. Navigate to [API Keys](https://platform.openai.com/api-keys)
+    4. Click "Create new secret key"
+    5. Copy your API key (starts with `sk-...`)
+  </Step>
+
+  <Step title="Configure Forge">
+    Run the interactive login command:
+    ```bash
+    forge provider login
+    ```
+    
+    Select **OpenAI** from the list and paste your API key when prompted.
+  </Step>
+
+  <Step title="Select a Model">
+    Set your default model in `forge.yaml`:
+    ```yaml
+    model: gpt-4o
+    ```
+    
+    For coding tasks, consider:
+    ```yaml
+    model: gpt-5.3-codex
+    ```
+  </Step>
+
+  <Step title="Verify Connection">
+    Start Forge and test:
+    ```bash
+    forge
+    ```
+    
+    Try a prompt:
+    ```
+    > Write a function to calculate fibonacci numbers
+    ```
+  </Step>
+</Steps>
+
+## Configuration
+
+### API Endpoint
+
+- **Chat Completions**: `https://api.openai.com/v1/chat/completions`
+- **Models List**: `https://api.openai.com/v1/models`
+
+### Authentication
+
+OpenAI uses Bearer token authentication via the `Authorization` header.
+
+## Model Selection Guide
+
+### For Coding and Development
+
+**Best Overall**:
+- `gpt-5.3-codex` - 400K context, optimized for agentic coding
+- `gpt-4o` - Excellent balance of capability and speed
+
+**Budget-Friendly**:
+- `gpt-4o-mini` - Fast and affordable
+- `gpt-3.5-turbo` - Good for simple tasks
+
+### For Reasoning Tasks
+
+**Complex Problem-Solving**:
+- `o3` - Advanced reasoning
+- `o1` - Strong reasoning capabilities
+
+**Quick Reasoning**:
+- `o3-mini` - Compact but capable
+- `o4-mini` - Next-generation efficiency
+
+### For General Use
+
+**Latest and Greatest**:
+- `gpt-5` - 200K context, most advanced
+- `chatgpt-4o-latest` - Continuously updated
+
+**Multimodal Tasks**:
+- `gpt-4.1` - Enhanced vision and text
+- `gpt-4o` - Flagship multimodal
+
+### Switching Models
+
+Change models during a session:
+
+```
+/model o3
+```
+
+## Features
+
+### Reasoning Models
+
+O-series models show their reasoning process:
+- Explicit chain of thought
+- Step-by-step problem solving
+- Verification of logic
+- Self-correction
+
+### Vision Capabilities
+
+GPT-4 and newer models support:
+- Image analysis
+- Screenshot understanding
+- Diagram interpretation
+- UI/UX review
+
+### Tool Calling
+
+All models support:
+- Function calling
+- Parallel tool execution
+- Structured outputs
+- Multi-step workflows
+
+### Long Context
+
+Context window sizes:
+- **400K**: gpt-5.3-codex
+- **200K**: o1, o3, gpt-5 series
+- **128K**: gpt-4 series
+- **16K**: gpt-3.5-turbo
+
+## Best Practices
+
+<Warning>
+  Keep your OpenAI API key secure. Never commit it to version control or share it publicly.
+</Warning>
+
+### Rate Limits
+
+OpenAI enforces rate limits by:
+- **Requests per minute (RPM)**
+- **Tokens per minute (TPM)**
+- **Tokens per day (TPD)**
+
+Limits vary by model and tier. Check your [usage dashboard](https://platform.openai.com/usage) for details.
+
+### Cost Optimization
+
+**Save Money**:
+- Use `gpt-4o-mini` for simple tasks
+- Use `gpt-3.5-turbo` for basic operations
+- Cache frequently used prompts
+- Limit context size when possible
+
+**When to Splurge**:
+- Use `gpt-5.3-codex` for complex coding
+- Use `o3` for difficult reasoning
+- Use `gpt-5` for maximum capability
+
+### Token Management
+
+- Monitor token usage in real-time
+- Set spending limits in your account
+- Use shorter system prompts
+- Summarize long conversations
+
+## Troubleshooting
+
+### Invalid API Key
+
+If authentication fails:
+1. Verify your key starts with `sk-`
+2. Check that it's active in your OpenAI account
+3. Ensure you have sufficient credits/quota
+4. Try regenerating the key
+
+### Rate Limit Errors
+
+If you hit rate limits:
+1. Check your tier and limits in the dashboard
+2. Implement exponential backoff retry logic
+3. Spread requests over time
+4. Consider upgrading your tier
+
+### Insufficient Quota
+
+If you run out of quota:
+1. Add credits to your account
+2. Check your [billing settings](https://platform.openai.com/settings/organization/billing/overview)
+3. Set up auto-recharge if needed
+4. Monitor usage to avoid surprises
+
+### Context Length Exceeded
+
+If requests are too large:
+1. Reduce conversation history
+2. Summarize previous context
+3. Switch to a model with larger context
+4. Split work into smaller chunks
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility:
+
+```bash
+# .env
+OPENAI_API_KEY=sk-your-api-key
+```
+
+```yaml
+# forge.yaml
+model: gpt-4o
+```
+
+## Next Steps
+
+- Explore [OpenAI's documentation](https://platform.openai.com/docs)
+- Learn about [prompt engineering](https://platform.openai.com/docs/guides/prompt-engineering)
+- Set up [custom commands](/configuration/commands) for your workflow
+- Configure [temperature and other parameters](/configuration/model-parameters)

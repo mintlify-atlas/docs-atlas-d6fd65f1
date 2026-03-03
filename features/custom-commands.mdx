@@ -1,0 +1,366 @@
+---
+title: Custom Commands
+description: Create reusable command workflows tailored to your project needs
+icon: terminal
+---
+
+Custom commands are reusable workflows stored as Markdown files that automate repetitive tasks and standardize team processes. They live in your project's `.forge/commands` directory and can be invoked instantly from the Forge CLI.
+
+## Overview
+
+Custom commands let you:
+- **Automate workflows** - Turn multi-step processes into single commands
+- **Standardize practices** - Share team conventions and procedures
+- **Embed expertise** - Capture domain knowledge in executable form
+- **Accelerate development** - Reduce repetitive prompting
+
+<Card title="Example Use Case" icon="lightbulb">
+  Create a `fixme` command that automatically finds all FIXME comments in your codebase and attempts to resolve them, or a `check` command that runs your full test and lint suite.
+</Card>
+
+## Command Structure
+
+Commands are Markdown files with YAML frontmatter:
+
+```markdown
+---
+name: command-name
+description: Brief description of what the command does
+---
+
+Detailed instructions for the AI agent to follow.
+Can include multiple steps, examples, and guidelines.
+```
+
+### File Location
+
+Commands must be stored in:
+
+```
+<project-root>/.forge/commands/
+  ├── fixme.md
+  ├── check.md
+  └── my-custom-command.md
+```
+
+Forge automatically discovers and registers all commands in this directory.
+
+## Creating Commands
+
+<Tabs>
+  <Tab title="Basic Command">
+    Create a simple command for code review:
+    
+    ```markdown
+    ---
+    name: review
+    description: Perform comprehensive code review
+    ---
+    
+    Review the provided code for:
+    - Code quality and readability
+    - Potential bugs or edge cases
+    - Performance considerations
+    - Security vulnerabilities
+    - Best practices adherence
+    
+    Provide specific, actionable suggestions for improvements.
+    ```
+  </Tab>
+  
+  <Tab title="Multi-Step Workflow">
+    Create a command with sequential steps:
+    
+    ```markdown
+    ---
+    name: prepare-release
+    description: Prepare codebase for release
+    ---
+    
+    Execute the following steps in order:
+    
+    1. **Version Bump**: Update version numbers in all relevant files
+    2. **Changelog**: Generate changelog from git commits since last release
+    3. **Tests**: Run full test suite and verify all pass
+    4. **Documentation**: Update API docs and README if needed
+    5. **Build**: Create production build and verify output
+    
+    Report status after each step and stop if any step fails.
+    ```
+  </Tab>
+  
+  <Tab title="With Special Tags">
+    Use special tags for automated execution:
+    
+    ```markdown
+    ---
+    name: check
+    description: Checks if code is ready to commit
+    ---
+    
+    - Run the lint and test commands:
+      <lint>cargo +nightly fmt --all; cargo clippy --fix</lint>
+      <test>cargo test --all</test>
+    - Fix every issue found in the process
+    - Verify all tests pass before completing
+    ```
+  </Tab>
+</Tabs>
+
+## Special Command Tags
+
+Forge supports special XML-style tags for automated workflows:
+
+### Available Tags
+
+<CodeGroup>
+  ```markdown Lint Tag
+  <lint>cargo clippy --fix --allow-staged</lint>
+  ```
+  
+  ```markdown Test Tag
+  <test>cargo test --workspace</test>
+  ```
+</CodeGroup>
+
+These tags tell Forge to:
+1. Extract and execute the command automatically
+2. Capture the output for the AI to process
+3. Continue the workflow based on results
+
+## Built-in Command Examples
+
+Forge includes example commands you can reference:
+
+### FIXME Command
+
+```markdown
+---
+name: fixme
+description: Looks for all fixme comments and attempts to fix them
+---
+
+Find all the FIXME comments in source-code files and attempt to fix them.
+```
+
+**Usage:**
+```bash
+forge -c .forge/commands/fixme.md
+# or via the CLI
+:fixme
+```
+
+### Check Command
+
+```markdown
+---
+name: check  
+description: Checks if code is ready to be committed
+---
+
+- Run the lint and test commands and verify if everything is fine.
+  <lint>cargo +nightly fmt --all; cargo +nightly clippy --fix</lint>
+  <test>cargo insta test --accept --unreferenced=delete</test>
+- Fix every issue found in the process
+```
+
+**Usage:**
+```bash
+forge -c .forge/commands/check.md
+```
+
+## Using Commands
+
+<Tabs>
+  <Tab title="CLI Flag">
+    Execute a command using the `-c` or `--command` flag:
+    
+    ```bash
+    forge -c .forge/commands/my-command.md
+    ```
+  </Tab>
+  
+  <Tab title="Interactive Mode">
+    Load a command in interactive session:
+    
+    ```bash
+    forge
+    > Load and execute the review command from .forge/commands/review.md
+    ```
+  </Tab>
+  
+  <Tab title="Shell Integration">
+    With the ZSH plugin:
+    
+    ```bash
+    : Run the check command
+    ```
+  </Tab>
+</Tabs>
+
+## Command Best Practices
+
+### Writing Effective Commands
+
+<Steps>
+  <Step title="Be Specific">
+    Provide clear, actionable instructions. Avoid ambiguous language.
+    
+    **Good**: "Run eslint with --fix flag and report any remaining errors"
+    
+    **Bad**: "Check the code"
+  </Step>
+  
+  <Step title="Structure Steps">
+    Break complex workflows into numbered or bulleted steps.
+    
+    ```markdown
+    1. First, analyze the current state
+    2. Then, identify issues
+    3. Finally, propose solutions
+    ```
+  </Step>
+  
+  <Step title="Include Context">
+    Add background information and rationale.
+    
+    ```markdown
+    Our team follows the Conventional Commits standard.
+    When reviewing commits, verify they match the format:
+    type(scope): description
+    ```
+  </Step>
+  
+  <Step title="Handle Errors">
+    Specify what to do when things fail.
+    
+    ```markdown
+    If tests fail:
+    - Report which tests failed
+    - Analyze the failure reasons
+    - Suggest fixes but do not modify code
+    ```
+  </Step>
+</Steps>
+
+### Naming Conventions
+
+- Use **kebab-case** for file names: `my-command.md`
+- Keep names **short and descriptive**: `review`, `deploy`, `check`
+- Avoid special characters except hyphens
+- Command name in frontmatter should match filename (without `.md`)
+
+## Advanced Patterns
+
+### Conditional Logic
+
+```markdown
+---
+name: smart-deploy
+description: Deploy with environment-specific steps
+---
+
+1. Detect the current git branch
+2. If branch is 'main':
+   - Deploy to production
+   - Send notification to #releases channel
+3. If branch is 'staging':
+   - Deploy to staging environment
+   - Run smoke tests
+4. Otherwise:
+   - Deploy to preview environment
+   - Generate preview URL
+```
+
+### Parameterized Commands
+
+```markdown
+---
+name: create-feature
+description: Scaffold a new feature with tests
+---
+
+Ask the user for:
+- Feature name
+- Module location
+
+Then:
+1. Create feature file at `src/{module}/{feature}.rs`
+2. Create test file at `tests/{feature}_test.rs`
+3. Add module declaration to parent mod.rs
+4. Generate boilerplate code with TODO markers
+```
+
+### Integration with Other Tools
+
+```markdown
+---
+name: github-pr
+description: Create pull request with AI-generated description
+---
+
+1. Get current branch and changes using git
+2. Generate comprehensive PR description covering:
+   - Summary of changes
+   - Motivation and context
+   - Testing performed
+   - Breaking changes (if any)
+3. Create PR using gh CLI: `gh pr create --title "..." --body "..."`
+```
+
+## Team Workflows
+
+Share commands with your team:
+
+1. **Commit to repository** - Include `.forge/commands/` in version control
+2. **Document in README** - List available commands and their purposes  
+3. **Standardize practices** - Create commands for onboarding, reviews, releases
+4. **Iterate together** - Improve commands based on team feedback
+
+### Example Team Commands
+
+- `onboard` - Guide new developers through setup
+- `security-check` - Run security audit tools
+- `performance-profile` - Generate performance reports
+- `update-deps` - Update dependencies safely
+- `generate-docs` - Build and verify documentation
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    - Verify file is in `.forge/commands/` directory
+    - Check filename ends with `.md`
+    - Ensure YAML frontmatter is valid
+    - Restart Forge to reload command registry
+  </Accordion>
+  
+  <Accordion title="Command executes but doesn't work as expected">
+    - Review command instructions for clarity
+    - Test special tags (`<lint>`, `<test>`) in isolation
+    - Check for conflicting instructions
+    - Add more specific context and examples
+  </Accordion>
+  
+  <Accordion title="Special tags not executing">
+    - Verify tag syntax: `<lint>command here</lint>`
+    - Ensure commands are valid shell commands
+    - Check command output for errors
+    - Tags must be on single lines (no line breaks within tags)
+  </Accordion>
+</AccordionGroup>
+
+## Command Library
+
+Explore the community command library at [forgecode.dev/commands](https://forgecode.dev/commands) for:
+
+- Pre-built commands for common tasks
+- Language-specific workflows
+- Framework integrations
+- Best practice examples
+
+## Related Features
+
+- [Shell Integration](/features/shell-integration) - Execute commands from your shell
+- [Git Operations](/features/git-operations) - Commands for git workflows
+- [Multi-Agent Workflows](/features/multi-agent-workflows) - Orchestrate multiple agents with commands

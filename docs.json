@@ -1,122 +1,171 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Forge",
+  "theme": "aspen",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#FF6B35",
+    "light": "#FFB84D",
+    "dark": "#D64933"
   },
-  "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/antinomyhq/forge"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/antinomyhq/forge",
+      "discord": "https://discord.gg/kRZBPpkgwq"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "introduction",
+              "installation",
+              "quickstart"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Core Concepts",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "concepts/interactive-mode",
+              "concepts/agents",
+              "concepts/workflows",
+              "concepts/conversations",
+              "concepts/model-context-protocol"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Configuration",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "configuration/overview",
+              "configuration/providers",
+              "configuration/forge-yaml",
+              "configuration/environment-variables",
+              "configuration/custom-rules"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Providers",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "providers/overview",
+              "providers/openrouter",
+              "providers/anthropic",
+              "providers/openai",
+              "providers/vertex-ai",
+              "providers/aws-bedrock",
+              "providers/custom-providers"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/semantic-search",
+              "features/custom-commands",
+              "features/shell-integration",
+              "features/git-operations",
+              "features/multi-agent-workflows"
+            ]
+          },
+          {
+            "group": "Advanced Usage",
+            "pages": [
+              "advanced/mcp-servers",
+              "advanced/custom-agents",
+              "advanced/sandboxes",
+              "advanced/conversation-management",
+              "advanced/data-processing"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/debugging",
+              "guides/code-review",
+              "guides/refactoring",
+              "guides/testing",
+              "guides/best-practices"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Command Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "CLI Commands",
             "pages": [
-              "api-reference/introduction"
+              "commands/overview",
+              "commands/forge",
+              "commands/agent",
+              "commands/provider",
+              "commands/config",
+              "commands/conversation",
+              "commands/workspace",
+              "commands/mcp",
+              "commands/cmd",
+              "commands/commit",
+              "commands/suggest"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Interactive Commands",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "commands/interactive/overview",
+              "commands/interactive/slash-commands",
+              "commands/interactive/keyboard-shortcuts"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Integration",
+        "groups": [
+          {
+            "group": "Shell Integration",
+            "pages": [
+              "integration/zsh-plugin",
+              "integration/zsh-theme",
+              "integration/shell-completions"
+            ]
+          },
+          {
+            "group": "Editor Integration",
+            "pages": [
+              "integration/vscode"
+            ]
+          },
+          {
+            "group": "CI/CD",
+            "pages": [
+              "integration/github-actions",
+              "integration/automation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/troubleshooting",
+              "resources/faq",
+              "resources/contributing",
+              "resources/changelog",
+              "resources/community"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

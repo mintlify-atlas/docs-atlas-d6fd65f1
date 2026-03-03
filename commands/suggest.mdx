@@ -1,0 +1,340 @@
+---
+title: forge suggest
+description: Get AI-powered shell command suggestions from natural language
+---
+
+The `suggest` command translates natural language descriptions into shell commands, helping you discover and execute the right commands without memorizing syntax.
+
+## Usage
+
+```bash
+forge suggest <PROMPT>
+```
+
+## Arguments
+
+<ParamField path="prompt" type="string" required>
+  Natural language description of the desired command.
+  
+  ```bash
+  forge suggest "find all JavaScript files"
+  forge suggest "list processes using port 8080"
+  forge suggest "compress directory into tar.gz"
+  ```
+</ParamField>
+
+## Examples
+
+### File Operations
+
+```bash
+forge suggest "find all JavaScript files in src directory"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+find src -name "*.js"
+─────────────────────────────
+
+This command finds all files with .js extension in the src directory.
+
+Run this command? [Y/n/e]: 
+```
+
+### Process Management
+
+```bash
+forge suggest "show which process is using port 8080"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+lsof -i :8080
+─────────────────────────────
+
+Shows the process listening on port 8080.
+
+Run this command? [Y/n/e]: 
+```
+
+### Git Operations
+
+```bash
+forge suggest "undo last git commit but keep changes"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+git reset HEAD~1
+─────────────────────────────
+
+Resets the last commit while preserving your changes.
+
+Run this command? [Y/n/e]: 
+```
+
+### Archive Operations
+
+```bash
+forge suggest "compress this directory into a tar.gz file"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+tar -czf archive.tar.gz .
+─────────────────────────────
+
+Creates a compressed tar.gz archive of the current directory.
+
+Run this command? [Y/n/e]: 
+```
+
+### System Information
+
+```bash
+forge suggest "show disk usage for all mounted drives"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+df -h
+─────────────────────────────
+
+Displays disk space usage in human-readable format.
+
+Run this command? [Y/n/e]: 
+```
+
+### Network Operations
+
+```bash
+forge suggest "test connection to google.com"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+ping -c 4 google.com
+─────────────────────────────
+
+Sends 4 ping requests to google.com to test connectivity.
+
+Run this command? [Y/n/e]: 
+```
+
+### Text Processing
+
+```bash
+forge suggest "count lines in all Python files"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+find . -name "*.py" -exec wc -l {} + | awk '{sum+=$1} END {print sum}'
+─────────────────────────────
+
+Finds all Python files and counts total lines.
+
+Run this command? [Y/n/e]: 
+```
+
+### Docker Operations
+
+```bash
+forge suggest "stop all running docker containers"
+```
+
+Example output:
+
+```
+Suggested command:
+─────────────────────────────
+docker stop $(docker ps -q)
+─────────────────────────────
+
+Stops all currently running Docker containers.
+
+Run this command? [Y/n/e]: 
+```
+
+## Interactive Prompts
+
+After suggesting a command, Forge prompts for action:
+
+- `Y` (yes) - Execute the command immediately
+- `n` (no) - Cancel without executing
+- `e` (edit) - Edit the command before executing
+
+### Execute Command
+
+```bash
+Run this command? [Y/n/e]: y
+```
+
+Executes the suggested command.
+
+### Cancel
+
+```bash
+Run this command? [Y/n/e]: n
+```
+
+Cancels without executing.
+
+### Edit Before Executing
+
+```bash
+Run this command? [Y/n/e]: e
+```
+
+Opens the command in your default editor for modification before execution.
+
+## Use Cases
+
+### Learning New Commands
+
+```bash
+forge suggest "recursively change file permissions to 644"
+```
+
+Helps you learn the correct syntax:
+
+```
+Suggested command:
+─────────────────────────────
+find . -type f -exec chmod 644 {} +
+─────────────────────────────
+```
+
+### Complex One-Liners
+
+```bash
+forge suggest "find files larger than 100MB modified in last week"
+```
+
+Generates complex commands:
+
+```
+Suggested command:
+─────────────────────────────
+find . -type f -size +100M -mtime -7
+─────────────────────────────
+```
+
+### Safe Exploration
+
+```bash
+forge suggest "safely delete all node_modules directories"
+```
+
+Provides safe commands with explanations:
+
+```
+Suggested command:
+─────────────────────────────
+find . -name "node_modules" -type d -prune -exec rm -rf {} +
+─────────────────────────────
+
+Recursively finds and removes all node_modules directories.
+```
+
+## Best Practices
+
+### Be Specific
+
+More specific prompts yield better results:
+
+```bash
+# Good
+forge suggest "find JavaScript files modified in last 24 hours"
+
+# Less specific
+forge suggest "find files"
+```
+
+### Include Context
+
+Mention the tools or operations you want:
+
+```bash
+forge suggest "use rsync to backup home directory"
+```
+
+### Review Before Executing
+
+Always review suggested commands, especially:
+
+- File deletion operations
+- System-wide changes
+- Commands with sudo/root access
+- Network operations
+
+### Use Edit Mode
+
+For complex commands, use edit mode to refine:
+
+```bash
+Run this command? [Y/n/e]: e
+```
+
+## Command Categories
+
+Forge can suggest commands for:
+
+- **File operations**: find, grep, sed, awk, xargs
+- **Process management**: ps, kill, lsof, top
+- **Git operations**: commit, branch, merge, rebase
+- **Network**: curl, wget, ping, netstat
+- **Docker**: container, image, volume management
+- **System admin**: systemctl, journalctl, cron
+- **Archive**: tar, zip, gzip, bzip2
+- **Package management**: apt, yum, brew, npm
+
+## Related Commands
+
+- `forge commit` - Generate git commit messages
+- `forge cmd execute` - Run custom commands
+- `forge -p <prompt>` - General AI assistance
+
+## Shell Integration
+
+For even faster access, add a shell alias:
+
+```bash
+alias fs="forge suggest"
+```
+
+Then use:
+
+```bash
+fs "find large files"
+```
+
+## Notes
+
+- Commands are tailored to your operating system
+- Suggestions consider common best practices
+- Always review commands before executing
+- Edit mode opens in `$EDITOR` (defaults to vim/nano)
+- Complex commands include explanations
+- Safe by default - prompts before execution

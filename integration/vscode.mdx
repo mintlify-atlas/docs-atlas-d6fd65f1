@@ -1,0 +1,346 @@
+---
+title: 'VS Code Integration'
+description: 'Use Forge seamlessly within Visual Studio Code with automatic extension detection and installation'
+---
+
+## Overview
+
+Forge integrates with Visual Studio Code through automatic terminal detection and extension installation. When running Forge in VS Code's integrated terminal, it can detect the environment and offer to install the official Forge extension for enhanced functionality.
+
+## Features
+
+- Automatic VS Code terminal detection
+- One-click extension installation
+- Seamless terminal integration
+- Access to Forge commands within VS Code
+- Integrated AI assistance in your workflow
+
+## Extension Installation
+
+### Automatic Installation
+
+Forge automatically detects when running in VS Code and offers to install the extension:
+
+<Steps>
+  <Step title="Open VS Code Terminal">
+    Open the integrated terminal in VS Code:
+
+    - Press <kbd>Ctrl</kbd> + <kbd>`</kbd> (Windows/Linux)
+    - Press <kbd>Cmd</kbd> + <kbd>`</kbd> (macOS)
+    - Or: View → Terminal
+  </Step>
+
+  <Step title="Run Forge">
+    Run any Forge command:
+
+    ```bash
+    forge
+    ```
+
+    If the extension isn't installed, Forge will prompt you to install it.
+  </Step>
+
+  <Step title="Accept Installation">
+    When prompted, accept the installation:
+
+    ```
+    Forge VS Code extension not detected. Install it? (y/n)
+    ```
+
+    Type `y` and press Enter.
+  </Step>
+
+  <Step title="Automatic Installation">
+    Forge will automatically run:
+
+    ```bash
+    code --install-extension ForgeCode.forge-vscode --force
+    ```
+
+    The extension will be installed in the background.
+  </Step>
+
+  <Step title="Reload VS Code">
+    After installation completes, reload VS Code:
+
+    - Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (Windows/Linux)
+    - Press <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (macOS)
+    - Type: "Developer: Reload Window"
+    - Press Enter
+  </Step>
+</Steps>
+
+### Manual Installation
+
+<Steps>
+  <Step title="Via Command Line">
+    Install directly using the `code` command:
+
+    ```bash
+    code --install-extension ForgeCode.forge-vscode
+    ```
+  </Step>
+
+  <Step title="Via VS Code Extensions">
+    1. Open VS Code
+    2. Click the Extensions icon in the sidebar (or press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd>)
+    3. Search for "Forge"
+    4. Click "Install" on the ForgeCode.forge-vscode extension
+  </Step>
+
+  <Step title="Via VS Code Marketplace">
+    Visit the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ForgeCode.forge-vscode) and click "Install".
+  </Step>
+</Steps>
+
+## Detection Mechanism
+
+Forge detects VS Code by checking for environment variables that are automatically set in VS Code's integrated terminal.
+
+### Environment Variables Checked
+
+From `crates/forge_main/src/vscode.rs:9`:
+
+```rust
+pub fn is_vscode_terminal() -> bool {
+    std::env::var("TERM_PROGRAM")
+        .map(|val| val == "vscode")
+        .unwrap_or(false)
+    || std::env::var("VSCODE_PID").is_ok()
+    || std::env::var("VSCODE_GIT_ASKPASS_NODE").is_ok()
+    || std::env::var("VSCODE_GIT_IPC_HANDLE").is_ok()
+}
+```
+
+Forge checks for:
+
+1. `TERM_PROGRAM=vscode` - Primary VS Code terminal identifier
+2. `VSCODE_PID` - VS Code process ID
+3. `VSCODE_GIT_ASKPASS_NODE` - VS Code Git integration
+4. `VSCODE_GIT_IPC_HANDLE` - VS Code IPC handle
+
+### Extension Detection
+
+From `crates/forge_main/src/vscode.rs:22`:
+
+```rust
+pub fn is_extension_installed() -> bool {
+    if let Ok(output) = Command::new("code").arg("--list-extensions").output()
+        && output.status.success()
+        && let Ok(extensions) = String::from_utf8(output.stdout)
+    {
+        return extensions
+            .lines()
+            .any(|line| line.trim() == "ForgeCode.forge-vscode");
+    }
+    false
+}
+```
+
+This checks if `ForgeCode.forge-vscode` appears in the installed extensions list.
+
+## Extension Features
+
+The Forge VS Code extension provides:
+
+- Integrated terminal commands
+- Syntax highlighting for Forge conversations
+- Code action suggestions
+- Quick fixes powered by AI
+- Inline AI assistance
+- Context-aware completions
+
+## Configuration
+
+### Disable Auto-Install Prompt
+
+If you don't want Forge to prompt for extension installation:
+
+```bash
+# Set environment variable
+export FORGE_SKIP_VSCODE_PROMPT="1"
+```
+
+Or add to your shell configuration:
+
+```bash ~/.zshrc or ~/.bashrc
+# Disable Forge VS Code extension prompt
+export FORGE_SKIP_VSCODE_PROMPT="1"
+```
+
+### Extension Settings
+
+Configure the extension in VS Code settings:
+
+```json settings.json
+{
+  "forge.autoStart": true,
+  "forge.binaryPath": "/usr/local/bin/forge",
+  "forge.enableCodeActions": true,
+  "forge.enableInlineAssistance": true
+}
+```
+
+## Using Forge in VS Code
+
+### Terminal Integration
+
+Once the extension is installed, use Forge commands directly in the integrated terminal:
+
+```bash
+# Start a conversation
+forge
+
+# Or use ZSH plugin syntax (if configured)
+: Review this file @[src/main.rs]
+```
+
+### Command Palette
+
+Access Forge commands via Command Palette:
+
+1. Press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
+2. Type "Forge"
+3. Select from available commands:
+   - Forge: Start Conversation
+   - Forge: Review Current File
+   - Forge: Generate Tests
+   - Forge: Explain Code
+   - Forge: Fix Issues
+
+### Keyboard Shortcuts
+
+Default keybindings (customizable):
+
+| Command | Windows/Linux | macOS |
+|---------|---------------|-------|
+| Start Conversation | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> |
+| Review Current File | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> |
+| Explain Selection | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd> | <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>E</kbd> |
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Extension not detected">
+    Verify the extension is installed:
+
+    ```bash
+    code --list-extensions | grep ForgeCode.forge-vscode
+    ```
+
+    If not listed, install manually:
+
+    ```bash
+    code --install-extension ForgeCode.forge-vscode
+    ```
+  </Accordion>
+
+  <Accordion title="Auto-install fails">
+    Check if the `code` command is in PATH:
+
+    ```bash
+    which code
+    ```
+
+    If not found, add VS Code to PATH:
+
+    **macOS:**
+    1. Open VS Code
+    2. Press <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
+    3. Type: "Shell Command: Install 'code' command in PATH"
+    4. Press Enter
+
+    **Windows:**
+    The `code` command is usually added automatically during installation.
+
+    **Linux:**
+    ```bash
+    export PATH="$PATH:/usr/share/code/bin"
+    ```
+  </Accordion>
+
+  <Accordion title="VS Code not detected">
+    Forge may not detect VS Code if environment variables aren't set. Verify:
+
+    ```bash
+    # In VS Code integrated terminal
+    echo $TERM_PROGRAM
+    # Should output: vscode
+
+    echo $VSCODE_PID
+    # Should output a process ID
+    ```
+
+    If these are empty, you may be using a non-standard terminal or VS Code fork.
+  </Accordion>
+
+  <Accordion title="Extension not working after install">
+    1. Reload VS Code window:
+       - <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
+       - Type: "Developer: Reload Window"
+
+    2. Check extension is activated:
+       - View → Extensions
+       - Search for "Forge"
+       - Verify it shows "Enabled"
+
+    3. Check extension logs:
+       - View → Output
+       - Select "Forge" from dropdown
+  </Accordion>
+</AccordionGroup>
+
+## Implementation Details
+
+### Extension Installation Function
+
+From `crates/forge_main/src/vscode.rs:39`:
+
+```rust
+pub fn install_extension() -> Result<bool, std::io::Error> {
+    let output = Command::new("code")
+        .arg("--install-extension")
+        .arg("ForgeCode.forge-vscode")
+        .arg("--force")
+        .output()?;
+
+    Ok(output.status.success())
+}
+```
+
+This function:
+1. Runs `code --install-extension ForgeCode.forge-vscode --force`
+2. Returns `Ok(true)` if installation succeeds
+3. Returns `Ok(false)` if installation fails
+4. Returns `Err` if the command can't be executed
+
+### Installation Check
+
+From `crates/forge_main/src/vscode.rs:54`:
+
+```rust
+pub fn should_install_extension() -> bool {
+    is_vscode_terminal() && !is_extension_installed()
+}
+```
+
+This determines when to prompt for installation:
+- Only when running in VS Code terminal
+- Only when extension is not already installed
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="ZSH Plugin" icon="plug" href="/integration/zsh-plugin">
+    Use Forge with enhanced ZSH integration
+  </Card>
+  <Card title="GitHub Actions" icon="github" href="/integration/github-actions">
+    Integrate Forge in CI/CD
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Configure Forge settings
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get started with Forge
+  </Card>
+</CardGroup>

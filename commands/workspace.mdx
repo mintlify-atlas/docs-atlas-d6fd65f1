@@ -1,0 +1,420 @@
+---
+title: forge workspace
+description: Manage workspaces for semantic search and code indexing
+---
+
+The `workspace` command group manages semantic code search, allowing you to index directories and perform intelligent queries across your codebase.
+
+## Usage
+
+```bash
+forge workspace [SUBCOMMAND] [OPTIONS]
+```
+
+## Subcommands
+
+### sync
+
+Synchronize a directory for semantic search by indexing its contents.
+
+```bash
+forge workspace sync [PATH] [OPTIONS]
+```
+
+<ParamField path="path" type="path" default=".">
+  Path to the directory to sync. Defaults to current directory.
+  
+  ```bash
+  forge workspace sync
+  forge workspace sync ~/projects/myapp
+  forge workspace sync /path/to/repo
+  ```
+</ParamField>
+
+<ParamField path="--batch-size" type="number" default="100">
+  Number of files to process concurrently.
+  
+  ```bash
+  forge workspace sync --batch-size 50
+  forge workspace sync . --batch-size 200
+  ```
+</ParamField>
+
+### list
+
+List all indexed workspaces.
+
+```bash
+forge workspace list [OPTIONS]
+```
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  Alias: `-p`
+  
+  ```bash
+  forge workspace list --porcelain
+  forge workspace list -p
+  ```
+</ParamField>
+
+### query
+
+Query the workspace using semantic search.
+
+```bash
+forge workspace query <QUERY> [PATH] [OPTIONS]
+```
+
+<ParamField path="query" type="string" required>
+  Search query.
+  
+  ```bash
+  forge workspace query "authentication logic"
+  forge workspace query "error handling"
+  ```
+</ParamField>
+
+<ParamField path="path" type="path" default=".">
+  Path to the directory to search. Defaults to current directory.
+  
+  ```bash
+  forge workspace query "database queries" .
+  forge workspace query "API endpoints" ~/projects/api
+  ```
+</ParamField>
+
+<ParamField path="--limit" type="number" default="10">
+  Maximum number of results to return.
+  
+  Alias: `-l`
+  
+  ```bash
+  forge workspace query "tests" -l 20
+  forge workspace query "config" --limit 5
+  ```
+</ParamField>
+
+<ParamField path="--top-k" type="number" default="none">
+  Number of highest probability tokens to consider (1-1000).
+  
+  ```bash
+  forge workspace query "imports" --top-k 100
+  ```
+</ParamField>
+
+<ParamField path="--use-case" type="string" required>
+  Describe your intent or goal to filter results for relevance.
+  
+  Alias: `-r`
+  
+  ```bash
+  forge workspace query "http" -r "finding API route handlers"
+  forge workspace query "test" --use-case "locating integration tests"
+  ```
+</ParamField>
+
+<ParamField path="--starts-with" type="string" default="none">
+  Filter results to files starting with this prefix.
+  
+  ```bash
+  forge workspace query "utils" --starts-with src/
+  forge workspace query "config" --starts-with packages/core
+  ```
+</ParamField>
+
+<ParamField path="--ends-with" type="string" default="none">
+  Filter results to files ending with this suffix.
+  
+  ```bash
+  forge workspace query "tests" --ends-with .test.ts
+  forge workspace query "types" --ends-with .d.ts
+  ```
+</ParamField>
+
+### info
+
+Show workspace information for an indexed directory.
+
+```bash
+forge workspace info [PATH]
+```
+
+<ParamField path="path" type="path" default=".">
+  Path to the directory to get information for. Defaults to current directory.
+  
+  ```bash
+  forge workspace info
+  forge workspace info ~/projects/myapp
+  ```
+</ParamField>
+
+### delete
+
+Delete one or more workspaces.
+
+```bash
+forge workspace delete <WORKSPACE_ID>...
+```
+
+<ParamField path="workspace_ids" type="string[]" required>
+  Workspace IDs to delete. Multiple IDs can be specified.
+  
+  ```bash
+  forge workspace delete abc123
+  forge workspace delete abc123 def456 ghi789
+  ```
+</ParamField>
+
+### status
+
+Show sync status of all files in the workspace.
+
+```bash
+forge workspace status [PATH] [OPTIONS]
+```
+
+<ParamField path="path" type="path" default=".">
+  Path to the directory to check status for. Defaults to current directory.
+  
+  ```bash
+  forge workspace status
+  forge workspace status ~/projects/myapp
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  Alias: `-p`
+  
+  ```bash
+  forge workspace status --porcelain
+  forge workspace status . -p
+  ```
+</ParamField>
+
+### init
+
+Initialize an empty workspace for the provided directory.
+
+```bash
+forge workspace init [PATH]
+```
+
+<ParamField path="path" type="path" default=".">
+  Path to the directory to initialize as a workspace. Defaults to current directory.
+  
+  ```bash
+  forge workspace init
+  forge workspace init ~/projects/newapp
+  ```
+</ParamField>
+
+## Examples
+
+### Sync Current Directory
+
+```bash
+forge workspace sync
+```
+
+Example output:
+
+```
+Indexing workspace: /home/user/projects/myapp
+
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%
+
+✓ Indexed 1,247 files in 23 seconds
+```
+
+### Sync with Custom Batch Size
+
+```bash
+forge workspace sync ~/projects/large-repo --batch-size 200
+```
+
+### List All Workspaces
+
+```bash
+forge workspace list
+```
+
+Example output:
+
+```
+Indexed Workspaces:
+
+ID       Path                              Files   Last Synced
+abc123   /home/user/projects/myapp        1,247   2024-01-15 10:23
+def456   /home/user/projects/api          856     2024-01-14 16:45
+ghi789   /home/user/projects/frontend     2,341   2024-01-13 09:12
+```
+
+### Query Workspace
+
+```bash
+forge workspace query "authentication logic" -r "finding login implementation"
+```
+
+Example output:
+
+```
+Search Results:
+
+1. src/auth/login.ts (score: 0.94)
+   Implementation of user authentication and session management
+
+2. src/middleware/auth.ts (score: 0.87)
+   Authentication middleware for API routes
+
+3. tests/auth.test.ts (score: 0.82)
+   Integration tests for authentication flow
+```
+
+### Query with Filters
+
+```bash
+forge workspace query "error handling" \
+  --limit 5 \
+  --starts-with src/ \
+  --ends-with .ts \
+  -r "finding error handling patterns"
+```
+
+### View Workspace Status
+
+```bash
+forge workspace status
+```
+
+Example output:
+
+```
+Workspace Status: /home/user/projects/myapp
+
+Status      Files
+Indexed     1,247
+Modified    3
+New         5
+Deleted     2
+
+Out of sync files:
+  M  src/auth/login.ts
+  M  src/api/users.ts
+  M  README.md
+  A  src/utils/new-helper.ts
+  A  tests/new-test.test.ts
+  D  old-file.ts
+
+Run 'forge workspace sync' to update the index.
+```
+
+### Get Workspace Info
+
+```bash
+forge workspace info
+```
+
+Example output:
+
+```
+Workspace Information:
+
+  ID:           abc123
+  Path:         /home/user/projects/myapp
+  Files:        1,247
+  Total size:   12.4 MB
+  Last synced:  2024-01-15 10:23
+  Created:      2024-01-10 14:30
+```
+
+### Delete Workspace
+
+```bash
+forge workspace delete abc123
+```
+
+Example output:
+
+```
+✓ Workspace deleted: abc123
+```
+
+### Initialize New Workspace
+
+```bash
+forge workspace init ~/projects/newapp
+```
+
+Example output:
+
+```
+✓ Workspace initialized: /home/user/projects/newapp
+  Run 'forge workspace sync' to index files.
+```
+
+## Use Cases
+
+### Finding Specific Code Patterns
+
+```bash
+forge workspace query "database migrations" \
+  -r "locating migration files" \
+  --ends-with .sql
+```
+
+### Locating Test Files
+
+```bash
+forge workspace query "user authentication" \
+  -r "finding relevant test files" \
+  --starts-with tests/ \
+  --ends-with .test.ts
+```
+
+### Exploring New Codebase
+
+```bash
+forge workspace query "entry point" \
+  -r "finding main application entry points" \
+  --limit 3
+```
+
+## Machine-Readable Output
+
+```bash
+forge workspace list --porcelain | jq '.workspaces[] | select(.files > 1000)'
+forge workspace status --porcelain
+```
+
+## Storage Location
+
+Workspace indexes are stored in:
+
+```
+~/.local/share/forge/workspaces/
+```
+
+## Performance Tips
+
+- Use `--batch-size` to adjust indexing speed based on your system
+- Larger batch sizes (200-500) work well for SSDs
+- Smaller batch sizes (50-100) may be better for HDDs
+- Re-sync periodically to keep the index up to date
+
+## Related Commands
+
+- `forge` - AI assistant can use workspace search automatically
+- `forge list workspace` - Alternative way to list workspaces
+
+## Notes
+
+- Workspaces must be synced before querying
+- The `sync` command respects `.gitignore` files
+- Semantic search uses AI embeddings for intelligent matching
+- Query results are ranked by relevance
+- Use `--use-case` to improve result relevance
+- File filters (`--starts-with`, `--ends-with`) narrow results efficiently

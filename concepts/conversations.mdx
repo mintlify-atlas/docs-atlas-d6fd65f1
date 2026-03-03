@@ -1,0 +1,419 @@
+---
+title: Conversation Management
+description: Learn how Forge manages conversation state and history
+---
+
+# Conversation Management
+
+Forge maintains detailed conversation history that enables context preservation, cost tracking, and session resumption. Understanding how conversations work helps you use Forge more effectively.
+
+## What is a Conversation?
+
+A conversation in Forge represents a complete interaction session between you and the AI. Each conversation contains:
+
+- **Unique ID** - UUID identifier for the conversation
+- **Messages** - Complete history of user and AI messages
+- **Context** - Tool calls, results, and intermediate steps
+- **Metrics** - Token usage, cost, and timing information
+- **Metadata** - Creation time, last update, and title
+
+## Conversation Structure
+
+```rust
+pub struct Conversation {
+    pub id: ConversationId,
+    pub title: Option<String>,
+    pub context: Option<Context>,
+    pub metrics: Metrics,
+    pub metadata: MetaData,
+}
+```
+
+### Conversation ID
+
+Each conversation has a unique UUID:
+
+```rust
+let conversation = Conversation::generate(); // Creates new UUID
+let id = conversation.id; // e.g., "a7b3c8d9-..."
+```
+
+### Context
+
+The context contains all messages exchanged:
+
+- **User messages** - Your prompts and requests
+- **Assistant messages** - AI responses
+- **Tool messages** - Tool call results
+- **System messages** - Internal state and instructions
+
+### Metrics
+
+Forge tracks comprehensive metrics:
+
+```rust
+pub struct Metrics {
+    started_at: DateTime<Utc>,
+    ended_at: Option<DateTime<Utc>>,
+    duration: Option<Duration>,
+    token_count: TokenCount,
+    cost: Option<f64>,
+}
+```
+
+## Creating Conversations
+
+Conversations are created automatically when you:
+
+### Start Interactive Mode
+
+```bash
+forge
+```
+
+Creates a new conversation that persists until you exit.
+
+### Execute a Direct Prompt
+
+```bash
+forge -p "Explain the authentication flow"
+```
+
+Creates a single-turn conversation.
+
+### Load a Saved Conversation
+
+```bash
+forge --conversation path/to/conversation.json
+```
+
+Resumes an existing conversation from a file.
+
+## Conversation Lifecycle
+
+1. **Creation** - Conversation initialized with unique ID and timestamp
+2. **Interaction** - Messages exchanged, tools called, context accumulated
+3. **Persistence** - Automatically saved to Forge's history directory
+4. **Resumption** (optional) - Load and continue from saved state
+5. **Export** (optional) - Export as HTML or JSON for documentation
+
+## Message Types
+
+Forge uses different message types:
+
+### User Messages
+
+Your inputs to the AI:
+
+```rust
+ContextMessage::user("Refactor the auth module", None)
+```
+
+### Assistant Messages
+
+AI responses:
+
+```rust
+ContextMessage::assistant(
+    "I'll refactor the authentication module...",
+    None,  // tool_calls
+    None,  // usage
+    None,  // finish_reason
+)
+```
+
+### Tool Messages
+
+Results from tool executions:
+
+```rust
+ContextMessage::Tool(ToolResult::new("read")
+    .output(Ok(ToolOutput::text(file_content))))
+```
+
+## Token Tracking
+
+Forge tracks token usage throughout conversations:
+
+```rust
+pub struct Usage {
+    pub prompt_tokens: TokenCount,
+    pub completion_tokens: TokenCount,
+    pub total_tokens: TokenCount,
+    pub cached_tokens: TokenCount,
+    pub cost: Option<f64>,
+}
+```
+
+### Accumulated Usage
+
+Get total usage across the entire conversation:
+
+```rust
+let usage = conversation.accumulated_usage();
+if let Some(usage) = usage {
+    println!("Total tokens: {}", usage.total_tokens);
+    println!("Total cost: ${:.4}", usage.cost.unwrap_or(0.0));
+}
+```
+
+<Info>
+Forge automatically accumulates token usage from all messages, including tool calls and agent invocations.
+</Info>
+
+## Cost Tracking
+
+Forge calculates costs based on model pricing:
+
+```rust
+let cost = conversation.accumulated_cost(); // Option<f64>
+```
+
+### Multi-Agent Cost Tracking
+
+When using multiple agents, Forge tracks the total cost:
+
+```rust
+let total_cost = Conversation::total_cost(&[main_conv, agent_conv_1, agent_conv_2]);
+```
+
+<Note>
+Costs include all sub-agent conversations spawned during tool calls. This gives you a complete picture of the actual expense.
+</Note>
+
+## Related Conversations
+
+When agents call other agents, Forge tracks relationships:
+
+```rust
+// Get IDs of all related conversations
+let related_ids = conversation.related_conversation_ids();
+```
+
+This creates a conversation tree:
+
+```
+[Main Conversation]
+    ├── [Backend Agent Conversation]
+    ├── [Frontend Agent Conversation]
+    └── [Database Agent Conversation]
+```
+
+## Conversation History
+
+Forge maintains conversation history:
+
+### Default Location
+
+```bash
+# macOS/Linux
+~/.forge/conversations/
+
+# Windows
+%APPDATA%\forge\conversations\
+```
+
+### Custom Location
+
+Set a custom history file location:
+
+```bash
+export FORGE_HISTORY_FILE=/path/to/custom/history
+```
+
+### History Limits
+
+Control how many conversations to keep:
+
+```bash
+export FORGE_MAX_CONVERSATIONS=100  # Default: 100
+```
+
+## Exporting Conversations
+
+### HTML Export
+
+Export as human-readable HTML:
+
+```rust
+let html = conversation.to_html();
+std::fs::write("conversation.html", html)?;
+```
+
+HTML export includes:
+- Formatted messages
+- Code syntax highlighting
+- Tool call details
+- Token usage statistics
+- Cost breakdown
+
+### HTML with Related Conversations
+
+Export with all sub-conversations:
+
+```rust
+let html = conversation.to_html_with_related(&related_conversations);
+```
+
+This creates a single HTML document with navigation between conversations.
+
+### JSON Export
+
+Export as structured JSON:
+
+```bash
+forge --conversation conversation.json --export
+```
+
+JSON export preserves complete conversation state for programmatic processing.
+
+## Message Filtering
+
+Extract specific message types:
+
+### First User Messages
+
+Get the first user message in each sequence:
+
+```rust
+let first_messages = conversation.first_user_messages();
+```
+
+Useful for understanding conversation flow and creating summaries.
+
+### Tool Results
+
+Filter for tool execution results:
+
+```rust
+let tool_results: Vec<&ToolResult> = conversation
+    .context
+    .messages
+    .iter()
+    .filter_map(|msg| msg.as_tool_result())
+    .collect();
+```
+
+## Context Compaction
+
+Forge can automatically compact conversation history:
+
+```yaml
+compact:
+  token_threshold: 100000     # Compact when exceeding this
+  message_threshold: 100      # Or this many messages
+  retention_window: 10        # Keep last N messages
+  eviction_window: 0.5        # Compact up to 50%
+  model: claude-3-haiku       # Use cheaper model
+```
+
+When compaction triggers:
+1. Recent messages (retention_window) are preserved
+2. Older messages are summarized using the compaction model
+3. Summary replaces the original messages
+4. Token count is significantly reduced
+
+<Warning>
+Compaction is lossy - detailed information from summarized messages may be lost. Adjust retention_window to preserve important context.
+</Warning>
+
+## Best Practices
+
+### Name Your Conversations
+
+Give conversations meaningful titles:
+
+```rust
+conversation.title("Refactor authentication module");
+```
+
+This makes them easier to find and reference later.
+
+### Review Before Major Changes
+
+Export conversations before significant refactoring:
+
+```bash
+forge -p "Explain current implementation" > before.html
+# Make changes
+forge -p "Explain new implementation" > after.html
+```
+
+### Monitor Token Usage
+
+Keep an eye on accumulated tokens:
+
+```rust
+if let Some(usage) = conversation.accumulated_usage() {
+    if usage.total_tokens > 50000 {
+        println!("Warning: High token usage!");
+    }
+}
+```
+
+### Archive Important Conversations
+
+Save valuable conversations for future reference:
+
+```bash
+forge --conversation current.json --export > important-refactor.html
+git add important-refactor.html
+git commit -m "Document major refactoring conversation"
+```
+
+### Use Conversation History
+
+Review past conversations to understand decisions:
+
+```bash
+# List recent conversations
+ls -lt ~/.forge/conversations/
+
+# Resume a specific conversation
+forge --conversation ~/.forge/conversations/abc123.json
+```
+
+## Programmatic Access
+
+You can programmatically work with conversations:
+
+```rust
+use forge_domain::{Conversation, ConversationId};
+
+// Create new conversation
+let conversation = Conversation::generate();
+
+// Access properties
+println!("ID: {}", conversation.id);
+println!("Tokens: {:?}", conversation.token_count());
+println!("Cost: {:?}", conversation.accumulated_cost());
+
+// Get related conversations
+let related_ids = conversation.related_conversation_ids();
+```
+
+<Accordion title="FAQ">
+  <AccordionItem title="Are conversations stored locally or in the cloud?">
+    Conversations are stored locally on your machine by default. They never leave your system unless you explicitly export or share them. This ensures your code and conversations remain private.
+  </AccordionItem>
+  
+  <AccordionItem title="Can I delete conversation history?">
+    Yes, you can delete conversation files from the history directory (`~/.forge/conversations/`). You can also clear history in interactive mode with `/clear`.
+  </AccordionItem>
+  
+  <AccordionItem title="How much disk space do conversations use?">
+    Conversation files vary in size based on length and content. A typical conversation might be 10-100 KB. With the default limit of 100 conversations, expect 1-10 MB of storage.
+  </AccordionItem>
+  
+  <AccordionItem title="Can I share conversations with my team?">
+    Yes! Export conversations as HTML or JSON and share them via email, documentation, or version control. HTML exports are human-readable, while JSON exports can be loaded by other team members.
+  </AccordionItem>
+  
+  <AccordionItem title="What happens to conversations when using multiple agents?">
+    Each agent creates its own sub-conversation. These are linked to the main conversation through the related_conversation_ids. You can export all related conversations together for a complete view.
+  </AccordionItem>
+  
+  <AccordionItem title="How does compaction affect conversation quality?">
+    Compaction trades detail for context length. Summaries preserve key information but lose specifics. Use generous retention_window values for important conversations, and review summaries to ensure quality.
+  </AccordionItem>
+</Accordion>

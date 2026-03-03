@@ -1,0 +1,173 @@
+---
+title: Interactive Mode
+description: Learn how Forge's interactive terminal mode enables real-time collaboration with AI
+---
+
+# Interactive Mode
+
+Forge's interactive mode provides a conversational terminal interface where you can collaborate with AI in real-time. When you run `forge` without arguments, you enter an interactive session where the AI becomes your coding partner.
+
+## Starting Interactive Mode
+
+To start an interactive session, simply run:
+
+```bash
+forge
+```
+
+This launches Forge in interactive mode, where you can have ongoing conversations with the AI about your codebase.
+
+## How It Works
+
+In interactive mode, Forge:
+
+1. **Analyzes your context** - Understands your current directory and project structure
+2. **Maintains conversation state** - Remembers your previous messages and decisions
+3. **Executes tools** - Can read files, run commands, and modify code on your behalf
+4. **Provides real-time feedback** - Shows you what it's doing as it works
+
+## Direct Prompt Mode
+
+If you need to execute a single task without entering an interactive session, you can use the `-p` flag:
+
+```bash
+forge -p "Refactor the authentication module to use async/await"
+```
+
+This executes the prompt and exits, making it useful for scripts and automation.
+
+<Info>
+Direct prompt mode is ideal for CI/CD pipelines, git hooks, or quick one-off tasks.
+</Info>
+
+## Command File Execution
+
+You can also provide a file containing commands to execute:
+
+```bash
+forge -c commands.txt
+```
+
+This is useful for running pre-defined workflows or batch operations.
+
+## Interactive Commands
+
+While in interactive mode, you have access to several built-in commands:
+
+- `/help` - Display available commands
+- `/model` - Switch the AI model
+- `/exit` - Exit the interactive session
+- `/clear` - Clear the conversation history
+
+## Session Management
+
+Forge automatically saves your conversation history, allowing you to:
+
+- Resume previous conversations
+- Review past interactions
+- Export conversations for documentation
+
+You can manage conversations using the `--conversation` flag:
+
+```bash
+forge --conversation path/to/saved-conversation.json
+```
+
+## Custom Commands
+
+You can define custom commands in your `forge.yaml` to create shortcuts for repetitive prompts:
+
+```yaml
+commands:
+  - name: "refactor"
+    description: "Refactor selected code"
+    prompt: "Please refactor this code to improve readability and performance"
+  - name: "review"
+    description: "Review code for issues"
+    prompt: "Review this code and suggest improvements for security, performance, and maintainability"
+```
+
+Use custom commands by typing `/refactor` or `/review` in the interactive session.
+
+<Note>
+Custom commands help standardize common tasks across your team and ensure consistent code quality.
+</Note>
+
+## Restricted Mode
+
+For enhanced security, you can enable restricted shell mode:
+
+```bash
+forge --restricted
+```
+
+Restricted mode limits the AI's ability to execute certain shell commands, providing an extra layer of safety when working with sensitive codebases.
+
+<Warning>
+Restricted mode prevents potentially dangerous operations but may limit the AI's ability to help with certain tasks.
+</Warning>
+
+## Verbose Output
+
+Enable verbose mode to see detailed information about what Forge is doing:
+
+```bash
+forge --verbose
+```
+
+This is helpful for debugging or understanding the AI's decision-making process.
+
+## Best Practices
+
+### Be Specific
+
+The more specific your request, the better the results:
+
+- **Good**: "Add error handling to the login function in src/auth.ts"
+- **Better**: "Add try-catch blocks with proper error messages to the login function in src/auth.ts, and log errors to our logging service"
+
+### Provide Context
+
+Mention relevant files, functions, or patterns in your codebase:
+
+```
+I need to update the user profile component to match the pattern we use in the settings component
+```
+
+### Iterate and Refine
+
+Don't expect perfect results on the first try. Forge works best when you iterate:
+
+1. Make an initial request
+2. Review the output
+3. Provide feedback and refinements
+4. Continue until you're satisfied
+
+### Use Version Control
+
+Always commit your work before major changes:
+
+```bash
+git commit -am "Before AI refactoring"
+forge -p "Refactor the entire authentication module"
+```
+
+This gives you an easy way to review changes and roll back if needed.
+
+<Accordion title="FAQ">
+  <AccordionItem title="Can I use interactive mode with different AI models?">
+    Yes! Use the `/model` command during an interactive session to switch between available models. You can also set a default model in your `forge.yaml` configuration.
+  </AccordionItem>
+  
+  <AccordionItem title="How long does conversation history persist?">
+    Forge maintains conversation history indefinitely unless you explicitly clear it with `/clear` or delete the conversation files from your Forge history directory.
+  </AccordionItem>
+  
+  <AccordionItem title="Can I run multiple interactive sessions simultaneously?">
+    Yes, you can run multiple Forge sessions in different terminal windows. Each maintains its own conversation state independently.
+  </AccordionItem>
+  
+  <AccordionItem title="What happens if I interrupt Forge while it's working?">
+    You can safely interrupt Forge with Ctrl+C. The conversation state is saved, and you can resume or start a new request.
+  </AccordionItem>
+</Accordion>

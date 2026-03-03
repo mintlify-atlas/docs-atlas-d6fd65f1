@@ -1,0 +1,529 @@
+---
+title: 'GitHub Actions Integration'
+description: 'Integrate Forge into your GitHub Actions CI/CD workflows for automated testing, building, and deployment'
+---
+
+## Overview
+
+Forge uses GitHub Actions for continuous integration and delivery. The CI/CD pipeline includes automated testing, multi-platform builds, release management, and distribution across multiple channels.
+
+## CI Workflow
+
+The main CI workflow runs on pull requests and pushes to main, performing comprehensive testing and validation.
+
+### Workflow Configuration
+
+From `.github/workflows/ci.yml:18`:
+
+```yaml
+name: ci
+env:
+  RUSTFLAGS: '-Dwarnings'
+  OPENROUTER_API_KEY: ${{secrets.OPENROUTER_API_KEY}}
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+```
+
+### Build and Test Job
+
+<Steps>
+  <Step title="Checkout Code">
+    ```yaml
+    - name: Checkout Code
+      uses: actions/checkout@v6
+    ```
+  </Step>
+
+  <Step title="Setup Protobuf Compiler">
+    ```yaml
+    - name: Setup Protobuf Compiler
+      uses: arduino/setup-protoc@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    ```
+  </Step>
+
+  <Step title="Setup Rust Toolchain">
+    ```yaml
+    - name: Setup Rust Toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+    ```
+  </Step>
+
+  <Step title="Run Tests with Coverage">
+    ```yaml
+    - name: Install cargo-llvm-cov
+      run: cargo install cargo-llvm-cov
+
+    - name: Generate coverage
+      run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+    ```
+  </Step>
+</Steps>
+
+### Performance Benchmarks
+
+The CI includes performance tests to ensure the ZSH rprompt renders quickly:
+
+```yaml
+zsh_rprompt_perf:
+  name: 'Performance: zsh rprompt'
+  runs-on: ubuntu-latest
+  steps:
+    - name: Run performance benchmark
+      run: './scripts/benchmark.sh --threshold 60 zsh rprompt'
+```
+
+This ensures prompt rendering stays under 60ms.
+
+## Release Workflow
+
+### Multi-Platform Builds
+
+Forge builds for multiple platforms using a matrix strategy:
+
+```yaml
+strategy:
+  matrix:
+    include:
+      - binary_name: forge-x86_64-unknown-linux-musl
+        target: x86_64-unknown-linux-musl
+        os: ubuntu-latest
+        cross: 'true'
+      - binary_name: forge-aarch64-unknown-linux-musl
+        target: aarch64-unknown-linux-musl
+        os: ubuntu-latest
+        cross: 'true'
+      - binary_name: forge-x86_64-apple-darwin
+        target: x86_64-apple-darwin
+        os: macos-latest
+        cross: 'false'
+      - binary_name: forge-aarch64-apple-darwin
+        target: aarch64-apple-darwin
+        os: macos-latest
+        cross: 'false'
+      - binary_name: forge-x86_64-pc-windows-msvc.exe
+        target: x86_64-pc-windows-msvc
+        os: windows-latest
+        cross: 'false'
+      # ... more targets
+```
+
+### Build Steps
+
+<Steps>
+  <Step title="Setup Build Environment">
+    ```yaml
+    - name: Setup Cross Toolchain
+      if: ${{ matrix.cross == 'false' }}
+      uses: taiki-e/setup-cross-toolchain-action@v1
+      with:
+        target: ${{ matrix.target }}
+
+    - name: Add Rust target
+      if: ${{ matrix.cross == 'false' }}
+      run: rustup target add ${{ matrix.target }}
+    ```
+  </Step>
+
+  <Step title="Build Binary">
+    ```yaml
+    - name: Build Binary
+      uses: ClementTsang/cargo-action@v0.0.7
+      with:
+        command: build --release
+        args: '--target ${{ matrix.target }}'
+        use-cross: ${{ matrix.cross }}
+        cross-version: '0.2.5'
+      env:
+        RUSTFLAGS: ${{ env.RUSTFLAGS }}
+        APP_VERSION: ${{ needs.draft_release.outputs.crate_release_name }}
+    ```
+  </Step>
+
+  <Step title="Upload to Release">
+    ```yaml
+    - name: Copy Binary
+      run: cp ${{ matrix.binary_path }} ${{ matrix.binary_name }}
+
+    - name: Upload to Release
+      uses: xresloader/upload-to-github-release@v1
+      with:
+        release_id: ${{ needs.draft_release.outputs.crate_release_id }}
+        file: ${{ matrix.binary_name }}
+        overwrite: 'true'
+    ```
+  </Step>
+</Steps>
+
+## Multi-Channel Release
+
+From `.github/workflows/release.yml:18`, Forge publishes to multiple distribution channels:
+
+### NPM Release
+
+```yaml
+npm_release:
+  needs:
+    - build_release
+  name: npm_release
+  runs-on: ubuntu-latest
+  strategy:
+    matrix:
+      repository:
+        - antinomyhq/npm-code-forge
+        - antinomyhq/npm-forgecode
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: ${{ matrix.repository }}
+        ref: main
+        token: ${{ secrets.NPM_ACCESS }}
+
+    - name: Update NPM Package
+      run: './update-package.sh ${{ github.event.release.tag_name }}'
+      env:
+        AUTO_PUSH: 'true'
+        CI: 'true'
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+### Homebrew Release
+
+```yaml
+homebrew_release:
+  needs:
+    - build_release
+  name: homebrew_release
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: antinomyhq/homebrew-code-forge
+        ref: main
+        token: ${{ secrets.HOMEBREW_ACCESS }}
+
+    - name: Update Homebrew Formula
+      run: GITHUB_TOKEN="${{ secrets.HOMEBREW_ACCESS }}" ./update-formula.sh ${{ github.event.release.tag_name }}
+```
+
+## Using Forge in Your Workflows
+
+### Basic Setup
+
+<Steps>
+  <Step title="Install Forge">
+    ```yaml
+    - name: Install Forge
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/forge/install.sh | sh
+    ```
+  </Step>
+
+  <Step title="Use Forge">
+    ```yaml
+    - name: Run Forge
+      run: forge --help
+    ```
+  </Step>
+</Steps>
+
+### Example: AI-Powered Code Review
+
+```yaml
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Install Forge
+        run: |
+          curl -fsSL https://forge.sh/install.sh | sh
+          echo "$HOME/.forge/bin" >> $GITHUB_PATH
+
+      - name: Review Changed Files
+        run: |
+          # Get list of changed files
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          # Review each file with Forge
+          for file in $FILES; do
+            if [ -f "$file" ]; then
+              forge review "$file" >> review.md
+            fi
+          done
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('review.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## AI Code Review\n\n${review}`
+            });
+```
+
+### Example: Automated Testing
+
+```yaml
+name: Forge Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Run Tests
+        run: cargo test --all-features --workspace
+
+      - name: Run Forge Integration Tests
+        run: cargo test --test integration -- --nocapture
+```
+
+### Example: Release Automation
+
+```yaml
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Build Release Binary
+        uses: ClementTsang/cargo-action@v0.0.7
+        with:
+          command: build --release
+          args: '--target ${{ matrix.target }}'
+
+      - name: Upload to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./target/${{ matrix.target }}/release/forge
+          asset_name: forge-${{ matrix.target }}
+          asset_content_type: application/octet-stream
+```
+
+## Secrets Configuration
+
+Required secrets for Forge workflows:
+
+### API Keys
+
+```bash
+# OpenRouter API key for AI functionality
+OPENROUTER_API_KEY
+
+# PostHog API secret for analytics
+POSTHOG_API_SECRET
+```
+
+### Distribution Tokens
+
+```bash
+# NPM token for package publishing
+NPM_TOKEN
+
+# GitHub token for Homebrew formula updates
+HOMEBREW_ACCESS
+
+# GitHub token for NPM repository access
+NPM_ACCESS
+```
+
+### Setting Secrets
+
+<Steps>
+  <Step title="Navigate to Settings">
+    Go to your repository → Settings → Secrets and variables → Actions
+  </Step>
+
+  <Step title="Add New Secret">
+    Click "New repository secret"
+  </Step>
+
+  <Step title="Enter Secret">
+    - Name: `OPENROUTER_API_KEY`
+    - Value: Your API key
+    - Click "Add secret"
+  </Step>
+</Steps>
+
+## Best Practices
+
+### Caching
+
+Cache dependencies to speed up builds:
+
+```yaml
+- name: Cache Cargo Registry
+  uses: actions/cache@v4
+  with:
+    path: ~/.cargo/registry
+    key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+- name: Cache Cargo Index
+  uses: actions/cache@v4
+  with:
+    path: ~/.cargo/git
+    key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+- name: Cache Build Output
+  uses: actions/cache@v4
+  with:
+    path: target
+    key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+```
+
+### Conditional Execution
+
+Run jobs only when needed:
+
+```yaml
+# Only run on labeled PRs
+if: contains(github.event.pull_request.labels.*.name, 'ci: build all targets')
+
+# Only run on main branch
+if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+# Only run on releases
+if: startsWith(github.ref, 'refs/tags/v')
+```
+
+### Concurrency Control
+
+Prevent duplicate workflow runs:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Build fails on specific platform">
+    Check the build logs for platform-specific errors:
+
+    1. Navigate to Actions tab
+    2. Click on failed workflow run
+    3. Click on failed job
+    4. Expand failed step
+
+    Common issues:
+    - Missing dependencies: Add to workflow
+    - Platform-specific code: Add conditional compilation
+    - Toolchain issues: Update Rust version
+  </Accordion>
+
+  <Accordion title="Secrets not available">
+    Verify secrets are configured:
+
+    1. Settings → Secrets and variables → Actions
+    2. Check secret names match exactly
+    3. Ensure secrets are available to workflows
+
+    Note: Secrets are not available in forked repositories for security.
+  </Accordion>
+
+  <Accordion title="Release artifacts missing">
+    Check the release job dependencies:
+
+    ```yaml
+    needs:
+      - build_release  # Ensure this job completes first
+    ```
+
+    Verify artifacts are uploaded:
+
+    ```yaml
+    - name: Upload to Release
+      uses: xresloader/upload-to-github-release@v1
+      with:
+        release_id: ${{ needs.draft_release.outputs.crate_release_id }}
+        file: ${{ matrix.binary_name }}
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Automation" icon="robot" href="/integration/automation">
+    Learn about CI/CD automation strategies
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Configure Forge for your workflow
+  </Card>
+  <Card title="ZSH Plugin" icon="plug" href="/integration/zsh-plugin">
+    Set up local development workflow
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get started with Forge
+  </Card>
+</CardGroup>

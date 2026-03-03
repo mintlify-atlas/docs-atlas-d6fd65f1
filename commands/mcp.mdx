@@ -1,0 +1,356 @@
+---
+title: forge mcp
+description: Manage Model Context Protocol servers
+---
+
+The `mcp` command group manages Model Context Protocol (MCP) servers, which extend Forge's capabilities by providing additional tools, resources, and integrations.
+
+## Usage
+
+```bash
+forge mcp [SUBCOMMAND] [OPTIONS]
+```
+
+## Subcommands
+
+### import
+
+Import server configuration from JSON.
+
+```bash
+forge mcp import <JSON> [OPTIONS]
+```
+
+<ParamField path="json" type="string" required>
+  JSON configuration to import.
+  
+  ```bash
+  forge mcp import '{"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"]}'
+  ```
+</ParamField>
+
+<ParamField path="--scope" type="enum" default="local">
+  Configuration scope. Available scopes:
+  - `local` - Project-specific configuration
+  - `user` - Global user configuration
+  
+  Alias: `-s`
+  
+  ```bash
+  forge mcp import '{...}' --scope user
+  forge mcp import '{...}' -s local
+  ```
+</ParamField>
+
+### list
+
+List configured MCP servers.
+
+```bash
+forge mcp list
+```
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge mcp list --porcelain
+  ```
+</ParamField>
+
+### remove
+
+Remove a configured server.
+
+```bash
+forge mcp remove <NAME> [OPTIONS]
+```
+
+<ParamField path="name" type="string" required>
+  Name of the server to remove.
+  
+  ```bash
+  forge mcp remove filesystem
+  forge mcp remove github
+  ```
+</ParamField>
+
+<ParamField path="--scope" type="enum" default="local">
+  Configuration scope.
+  - `local` - Project-specific configuration
+  - `user` - Global user configuration
+  
+  Alias: `-s`
+  
+  ```bash
+  forge mcp remove filesystem --scope user
+  forge mcp remove github -s local
+  ```
+</ParamField>
+
+### show
+
+Show server configuration details.
+
+```bash
+forge mcp show <NAME>
+```
+
+<ParamField path="name" type="string" required>
+  Name of the server to show details for.
+  
+  ```bash
+  forge mcp show filesystem
+  forge mcp show github
+  ```
+</ParamField>
+
+### reload
+
+Reload servers and rebuild caches.
+
+```bash
+forge mcp reload
+```
+
+## Examples
+
+### Import Filesystem Server
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects"],
+  "env": {}
+}' --scope user
+```
+
+Example output:
+
+```
+✓ MCP server imported
+  Name: filesystem
+  Scope: user
+```
+
+### Import GitHub Server
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_TOKEN": "ghp_..."
+  }
+}' --scope local
+```
+
+### List MCP Servers
+
+```bash
+forge mcp list
+```
+
+Example output:
+
+```
+Configured MCP Servers:
+
+Name          Scope   Status    Command
+filesystem    user    active    npx -y @modelcontextprotocol/server-filesystem
+github        local   active    npx -y @modelcontextprotocol/server-github
+postgres      user    active    npx -y @modelcontextprotocol/server-postgres
+```
+
+### Show Server Details
+
+```bash
+forge mcp show filesystem
+```
+
+Example output:
+
+```
+MCP Server: filesystem
+
+  Scope:    user
+  Status:   active
+  Command:  npx -y @modelcontextprotocol/server-filesystem
+  Args:
+    - /home/user/projects
+  
+  Environment:
+    (none)
+  
+  Capabilities:
+    - read_file
+    - write_file
+    - list_directory
+    - search_files
+```
+
+### Remove Server
+
+```bash
+forge mcp remove github --scope local
+```
+
+Example output:
+
+```
+✓ MCP server removed: github
+```
+
+### Reload All Servers
+
+```bash
+forge mcp reload
+```
+
+Example output:
+
+```
+✓ MCP servers reloaded
+  Active servers: 3
+  Cache rebuilt: 127 tools
+```
+
+## Alternative Commands
+
+You can also use the `list` command:
+
+```bash
+forge list mcp
+forge list mcps
+```
+
+## Configuration Scopes
+
+### Local Scope
+
+Project-specific servers (stored in `./.forge/mcp-servers.json`):
+
+```bash
+forge mcp import '{...}' --scope local
+```
+
+Use for:
+- Project-specific tools
+- Development-only integrations
+- Servers with project-specific configuration
+
+### User Scope
+
+Global user servers (stored in `~/.config/forge/mcp-servers.json`):
+
+```bash
+forge mcp import '{...}' --scope user
+```
+
+Use for:
+- General-purpose tools
+- Personal integrations
+- Servers used across all projects
+
+## Popular MCP Servers
+
+### Filesystem Server
+
+Provides file system access:
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allow"]
+}'
+```
+
+### GitHub Server
+
+Integrates with GitHub:
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_TOKEN": "your-token"
+  }
+}'
+```
+
+### PostgreSQL Server
+
+Provides database access:
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-postgres"],
+  "env": {
+    "POSTGRES_URL": "postgresql://..."
+  }
+}'
+```
+
+### Slack Server
+
+Integrates with Slack:
+
+```bash
+forge mcp import '{
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-slack"],
+  "env": {
+    "SLACK_TOKEN": "xoxb-..."
+  }
+}'
+```
+
+## Machine-Readable Output
+
+```bash
+forge mcp list --porcelain | jq '.servers[] | select(.scope == "user")'
+```
+
+## Configuration Files
+
+MCP servers are configured in:
+
+- **User scope**: `~/.config/forge/mcp-servers.json`
+- **Local scope**: `./.forge/mcp-servers.json`
+
+Example configuration:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_..."
+      }
+    }
+  }
+}
+```
+
+## Related Commands
+
+- `forge list tool <AGENT>` - List tools available to an agent (includes MCP tools)
+- `forge info` - View active MCP servers
+
+## Notes
+
+- MCP servers extend Forge with additional capabilities
+- Servers run as separate processes and communicate via stdio or SSE
+- Use `reload` after manually editing configuration files
+- Local scope takes precedence over user scope
+- Environment variables in server configs support secrets
+- See [Model Context Protocol documentation](https://modelcontextprotocol.io) for creating custom servers

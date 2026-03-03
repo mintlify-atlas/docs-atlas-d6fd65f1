@@ -1,80 +1,535 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get up and running with Forge in minutes. Learn the essential commands and workflows to boost your development productivity.
 ---
 
-## Get started in three steps
+## Your First Session
 
-Get your documentation site running locally and make your first customization.
+Let's start your first Forge session. Make sure you've completed the [installation](/installation) first.
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Start Forge">
+    Open your terminal and run:
+    ```bash
+    forge
+    ```
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    If this is your first time, Forge will guide you through provider setup:
+    ```bash
+    forge provider login
+    ```
+  </Step>
+
+  <Step title="Ask a question">
+    Once in interactive mode, try asking about your project:
+    ```
+    > What files are in this directory?
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    Forge will analyze your current directory and provide detailed information.
+  </Step>
 
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+  <Step title="Make a change">
+    Ask Forge to help with a task:
+    ```
+    > Create a simple Python script that prints 'Hello, Forge!'
+    ```
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    Forge will create the file and explain what it did.
+  </Step>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+  <Step title="Exit the session">
+    Type `exit`, `quit`, or press `Ctrl+D` to end the session.
+  </Step>
+</Steps>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+## Core Commands
 
-### Step 3: Go live
+Forge offers powerful CLI commands for various workflows:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+<CodeGroup>
 
-## Next steps
+```bash Interactive Mode
+# Start interactive session
+forge
 
-Now that you have your docs running, explore these key features:
+# Start with specific agent
+forge --agent sage
 
-<CardGroup cols={2}>
+# Continue previous conversation
+forge --conversation-id abc-123
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+# Start in specific directory
+forge -C /path/to/project
+```
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+```bash Direct Execution
+# Execute single prompt
+forge -p "explain the main.rs file"
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+# Pipe content to forge
+cat error.log | forge -p "analyze this error"
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+# Use specific model
+forge --model claude-3.7-sonnet -p "review this code"
+```
 
-</CardGroup>
+```bash Git Integration
+# Generate commit message
+forge commit --preview
+
+# Generate and commit
+forge commit
+
+# Customize commit message
+forge commit fix typo in readme
+
+# Pipe diff directly
+git diff | forge commit --preview
+```
+
+```bash Conversation Management
+# List all conversations
+forge conversation list
+
+# Show last message
+forge conversation show abc-123
+
+# Resume conversation
+forge conversation resume abc-123
+
+# Export conversation
+forge conversation dump abc-123
+
+# Export as HTML
+forge conversation dump abc-123 --html
+```
+
+</CodeGroup>
+
+## Common Workflows
+
+### Code Exploration
+
+Understand your codebase quickly:
+
+```bash
+forge -p "explain how authentication works in this codebase"
+```
+
+Forge will:
+1. Analyze your project structure
+2. Identify authentication-related files
+3. Explain the authentication flow
+4. Show relationships between components
+
+### Feature Development
+
+Implement new features with AI guidance:
+
+<Steps>
+  <Step title="Start interactive session">
+    ```bash
+    forge
+    ```
+  </Step>
+
+  <Step title="Describe your feature">
+    ```
+    > I need to add a dark mode toggle to our React application
+    ```
+  </Step>
+
+  <Step title="Review the plan">
+    Forge will suggest an approach based on your codebase.
+  </Step>
+
+  <Step title="Implement">
+    ```
+    > Let's implement the dark mode using context API
+    ```
+    
+    Forge will create the necessary components and styles.
+  </Step>
+
+  <Step title="Test and refine">
+    ```
+    > Add tests for the dark mode toggle
+    ```
+  </Step>
+</Steps>
+
+### Debugging
+
+Get help diagnosing and fixing issues:
+
+<CodeGroup>
+
+```bash Interactive Debugging
+forge
+> I'm getting "TypeError: Cannot read property 'map' of undefined"
+```
+
+```bash Quick Debug
+forge -p "why would I get a null pointer exception in user_service.rs:42?"
+```
+
+```bash Pipe Error Output
+npm test 2>&1 | forge -p "explain these test failures"
+```
+
+</CodeGroup>
+
+### Code Review
+
+Get instant feedback on code quality:
+
+```bash
+forge -p "review the code in src/components/UserProfile.js and suggest improvements"
+```
+
+Forge analyzes:
+- **Readability**: Clear naming, structure, comments
+- **Performance**: Optimization opportunities
+- **Security**: Potential vulnerabilities
+- **Maintainability**: Code smells, refactoring suggestions
+
+## Working with Agents
+
+Forge includes specialized agents for different tasks:
+
+<Tabs>
+  <Tab title="forge (Default)">
+    The general-purpose coding agent. Best for:
+    - Code understanding and explanation
+    - Feature implementation
+    - Debugging and problem-solving
+    - Refactoring
+
+    ```bash
+    forge --agent forge
+    ```
+  </Tab>
+
+  <Tab title="sage">
+    Expert for architectural decisions and best practices:
+    - System design
+    - Architecture reviews
+    - Technology selection
+    - Scalability planning
+
+    ```bash
+    forge --agent sage
+    ```
+  </Tab>
+
+  <Tab title="muse">
+    Creative assistant for brainstorming and exploration:
+    - Feature ideation
+    - API design
+    - User experience flows
+    - Alternative approaches
+
+    ```bash
+    forge --agent muse
+    ```
+  </Tab>
+</Tabs>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Use `forge list agent` to see all available agents and their descriptions.
 </Note>
+
+## Configuration Basics
+
+### Set Your Preferred Model
+
+```bash
+# View available models
+forge list model
+
+# Set default model
+forge config set model claude-3.7-sonnet
+
+# Override for single session
+forge --model o3-mini-high
+```
+
+### Manage Providers
+
+```bash
+# List configured providers
+forge list provider
+
+# Add new provider
+forge provider login
+
+# Switch provider
+forge config set provider OpenAI
+
+# Remove provider credentials
+forge provider logout
+```
+
+### View Configuration
+
+```bash
+# Show all configuration
+forge info
+
+# Get specific value
+forge config get model
+
+# List all config options
+forge config list
+```
+
+## Conversation Management
+
+Forge maintains conversation context across sessions:
+
+### Continuing Conversations
+
+```bash
+# List recent conversations
+forge conversation list
+
+# Resume specific conversation
+forge conversation resume abc-123
+
+# Continue with new prompt
+forge --conversation-id abc-123 -p "continue implementing the feature"
+```
+
+### Exporting Conversations
+
+<CodeGroup>
+
+```bash JSON Export
+# Export as JSON
+forge conversation dump abc-123
+
+# Save to file
+forge conversation dump abc-123 > conversation.json
+```
+
+```bash HTML Export
+# Export as readable HTML
+forge conversation dump abc-123 --html
+
+# Save to file
+forge conversation dump abc-123 --html > conversation.html
+```
+
+</CodeGroup>
+
+### Conversation Operations
+
+```bash
+# Show last assistant message
+forge conversation show abc-123
+
+# View conversation statistics
+forge conversation stats abc-123
+
+# Clone conversation with new ID
+forge conversation clone abc-123
+
+# Delete conversation
+forge conversation delete abc-123
+```
+
+## Slash Commands
+
+While in interactive mode, use slash commands for quick actions:
+
+<CardGroup cols={2}>
+  <Card title="/model" icon="microchip">
+    Switch models mid-conversation
+    ```
+    /model claude-3.7-sonnet
+    ```
+  </Card>
+  
+  <Card title="/agent" icon="robot">
+    Switch to different agent
+    ```
+    /agent sage
+    ```
+  </Card>
+  
+  <Card title="/help" icon="circle-question">
+    Show available commands
+    ```
+    /help
+    ```
+  </Card>
+  
+  <Card title="/clear" icon="eraser">
+    Clear conversation history
+    ```
+    /clear
+    ```
+  </Card>
+</CardGroup>
+
+<Tip>
+  Type `/` and press Tab to see all available slash commands with descriptions.
+</Tip>
+
+## Tips for Better Results
+
+<AccordionGroup>
+  <Accordion title="Be Specific" icon="bullseye">
+    Provide context and details for better responses:
+    
+    **Good**: "Refactor the user authentication in auth.js to use async/await instead of promises"
+    
+    **Too vague**: "Fix the auth code"
+  </Accordion>
+
+  <Accordion title="Use Project Context" icon="folder-tree">
+    Forge understands your project structure. Reference files and directories:
+    
+    ```
+    > Explain how the components in src/components/ interact with the API in src/api/
+    ```
+  </Accordion>
+
+  <Accordion title="Iterate and Refine" icon="arrows-rotate">
+    Don't expect perfection on the first try. Iterate:
+    
+    ```
+    > Create a user registration form
+    > Add email validation
+    > Add password strength indicator
+    > Style it to match our design system
+    ```
+  </Accordion>
+
+  <Accordion title="Use the Right Agent" icon="robot">
+    Different agents have different strengths:
+    - **forge**: Implementation and coding
+    - **sage**: Architecture and design
+    - **muse**: Brainstorming and exploration
+  </Accordion>
+
+  <Accordion title="Leverage Conversation History" icon="clock-rotate-left">
+    Resume conversations to maintain context:
+    
+    ```bash
+    forge conversation resume abc-123
+    ```
+    
+    This preserves all previous context and decisions.
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Features
+
+Once you're comfortable with the basics, explore these advanced features:
+
+<CardGroup cols={2}>
+  <Card
+    title="Semantic Search"
+    icon="magnifying-glass"
+    href="/essentials/workspaces"
+  >
+    Index your codebase for intelligent semantic search
+  </Card>
+  
+  <Card
+    title="Model Context Protocol"
+    icon="puzzle-piece"
+    href="/essentials/mcp"
+  >
+    Integrate external tools and services via MCP
+  </Card>
+  
+  <Card
+    title="Custom Agents"
+    icon="wand-magic-sparkles"
+    href="/essentials/agents"
+  >
+    Create specialized agents for your workflow
+  </Card>
+  
+  <Card
+    title="Custom Commands"
+    icon="terminal"
+    href="/essentials/commands"
+  >
+    Define reusable command shortcuts
+  </Card>
+  
+  <Card
+    title="Shell Integration"
+    icon="terminal"
+    href="/essentials/shell-integration"
+  >
+    Transform natural language to shell commands
+  </Card>
+  
+  <Card
+    title="Configuration File"
+    icon="file-code"
+    href="/essentials/configuration"
+  >
+    Deep customization with forge.yaml
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<Steps>
+  <Step title="Explore Your Project">
+    Try different questions about your codebase:
+    ```bash
+    forge -p "what's the overall architecture of this project?"
+    ```
+  </Step>
+
+  <Step title="Set Up Shell Integration">
+    Enhance your terminal experience:
+    ```bash
+    forge setup
+    ```
+  </Step>
+
+  <Step title="Index Your Workspace">
+    Enable semantic search:
+    ```bash
+    forge workspace sync
+    ```
+  </Step>
+
+  <Step title="Create Custom Configuration">
+    Create a `forge.yaml` file in your project:
+    ```yaml
+    model: claude-3.7-sonnet
+    temperature: 0.7
+    custom_rules: |
+      - Always add error handling
+      - Include unit tests
+      - Follow our team's naming conventions
+    ```
+  </Step>
+
+  <Step title="Join the Community">
+    Connect with other Forge users on [Discord](https://discord.gg/kRZBPpkgwq) and share your experience!
+  </Step>
+</Steps>
+
+## Getting Help
+
+<CardGroup cols={3}>
+  <Card title="Discord" icon="discord" href="https://discord.gg/kRZBPpkgwq">
+    Join our community
+  </Card>
+  <Card title="GitHub" icon="github" href="https://github.com/antinomyhq/forge">
+    Report issues and contribute
+  </Card>
+  <Card title="Documentation" icon="book" href="/">
+    Explore full documentation
+  </Card>
+</CardGroup>

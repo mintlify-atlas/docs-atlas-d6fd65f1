@@ -1,0 +1,111 @@
+---
+title: Providers Overview
+description: Learn about AI providers supported by Forge and how to configure them
+---
+
+Forge supports multiple AI providers, allowing you to choose the model and service that best fits your needs. You can configure providers using the interactive login command or through environment variables (deprecated).
+
+## Quick Start
+
+The easiest way to configure a provider is using the interactive login flow:
+
+```bash
+forge provider login
+```
+
+This command will:
+- Display a list of available providers
+- Guide you through entering the required credentials
+- Securely store your credentials locally
+
+## Managing Providers
+
+### List Available Providers
+
+```bash
+forge provider list
+```
+
+### Add or Update Provider Credentials
+
+```bash
+forge provider login
+```
+
+### Remove Provider Credentials
+
+```bash
+forge provider logout
+```
+
+## Supported Providers
+
+Forge supports a wide range of AI providers:
+
+### Cloud Providers
+- **[OpenAI](/providers/openai)** - GPT-4, GPT-3.5, and O-series models
+- **[Anthropic/Claude](/providers/anthropic)** - Claude Sonnet, Opus, and Haiku models
+- **[OpenRouter](/providers/openrouter)** - Access multiple models through a single API
+- **[Google Vertex AI](/providers/vertex-ai)** - Gemini and Claude models on Google Cloud
+- **[AWS Bedrock](/providers/aws-bedrock)** - Claude, Llama, and other models on AWS
+
+### OpenAI-Compatible Providers
+- Cerebras
+- XAI (Grok)
+- Z.AI (GLM models)
+- DeepSeek
+- IO Intelligence
+- Requesty
+
+### Custom Providers
+- **[Custom OpenAI-Compatible](/providers/custom-providers)** - Any OpenAI-compatible API
+- **[Custom Anthropic-Compatible](/providers/custom-providers)** - Any Anthropic-compatible API
+- Local inference engines (Ollama, LM Studio, llama.cpp, vLLM)
+
+## Provider Configuration
+
+<Warning>
+  Using `.env` files for provider configuration is deprecated and will be removed in a future version. Please use `forge provider login` instead.
+</Warning>
+
+Each provider requires:
+1. **API Key** - Your authentication credentials
+2. **URL Parameters** (optional) - Some providers require additional parameters like project IDs or regions
+
+### Credential Storage
+
+Credentials are stored securely in:
+- **Location**: `~/.config/forge/credentials.json` (Linux/macOS) or `%APPDATA%\forge\credentials.json` (Windows)
+- **Format**: JSON with API keys and configuration parameters
+- **Security**: File permissions are set to be readable only by the owner
+
+## Selecting a Model
+
+After configuring a provider, you can:
+
+1. **Set a default model** in `forge.yaml`:
+   ```yaml
+   model: claude-sonnet-4-20250514
+   ```
+
+2. **Switch models during a session** using the `/model` command:
+   ```
+   /model gpt-4o
+   ```
+
+3. **List available models** for your configured providers:
+   ```
+   /model
+   ```
+
+## Migration from Environment Variables
+
+If you have existing credentials in environment variables, Forge will automatically migrate them to file-based storage on first run. You'll see a message indicating which providers were migrated.
+
+## Next Steps
+
+- [Configure OpenRouter](/providers/openrouter) for access to multiple models
+- [Set up Anthropic/Claude](/providers/anthropic) for advanced reasoning
+- [Configure OpenAI](/providers/openai) for GPT models
+- [Use Google Vertex AI](/providers/vertex-ai) for Gemini models
+- [Set up AWS Bedrock](/providers/aws-bedrock) for enterprise deployments

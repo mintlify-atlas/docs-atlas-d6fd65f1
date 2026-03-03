@@ -1,0 +1,446 @@
+---
+title: 'Shell Completions'
+description: 'Set up tab completion for Forge commands across different shells'
+---
+
+## Overview
+
+Forge provides intelligent tab completion for commands, options, and arguments across multiple shells. The completion system includes:
+
+- Command name completion
+- Option and flag completion
+- Argument value suggestions
+- Context-aware completions
+- Agent name completion
+- File path completion
+
+## Supported Shells
+
+Forge provides native completion support for:
+
+- **ZSH** - Full integration with plugin
+- **Bash** - Standard completion script
+- **Fish** - Native Fish completions
+- **PowerShell** - Windows PowerShell support
+
+## Installation
+
+### ZSH
+
+<Steps>
+  <Step title="Automatic Setup">
+    The completions are automatically installed with the ZSH plugin:
+
+    ```bash
+    forge zsh setup
+    ```
+
+    This includes:
+    - Standard Forge command completions
+    - Custom `:command` completion widget
+    - File tagging completion with `@[file]` syntax
+    - Agent name completion
+  </Step>
+
+  <Step title="Manual Setup">
+    If you need to set up completions separately:
+
+    ```bash
+    # Generate completion script
+    forge completions zsh > ~/.zsh/completions/_forge
+
+    # Add to fpath in ~/.zshrc (before compinit)
+    fpath=(~/.zsh/completions $fpath)
+    autoload -Uz compinit && compinit
+    ```
+  </Step>
+
+  <Step title="Verify Installation">
+    Test completions:
+
+    ```bash
+    forge <TAB>  # Shows available commands
+    forge config <TAB>  # Shows config subcommands
+    ```
+  </Step>
+</Steps>
+
+### Bash
+
+<Steps>
+  <Step title="Generate Completion Script">
+    ```bash
+    forge completions bash > ~/.forge-completion.bash
+    ```
+  </Step>
+
+  <Step title="Load Completions">
+    Add to your `~/.bashrc`:
+
+    ```bash
+    # Forge completions
+    if [ -f ~/.forge-completion.bash ]; then
+        source ~/.forge-completion.bash
+    fi
+    ```
+  </Step>
+
+  <Step title="System-Wide Installation (Optional)">
+    For system-wide completions:
+
+    ```bash
+    # macOS
+    forge completions bash > /usr/local/etc/bash_completion.d/forge
+
+    # Linux
+    sudo forge completions bash > /usr/share/bash-completion/completions/forge
+    ```
+  </Step>
+
+  <Step title="Reload Shell">
+    ```bash
+    source ~/.bashrc
+    ```
+  </Step>
+</Steps>
+
+### Fish
+
+<Steps>
+  <Step title="Generate Completion Script">
+    ```fish
+    forge completions fish > ~/.config/fish/completions/forge.fish
+    ```
+  </Step>
+
+  <Step title="Verify Installation">
+    Fish will automatically load completions from the completions directory. Test with:
+
+    ```fish
+    forge <TAB>
+    ```
+  </Step>
+</Steps>
+
+### PowerShell
+
+<Steps>
+  <Step title="Generate Completion Script">
+    ```powershell
+    forge completions powershell > $PROFILE\..\Completions\forge.ps1
+    ```
+  </Step>
+
+  <Step title="Load Completions">
+    Add to your PowerShell profile:
+
+    ```powershell
+    # Forge completions
+    . $PSScriptRoot\Completions\forge.ps1
+    ```
+  </Step>
+
+  <Step title="Reload Profile">
+    ```powershell
+    . $PROFILE
+    ```
+  </Step>
+</Steps>
+
+## ZSH Advanced Completions
+
+The Forge ZSH plugin includes enhanced completion features beyond standard command completion.
+
+### Custom Completion Widget
+
+The plugin implements a custom completion widget that handles:
+
+```zsh
+# File and directory completion with @
+: Review this file @<TAB>
+# Opens fzf with file preview
+
+# Agent completion with :
+:<TAB>
+# Shows list of available agents
+
+# Filtered completion
+:sage<TAB>
+# Pre-filters to agents matching "sage"
+```
+
+### Implementation Details
+
+From `shell-plugin/lib/completion.zsh:5`:
+
+```zsh
+function forge-completion() {
+    local current_word="${LBUFFER##* }"
+    
+    # Handle @ completion (files and directories)
+    if [[ "$current_word" =~ ^@.*$ ]]; then
+        local filter_text="${current_word#@}"
+        local selected
+        local fzf_args=(
+            --preview="if [ -d {} ]; then ls -la --color=always {}; 
+                       else bat --color=always --style=numbers {}; fi"
+        )
+        
+        local file_list=$(fd --type f --type d --hidden --exclude .git)
+        selected=$(echo "$file_list" | fzf --query "$filter_text" "${fzf_args[@]}")
+        
+        if [[ -n "$selected" ]]; then
+            selected="@[${selected}]"
+            LBUFFER="${LBUFFER%$current_word}"
+            BUFFER="${LBUFFER}${selected}${RBUFFER}"
+        fi
+    fi
+    
+    # Handle :command completion
+    if [[ "${LBUFFER}" =~ "^:([a-zA-Z][a-zA-Z0-9_-]*)?$" ]]; then
+        local filter_text="${LBUFFER#:}"
+        local commands_list=$(forge commands list)
+        local selected=$(echo "$commands_list" | fzf --query "$filter_text")
+        
+        if [[ -n "$selected" ]]; then
+            local command_name="${selected%% *}"
+            BUFFER=":$command_name "
+        fi
+    fi
+}
+```
+
+### Keybindings
+
+From `shell-plugin/lib/bindings.zsh:31`:
+
+```zsh
+# Register completion widget
+zle -N forge-completion
+
+# Bind Tab to custom completion
+bindkey '^I' forge-completion
+```
+
+## Available Completions
+
+### Command Completions
+
+```bash
+forge <TAB>
+# Shows: config, agent, conversation, auth, sync, version, help
+
+forge config <TAB>
+# Shows: get, set, list, edit, path
+
+forge agent <TAB>
+# Shows: list, info, create, edit, delete
+```
+
+### Option Completions
+
+```bash
+forge --<TAB>
+# Shows: --help, --version, --config, --quiet, --verbose
+
+forge agent list --<TAB>
+# Shows: --format, --sort, --filter
+```
+
+### Argument Completions
+
+```bash
+forge config get <TAB>
+# Shows available configuration keys
+
+forge agent info <TAB>
+# Shows available agent names
+```
+
+## Completion Configuration
+
+### ZSH Completion Styles
+
+Customize completion behavior in your `~/.zshrc`:
+
+```bash
+# Case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+# Use menu selection
+zstyle ':completion:*' menu select
+
+# Group results by category
+zstyle ':completion:*' group-name ''
+
+# Show descriptions for options
+zstyle ':completion:*' verbose yes
+
+# Color completion menu
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+```
+
+### File Completion Configuration
+
+Customize file completion behavior:
+
+```bash
+# Use fd instead of find (faster)
+export _FORGE_FD_CMD="fd"
+
+# Use bat for file previews
+export _FORGE_CAT_CMD="bat --color=always --style=numbers"
+
+# Customize preview window
+export _FORGE_PREVIEW_WINDOW="--preview-window=bottom:75%:wrap"
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Completions not working">
+    ### ZSH
+    Ensure compinit is called after adding to fpath:
+
+    ```bash
+    fpath=(~/.zsh/completions $fpath)
+    autoload -Uz compinit && compinit
+    ```
+
+    Clear completion cache:
+
+    ```bash
+    rm -f ~/.zcompdump*
+    compinit
+    ```
+
+    ### Bash
+    Verify bash-completion is installed:
+
+    ```bash
+    # macOS
+    brew install bash-completion
+
+    # Linux
+    sudo apt install bash-completion
+    ```
+  </Accordion>
+
+  <Accordion title="Slow completions">
+    ### Check Dependencies
+    Ensure fast tools are installed:
+
+    ```bash
+    # Use fd instead of find
+    brew install fd  # or: sudo apt install fd-find
+
+    # Use bat instead of cat
+    brew install bat  # or: sudo apt install bat
+    ```
+
+    ### Disable Preview
+    If previews are slow, disable them:
+
+    ```bash
+    export _FORGE_PREVIEW_WINDOW="--preview-window=hidden"
+    ```
+  </Accordion>
+
+  <Accordion title="Custom completions not appearing">
+    ### ZSH Plugin
+    Verify the completion widget is registered:
+
+    ```bash
+    zle -l | grep forge-completion
+    # Should show: forge-completion
+    ```
+
+    Check keybinding:
+
+    ```bash
+    bindkey '^I'
+    # Should show: "^I" forge-completion
+    ```
+  </Accordion>
+
+  <Accordion title="File preview not working">
+    ### Install Required Tools
+    ```bash
+    # Install fd
+    brew install fd  # macOS
+    sudo apt install fd-find  # Ubuntu/Debian
+
+    # Install bat
+    brew install bat  # macOS
+    sudo apt install bat  # Ubuntu/Debian
+    ```
+
+    ### Check Configuration
+    ```bash
+    echo $_FORGE_FD_CMD
+    echo $_FORGE_CAT_CMD
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Examples
+
+### Basic Command Completion
+
+```bash
+# Complete command names
+$ forge co<TAB>
+config  conversation
+
+# Complete subcommands
+$ forge config <TAB>
+get  set  list  edit  path
+
+# Complete options
+$ forge --<TAB>
+--help  --version  --config  --quiet  --verbose
+```
+
+### ZSH Plugin Advanced Completion
+
+```bash
+# Agent completion with fuzzy matching
+$ :sag<TAB>
+# Opens fzf with agents matching "sag" highlighted
+
+# File completion with preview
+$ : Review @<TAB>
+# Opens fzf with file browser and preview
+
+# Multiple file tags
+$ : Compare @[src/main.rs] and @<TAB>
+# Completes second file
+```
+
+### Filtered Completion
+
+```bash
+# Type prefix before TAB for filtered results
+$ forge agent li<TAB>
+list  # Only shows commands starting with "li"
+
+$ :plan<TAB>
+planner  # Only shows agents starting with "plan"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="ZSH Plugin" icon="plug" href="/integration/zsh-plugin">
+    Full ZSH plugin with advanced features
+  </Card>
+  <Card title="ZSH Theme" icon="palette" href="/integration/zsh-theme">
+    Enhance your prompt with AI context
+  </Card>
+  <Card title="VS Code Integration" icon="code" href="/integration/vscode">
+    Use Forge in VS Code
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Configure Forge settings
+  </Card>
+</CardGroup>

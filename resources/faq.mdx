@@ -1,0 +1,474 @@
+---
+title: Frequently Asked Questions
+description: Common questions about Forge
+---
+
+## General Questions
+
+<Accordion title="What is Forge?">
+  Forge is an AI-enhanced terminal development environment that integrates AI capabilities with your development workflow. It's a comprehensive coding agent that helps you write code, debug issues, refactor projects, and learn new technologies without leaving your terminal.
+</Accordion>
+
+<Accordion title="Is Forge open source?">
+  Yes! Forge is open-source software under the Apache 2.0 license. You can view the source code, contribute, and even fork the project on [GitHub](https://github.com/antinomyhq/forge).
+</Accordion>
+
+<Accordion title="What programming languages does Forge support?">
+  Forge supports multiple programming languages through its language-aware parsing and analysis system. It works with popular languages including JavaScript/TypeScript, Python, Rust, Go, Java, C/C++, and many others.
+</Accordion>
+
+<Accordion title="Does my code stay on my machine?">
+  Yes, your code stays on your local machine. Forge is designed with security in mind. Only the specific code context needed for AI processing is sent to your chosen AI provider. Your entire codebase is never uploaded.
+</Accordion>
+
+<Accordion title="What's the difference between Forge and GitHub Copilot?">
+  Forge is a comprehensive terminal-based development environment with multi-agent workflows, conversation management, and extensive tool integration. GitHub Copilot is primarily an IDE plugin for code completion. Forge offers deeper code understanding, project-wide operations, shell integration, and autonomous task execution.
+</Accordion>
+
+## Installation & Setup
+
+<Accordion title="How do I install Forge?">
+  The easiest way to install Forge is using the installation script:
+
+  ```bash
+  curl -fsSL https://forgecode.dev/cli | sh
+  ```
+
+  Alternatively, you can install via npm:
+
+  ```bash
+  npm install -g forgecode
+  ```
+
+  Or build from source:
+
+  ```bash
+  git clone https://github.com/antinomyhq/forge
+  cd forge
+  cargo build --release
+  ```
+</Accordion>
+
+<Accordion title="What are the system requirements?">
+  - **Rust**: 1.75+ (for building from source)
+  - **Operating System**: macOS, Linux, or Windows (WSL recommended)
+  - **Node.js**: 16+ (for npm installation)
+  - **Git**: For version control operations
+  - **Optional**: GitHub CLI (`gh`) for GitHub integration
+</Accordion>
+
+<Accordion title="Do I need an API key?">
+  Yes, Forge requires an API key from one of the supported AI providers:
+  - OpenAI
+  - Anthropic
+  - OpenRouter
+  - Google Vertex AI
+  - Amazon Bedrock
+  - Cerebras
+  - x-ai
+  - z.ai
+  - Requesty
+  - IO Intelligence
+  - Groq
+  - OpenAI-compatible providers
+
+  Use `forge provider login` to configure your credentials interactively.
+</Accordion>
+
+<Accordion title="How do I update Forge?">
+  Forge checks for updates automatically in the background. When a new version is available:
+  - You'll see a notification
+  - Run the same installation command to update:
+
+  ```bash
+  curl -fsSL https://forgecode.dev/cli | sh
+  ```
+
+  Or via npm:
+
+  ```bash
+  npm update -g forgecode
+  ```
+</Accordion>
+
+## Configuration
+
+<Accordion title="Where are configuration files stored?">
+  Forge uses two configuration files:
+
+  - **`forge.yaml`**: Project-specific configuration in your project root
+  - **`.mcp.json`**: MCP server configuration (local or user-level)
+  - **Provider credentials**: Stored securely in your system's config directory
+
+  Provider credentials are stored at:
+  - **macOS/Linux**: `~/.config/forge/`
+  - **Windows**: `%APPDATA%\forge\`
+</Accordion>
+
+<Accordion title="How do I configure multiple AI providers?">
+  You can configure multiple providers using `forge provider login` and switch between them:
+
+  ```bash
+  # Add providers
+  forge provider login  # Follow prompts for each provider
+
+  # List providers
+  forge provider list
+
+  # Switch provider and model
+  forge --provider anthropic --model claude-3.7-sonnet
+  ```
+
+  Or set defaults in `forge.yaml`:
+
+  ```yaml
+  model: claude-3.7-sonnet
+  ```
+</Accordion>
+
+<Accordion title="What are custom rules?">
+  Custom rules are guidelines you can add to `forge.yaml` that all AI agents follow when generating responses:
+
+  ```yaml
+  custom_rules: |
+    1. Always add comprehensive error handling
+    2. Include unit tests for all new functions
+    3. Use TypeScript strict mode
+    4. Follow our team's naming conventions
+  ```
+
+  This ensures consistent code generation aligned with your team's standards.
+</Accordion>
+
+<Accordion title="Can I use Forge offline?">
+  No, Forge requires an internet connection to communicate with AI providers. However, you can:
+  - Use a local AI model with an OpenAI-compatible API server
+  - Configure a self-hosted AI provider
+  - Use on-premises AI services like Amazon Bedrock in your VPC
+</Accordion>
+
+## Usage
+
+<Accordion title="How do I start an interactive session?">
+  Simply run:
+
+  ```bash
+  forge
+  ```
+
+  This starts an interactive session where you can chat with the AI about your code.
+</Accordion>
+
+<Accordion title="Can I use Forge for one-off commands?">
+  Yes! Use the `--prompt` flag:
+
+  ```bash
+  forge --prompt "Explain what this function does" src/utils.js
+  ```
+
+  Or use specialized commands:
+
+  ```bash
+  forge cmd "list all JavaScript files modified in the last week"
+  forge commit  # Generate a commit message
+  forge suggest # Get a command suggestion
+  ```
+</Accordion>
+
+<Accordion title="What are slash commands?">
+  Slash commands are special commands you can use during an interactive session:
+
+  - `/model` - Switch AI models
+  - `/clear` - Clear conversation history
+  - `/save` - Save current conversation
+  - `/load` - Load a conversation
+  - `/exit` - Exit Forge
+  - `:copy` - Copy last assistant message to clipboard
+
+  Type `/help` in an interactive session to see all available commands.
+</Accordion>
+
+<Accordion title="How do conversations work?">
+  Forge maintains context across your session through conversations:
+
+  - Conversations persist automatically
+  - Each project can have multiple conversations
+  - Use `forge conversation list` to view all conversations
+  - Resume conversations with `forge conversation load <id>`
+  - Export conversations with `forge conversation export <id>`
+
+  You can limit stored conversations with:
+
+  ```bash
+  export FORGE_MAX_CONVERSATIONS=100
+  ```
+</Accordion>
+
+<Accordion title="What is restricted mode?">
+  Restricted mode (`forge --restricted`) enables enhanced security by limiting shell and file system operations. Use this in untrusted environments or when working with sensitive codebases.
+</Accordion>
+
+<Accordion title="Can Forge execute commands automatically?">
+  Yes, but with safeguards:
+  - Forge will show you commands before executing them
+  - You can review and approve each command
+  - Some tools have built-in safety measures
+  - Use `--restricted` mode for additional control
+
+  Configure command execution behavior in `forge.yaml`:
+
+  ```yaml
+  max_requests_per_turn: 50
+  max_tool_failure_per_turn: 3
+  ```
+</Accordion>
+
+## Model Context Protocol (MCP)
+
+<Accordion title="What is MCP?">
+  Model Context Protocol (MCP) is a standard for connecting AI agents to external tools and services. It allows Forge to integrate with:
+  - Web browsers for automation
+  - External APIs
+  - Custom development tools
+  - Third-party services
+
+  Learn more in the [MCP documentation](https://docs.anthropic.com/en/docs/claude-code/tutorials#set-up-model-context-protocol-mcp).
+</Accordion>
+
+<Accordion title="How do I add an MCP server?">
+  Use the MCP commands:
+
+  ```bash
+  # Interactive setup
+  forge mcp add
+
+  # JSON-based setup
+  forge mcp add-json
+
+  # List servers
+  forge mcp list
+
+  # Remove a server
+  forge mcp remove <server-name>
+  ```
+
+  Or manually edit `.mcp.json`:
+
+  ```json
+  {
+    "mcpServers": {
+      "my-server": {
+        "command": "node",
+        "args": ["server.js"],
+        "env": { "PORT": "3000" }
+      }
+    }
+  }
+  ```
+</Accordion>
+
+<Accordion title="Where can I find MCP servers?">
+  - [Anthropic's MCP Server List](https://github.com/anthropics/mcp-servers)
+  - Community-contributed servers on GitHub
+  - Build your own following the MCP specification
+</Accordion>
+
+## Integration
+
+<Accordion title="How do I set up the ZSH plugin?">
+  The ZSH plugin provides shell integration features. Set it up with:
+
+  ```bash
+  forge setup
+  ```
+
+  Or manually add to your `.zshrc`:
+
+  ```bash
+  # Load Forge ZSH plugin
+  source ~/.forge/shell-plugin/forge.zsh
+  ```
+
+  Then reload your shell:
+
+  ```bash
+  source ~/.zshrc
+  ```
+</Accordion>
+
+<Accordion title="Can I use Forge with VS Code?">
+  Yes! While Forge primarily operates in the terminal, you can:
+  - Use Forge alongside VS Code
+  - Open files in VS Code from Forge
+  - Use VS Code's integrated terminal to run Forge
+
+  See the [VS Code integration guide](/integration/vscode) for details.
+</Accordion>
+
+<Accordion title="Can I use Forge in CI/CD pipelines?">
+  Yes! Forge can be integrated into CI/CD workflows for:
+  - Automated code reviews
+  - Test generation
+  - Documentation updates
+  - Code analysis
+
+  See the [GitHub Actions guide](/integration/github-actions) for examples.
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Forge is hanging or slow, what should I do?">
+  Try these steps:
+
+  1. Check if a tool operation timed out (default: 300s)
+  2. Run with verbose logging: `forge --verbose`
+  3. Reduce search limits in environment variables
+  4. Adjust timeout: `export FORGE_TOOL_TIMEOUT=600`
+  5. Check your internet connection
+  6. Verify the AI provider service status
+</Accordion>
+
+<Accordion title="How do I debug issues?">
+  Enable debug logging:
+
+  ```bash
+  export FORGE_LOG=forge=debug
+  forge --verbose
+  ```
+
+  To debug HTTP requests:
+
+  ```bash
+  export FORGE_DEBUG_REQUESTS=/tmp/forge-debug.json
+  ```
+
+  Check the [troubleshooting guide](/resources/troubleshooting) for more solutions.
+</Accordion>
+
+<Accordion title="I'm getting SSL/TLS certificate errors">
+  For development environments, you can:
+
+  1. Add custom root certificates:
+
+  ```bash
+  export FORGE_HTTP_ROOT_CERT_PATHS=/path/to/cert.pem
+  ```
+
+  2. (Not recommended) Disable certificate validation:
+
+  ```bash
+  export FORGE_HTTP_ACCEPT_INVALID_CERTS=true
+  ```
+
+  ⚠️ Only disable certificate validation in trusted development environments.
+</Accordion>
+
+<Accordion title="Provider login fails with authentication error">
+  1. Verify your API key is correct and active
+  2. Check the provider's service status
+  3. Ensure your API key has the necessary permissions
+  4. Try logging out and back in:
+
+  ```bash
+  forge provider logout
+  forge provider login
+  ```
+</Accordion>
+
+## Costs & Pricing
+
+<Accordion title="How much does Forge cost?">
+  Forge itself is free and open-source. However, you'll need to pay for:
+  - AI provider API usage (pay-as-you-go)
+  - Optional: Forge Services subscription for managed AI access
+
+  Costs vary by provider and model. Most providers charge per token used.
+</Accordion>
+
+<Accordion title="How can I control API costs?">
+  Control costs by:
+
+  1. Setting request limits in `forge.yaml`:
+
+  ```yaml
+  max_requests_per_turn: 25  # Lower limit
+  ```
+
+  2. Using less expensive models:
+
+  ```bash
+  forge --model claude-3.5-sonnet  # Instead of claude-3.7-sonnet
+  ```
+
+  3. Limiting conversation history
+  4. Using semantic search efficiently
+  5. Monitoring usage through your provider's dashboard
+</Accordion>
+
+<Accordion title="Can I see cost estimates?">
+  The ZSH theme can display cost information. Configure it with:
+
+  ```bash
+  export FORGE_CURRENCY_SYMBOL="$"
+  export FORGE_CURRENCY_CONVERSION_RATE=1.0
+  ```
+
+  Cost tracking depends on your AI provider's API response including usage data.
+</Accordion>
+
+## Contributing
+
+<Accordion title="How can I contribute to Forge?">
+  Contributions are welcome! You can:
+  - Report bugs on [GitHub Issues](https://github.com/antinomyhq/forge/issues)
+  - Submit feature requests
+  - Contribute code via pull requests
+  - Improve documentation
+  - Help others on [Discord](https://discord.gg/kRZBPpkgwq)
+
+  See the [contributing guide](/resources/contributing) for details.
+</Accordion>
+
+<Accordion title="Do I need to sign a CLA?">
+  Yes, contributors are required to sign a Contributor License Agreement (CLA). The CLA assistant will guide you through this process when you submit your first pull request.
+</Accordion>
+
+<Accordion title="How do I report security vulnerabilities?">
+  Please report security issues privately by emailing the maintainers or using GitHub's security advisory feature. Do not create public issues for security vulnerabilities.
+</Accordion>
+
+## Community & Support
+
+<Accordion title="Where can I get help?">
+  - **Discord**: Join our community at [discord.gg/kRZBPpkgwq](https://discord.gg/kRZBPpkgwq)
+  - **GitHub Issues**: Report bugs and request features
+  - **Documentation**: Browse comprehensive guides
+  - **Discussions**: Ask questions on GitHub Discussions
+</Accordion>
+
+<Accordion title="Is there a forum or community?">
+  Yes! Join our active Discord community to:
+  - Get help from other users
+  - Share tips and workflows
+  - Provide feedback
+  - Stay updated on new features
+  - Connect with the development team
+
+  [![Discord](https://img.shields.io/discord/1044859667798568962?style=for-the-badge&logo=discord)](https://discord.gg/kRZBPpkgwq)
+</Accordion>
+
+<Accordion title="How do I stay updated on new releases?">
+  - Star the [GitHub repository](https://github.com/antinomyhq/forge) to get notifications
+  - Join the [Discord server](https://discord.gg/kRZBPpkgwq) for announcements
+  - Follow release notes in the [changelog](/resources/changelog)
+  - Forge automatically checks for updates
+</Accordion>
+
+## Still have questions?
+
+If your question isn't answered here:
+
+- Check the [troubleshooting guide](/resources/troubleshooting)
+- Visit our [Discord community](https://discord.gg/kRZBPpkgwq)
+- Search [GitHub Issues](https://github.com/antinomyhq/forge/issues)
+- Review the [full documentation](/introduction)

@@ -1,0 +1,259 @@
+---
+title: Keyboard Shortcuts
+description: Master Forge's keyboard shortcuts for efficient terminal navigation
+---
+
+## Overview
+
+Forge uses the Reedline library with Emacs-style keybindings for powerful terminal editing. This page documents all available keyboard shortcuts in interactive mode.
+
+## Essential Shortcuts
+
+<Note>
+  These are the most frequently used shortcuts that will significantly improve your workflow.
+</Note>
+
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| `Tab` | Autocomplete | Show completion menu or insert exact match |
+| `Ctrl+R` | Search history | Interactive search through command history |
+| `Ctrl+K` | Clear screen | Clear the terminal screen |
+| `Alt+Enter` | Insert newline | Add a newline without submitting |
+| `Ctrl+D` | Exit | Exit Forge (same as `/exit`) |
+| `Ctrl+C` | Cancel | Cancel current input and show new prompt |
+
+## Navigation Shortcuts
+
+Move around the current line efficiently:
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+A` | Move to beginning of line |
+| `Ctrl+E` | Move to end of line |
+| `Ctrl+B` | Move backward one character |
+| `Ctrl+F` | Move forward one character |
+| `Alt+B` | Move backward one word |
+| `Alt+F` | Move forward one word |
+| `←` | Move left one character |
+| `→` | Move right one character |
+| `↑` | Previous command in history |
+| `↓` | Next command in history |
+
+## Editing Shortcuts
+
+Edit text on the command line:
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+D` | Delete character under cursor (or exit if line is empty) |
+| `Backspace` | Delete character before cursor |
+| `Ctrl+H` | Delete character before cursor (alternative) |
+| `Ctrl+W` | Delete word before cursor |
+| `Alt+D` | Delete word after cursor |
+| `Ctrl+U` | Delete from cursor to beginning of line |
+| `Ctrl+K` | Delete from cursor to end of line (conflicts with clear screen) |
+| `Ctrl+Y` | Paste (yank) previously deleted text |
+| `Ctrl+T` | Transpose (swap) previous two characters |
+
+## Completion Features
+
+### Command Completion
+
+Press `Tab` after typing `/` to see all available commands:
+
+```
+/[Tab]
+```
+
+Shows:
+- Built-in system commands
+- Custom commands from your configuration
+- Agent switching commands
+- Workflow commands
+
+### Path Completion
+
+When referencing files or directories, `Tab` provides intelligent completion:
+
+```
+> Update the file in src/[Tab]
+```
+
+### Smart Completion
+
+If there's an exact match, `Tab` will insert it immediately. If multiple matches exist, a menu appears:
+
+```
+/m[Tab]        → /model (if unique)
+/mo[Tab]       → shows /model, /muse menu
+```
+
+## History Features
+
+### Interactive History Search
+
+<Note>
+  `Ctrl+R` is one of the most powerful features for finding previous commands quickly.
+</Note>
+
+Press `Ctrl+R` to enter interactive history search:
+
+1. Type to search through your command history
+2. Matching commands appear as you type
+3. Press `Enter` to execute the command
+4. Press `Esc` to cancel and return to prompt
+
+```
+Ctrl+R
+(search): git status
+```
+
+### History Navigation
+
+Use arrow keys to browse history:
+
+- `↑` - Previous command
+- `↓` - Next command
+
+History persists across sessions and is stored in your system config directory.
+
+## Multi-line Input
+
+Forge supports multi-line prompts for complex queries:
+
+### Creating Multi-line Input
+
+Press `Alt+Enter` to add a newline without submitting:
+
+```
+> Can you help me understand[Alt+Enter]
+  how the authentication system[Alt+Enter]
+  works in this codebase?[Enter]
+```
+
+### Editing Multi-line Input
+
+All editing shortcuts work across multiple lines:
+
+- `↑`/`↓` - Move between lines
+- `Ctrl+A` - Jump to start of current line
+- `Ctrl+E` - Jump to end of current line
+
+## Screen Control
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+K` | Clear screen and scrollback |
+| `Ctrl+L` | Redraw screen |
+
+<Note>
+  Use `Ctrl+K` to clear clutter when the terminal gets crowded with output.
+</Note>
+
+## Copy and Paste
+
+### Terminal Selection
+
+Forge supports bracketed paste mode:
+
+- Select text with your mouse in most terminals
+- Paste with your terminal's paste command:
+  - `Ctrl+Shift+V` (Linux)
+  - `Cmd+V` (macOS)
+  - Right-click → Paste (most terminals)
+
+### Forge Clipboard
+
+Internal clipboard using kill/yank:
+
+- `Ctrl+W` - Cut word before cursor
+- `Ctrl+U` - Cut from cursor to start of line
+- `Ctrl+K` - Cut from cursor to end of line
+- `Ctrl+Y` - Paste (yank) cut text
+
+## Process Control
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+C` | Cancel current input, show new prompt |
+| `Ctrl+D` | Exit Forge (if line is empty) |
+
+## Emacs-style Keybindings
+
+Forge uses Emacs-style keybindings by default. If you're familiar with Emacs, most standard editing commands work:
+
+| Shortcut | Emacs Command |
+|----------|---------------|
+| `Ctrl+A` | beginning-of-line |
+| `Ctrl+E` | end-of-line |
+| `Ctrl+F` | forward-char |
+| `Ctrl+B` | backward-char |
+| `Alt+F` | forward-word |
+| `Alt+B` | backward-word |
+| `Ctrl+K` | kill-line |
+| `Ctrl+U` | unix-line-discard |
+| `Ctrl+W` | unix-word-rubout |
+| `Ctrl+Y` | yank |
+
+## Tips for Efficiency
+
+### Quick Command Repetition
+
+1. Use `↑` to get the last command
+2. Press `Enter` to repeat it
+
+### Fast Agent Switching
+
+```
+/f[Tab]        → /forge
+/m[Tab]        → menu with /model, /muse
+/s[Tab]        → /sage
+```
+
+### History Search Best Practices
+
+- Use `Ctrl+R` instead of pressing `↑` repeatedly
+- Type unique parts of the command you're looking for
+- Use meaningful commit messages and commands for easier search
+
+### Multi-line for Complex Prompts
+
+Use `Alt+Enter` for:
+- Long explanations
+- Code snippets
+- Structured questions
+
+```
+> I need help with:[Alt+Enter]
+  1. Refactoring the auth module[Alt+Enter]
+  2. Adding error handling[Alt+Enter]
+  3. Writing unit tests[Enter]
+```
+
+### Clear Screen Regularly
+
+Use `Ctrl+K` to clear the screen between different tasks for better focus.
+
+## Customization
+
+Currently, Forge uses Emacs-style keybindings by default. Customization options may be added in future versions.
+
+## Terminal Compatibility
+
+These shortcuts work in most modern terminals:
+
+- iTerm2 (macOS)
+- Terminal.app (macOS)
+- GNOME Terminal (Linux)
+- Konsole (Linux)
+- Windows Terminal
+- Alacritty
+- Kitty
+- WezTerm
+
+Some terminals may require additional configuration for certain shortcuts (especially Alt/Option key combinations on macOS).
+
+## Next Steps
+
+- [Slash Commands Reference](/commands/interactive/slash-commands) - Learn all available slash commands
+- [Overview](/commands/interactive/overview) - Understand interactive mode concepts

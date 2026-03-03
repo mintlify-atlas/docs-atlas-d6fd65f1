@@ -1,0 +1,365 @@
+---
+title: Provider Configuration
+description: Configure AI provider credentials and authentication for Forge
+---
+
+Forge supports multiple AI providers. Use the interactive CLI to manage your provider credentials securely.
+
+## Quick Start
+
+```bash
+# Login to a provider
+forge provider login
+
+# List supported providers
+forge provider list
+
+# Remove provider credentials
+forge provider logout
+```
+
+On first run, Forge automatically guides you through provider setup if no credentials are found.
+
+## Provider Management
+
+### Interactive Login
+
+The recommended way to configure providers:
+
+```bash
+forge provider login
+```
+
+This command:
+1. Shows available providers
+2. Guides you through credential entry
+3. Securely stores credentials in file-based storage
+4. Validates the credentials
+
+### Listing Providers
+
+View all supported providers:
+
+```bash
+forge provider list
+```
+
+### Removing Credentials
+
+Remove stored credentials:
+
+```bash
+forge provider logout
+```
+
+## Supported Providers
+
+<AccordionGroup>
+  <Accordion title="Anthropic">
+    Claude models from Anthropic.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select Anthropic and enter your API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: claude-3.7-sonnet
+    ```
+
+    **Available models:**
+    - `claude-3.7-sonnet` - Latest Sonnet model
+    - `claude-sonnet-4` - Claude Sonnet 4
+    - `claude-3-opus` - Most capable model
+    - `claude-3-haiku` - Fastest model
+  </Accordion>
+
+  <Accordion title="OpenAI">
+    GPT models from OpenAI.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select OpenAI and enter your API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: o3-mini-high
+    ```
+
+    **Available models:**
+    - `o3-mini-high` - High reasoning capability
+    - `gpt-4-turbo` - Advanced GPT-4 model
+    - `gpt-4` - Standard GPT-4
+  </Accordion>
+
+  <Accordion title="Google Vertex AI">
+    Gemini and Claude models via Google Cloud.
+
+    **Setup:**
+    
+    1. Install and authenticate with Google Cloud CLI:
+    ```bash
+    gcloud auth login
+    gcloud config set project YOUR_PROJECT_ID
+    ```
+
+    2. Get authentication token:
+    ```bash
+    gcloud auth print-access-token
+    ```
+
+    3. Configure in Forge:
+    ```bash
+    forge provider login
+    # Select Google Vertex AI and enter credentials
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: google/gemini-2.5-pro
+    ```
+
+    **Available models:**
+    - `gemini-2.5-pro` - Latest Gemini Pro
+    - `gemini-2.0-flash` - Fast Gemini model
+    - `claude-sonnet-4@20250514` - Claude via Vertex AI
+  </Accordion>
+
+  <Accordion title="OpenRouter">
+    Access multiple AI models through a single API.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select OpenRouter and enter your API key
+    ```
+  </Accordion>
+
+  <Accordion title="x.ai">
+    Grok models from x.ai.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select x.ai and enter your API key
+    ```
+  </Accordion>
+
+  <Accordion title="Cerebras">
+    Fast inference models from Cerebras.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select Cerebras and enter your API key
+    ```
+  </Accordion>
+
+  <Accordion title="Amazon Bedrock">
+    Claude and other models via AWS Bedrock.
+
+    **Requirements:**
+    - Deploy [Bedrock Access Gateway](https://github.com/aws-samples/bedrock-access-gateway)
+    - Create API key in AWS Secrets Manager
+    - Note the API Base URL from CloudFormation outputs
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select OpenAI-compatible provider
+    # Enter Bedrock Gateway URL and API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: anthropic.claude-3-opus
+    ```
+  </Accordion>
+
+  <Accordion title="Groq">
+    Fast inference using Groq hardware.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select OpenAI-compatible provider
+    # Enter URL: https://api.groq.com/openai/v1
+    # Enter your Groq API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: deepseek-r1-distill-llama-70b
+    ```
+  </Accordion>
+
+  <Accordion title="OpenAI-Compatible Providers">
+    Any provider with OpenAI-compatible API.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select OpenAI-compatible provider
+    # Enter provider URL and API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: <provider-specific-model>
+    ```
+  </Accordion>
+
+  <Accordion title="Forge Services">
+    Managed AI services from Forge.
+
+    **Setup:**
+    ```bash
+    forge provider login
+    # Select Forge Services and enter your API key
+    ```
+
+    **Configure model:**
+    ```yaml
+    # forge.yaml
+    model: claude-3.7-sonnet
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Environment Variables (Deprecated)
+
+<Warning>
+  Using environment variables for provider configuration is deprecated and will be removed in a future version. Use `forge provider login` instead.
+</Warning>
+
+For backward compatibility, Forge still supports environment variables. Credentials found in environment variables are automatically migrated to file-based storage on first run.
+
+<CodeGroup>
+  ```bash OpenAI
+  # .env (deprecated)
+  OPENAI_API_KEY=<your_openai_api_key>
+  ```
+
+  ```bash Anthropic
+  # .env (deprecated)
+  ANTHROPIC_API_KEY=<your_anthropic_api_key>
+  ```
+
+  ```bash OpenRouter
+  # .env (deprecated)
+  OPENROUTER_API_KEY=<your_openrouter_api_key>
+  ```
+
+  ```bash Custom Provider
+  # .env (deprecated)
+  OPENAI_API_KEY=<your_provider_api_key>
+  OPENAI_URL=<your_provider_url>
+  ```
+</CodeGroup>
+
+## Model Selection
+
+After configuring a provider, specify the model in your `forge.yaml`:
+
+```yaml
+# forge.yaml
+model: claude-3.7-sonnet
+```
+
+Or use the `/model` command in the Forge CLI to see all available models for your configured providers.
+
+## Advanced Configuration
+
+### Custom API Endpoints
+
+Override default API URLs using environment variables:
+
+```bash
+# .env
+FORGE_API_URL=https://api.forgecode.dev
+FORGE_WORKSPACE_SERVER_URL=http://localhost:8080
+```
+
+### HTTP Client Configuration
+
+Fine-tune API request behavior:
+
+```bash
+# .env
+FORGE_HTTP_CONNECT_TIMEOUT=30
+FORGE_HTTP_READ_TIMEOUT=900
+FORGE_HTTP_MAX_REDIRECTS=10
+```
+
+See the [environment variables reference](/configuration/environment-variables) for all HTTP configuration options.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Invalid Credentials">
+    If you see authentication errors:
+    1. Run `forge provider logout` to remove old credentials
+    2. Run `forge provider login` to re-enter credentials
+    3. Verify your API key is valid on the provider's website
+  </Accordion>
+
+  <Accordion title="Rate Limiting">
+    If you hit rate limits, configure retry behavior:
+    ```bash
+    # .env
+    FORGE_RETRY_MAX_ATTEMPTS=5
+    FORGE_RETRY_INITIAL_BACKOFF_MS=2000
+    FORGE_RETRY_BACKOFF_FACTOR=2
+    ```
+  </Accordion>
+
+  <Accordion title="Connection Timeouts">
+    For slow connections, increase timeout values:
+    ```bash
+    # .env
+    FORGE_HTTP_CONNECT_TIMEOUT=60
+    FORGE_HTTP_READ_TIMEOUT=1800
+    ```
+  </Accordion>
+
+  <Accordion title="Certificate Errors">
+    If you encounter SSL certificate issues:
+    ```bash
+    # .env
+    # Add custom certificate paths
+    FORGE_HTTP_ROOT_CERT_PATHS=/path/to/cert1.pem,/path/to/cert2.crt
+    ```
+    
+    **Warning:** Only use `FORGE_HTTP_ACCEPT_INVALID_CERTS=true` in development.
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+<Card title="Credential Storage" icon="shield">
+  - Never commit API keys to version control
+  - Use `forge provider login` for secure credential storage
+  - Credentials are stored in platform-specific secure locations
+  - Environment variables are auto-migrated on first run
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="forge.yaml Configuration" icon="arrow-right" href="/configuration/forge-yaml">
+    Configure model behavior and workflow settings
+  </Card>
+  <Card title="Custom Rules" icon="arrow-right" href="/configuration/custom-rules">
+    Define project-specific guidelines
+  </Card>
+</CardGroup>

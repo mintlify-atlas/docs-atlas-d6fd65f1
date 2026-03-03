@@ -1,0 +1,264 @@
+---
+title: MCP Server Management
+description: Configure and manage Model Context Protocol (MCP) servers to extend Forge's capabilities
+---
+
+## Overview
+
+The Model Context Protocol (MCP) allows AI agents to communicate with external tools and services. This implementation follows Anthropic's [Model Context Protocol](https://docs.anthropic.com/en/docs/claude-code/tutorials#set-up-model-context-protocol-mcp) design, enabling powerful integrations with web browsers, APIs, and custom services.
+
+## Configuration
+
+### Using the CLI
+
+The recommended way to configure MCP servers is through Forge's CLI commands:
+
+```bash
+# List all configured MCP servers
+forge mcp list
+
+# Add a new server interactively
+forge mcp add
+
+# Add a server using JSON format
+forge mcp add-json
+
+# Get details about a specific server
+forge mcp get
+
+# Remove a server
+forge mcp remove
+```
+
+### Manual Configuration
+
+You can also manually create or edit `.mcp.json` configuration files. MCP configurations are read from two locations in order of precedence:
+
+1. **Local configuration** (project-specific): `.mcp.json` in your project directory
+2. **User configuration** (user-specific): `~/.config/forge/.mcp.json`
+
+#### Configuration Structure
+
+```json
+{
+  "mcpServers": {
+    "server_name": {
+      "command": "command_to_execute",
+      "args": ["arg1", "arg2"],
+      "env": { "ENV_VAR": "value" }
+    },
+    "another_server": {
+      "url": "http://localhost:3000/events"
+    }
+  }
+}
+```
+
+## Configuration Examples
+
+### Command-based Server
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/files"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+### HTTP-based Server
+
+```json
+{
+  "mcpServers": {
+    "api_server": {
+      "url": "https://api.example.com/mcp"
+    }
+  }
+}
+```
+
+### Browser Automation
+
+```json
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "node",
+      "args": ["/path/to/mcp-server-puppeteer/build/index.js"],
+      "env": {
+        "BROWSER_PATH": "/usr/bin/chromium"
+      }
+    }
+  }
+}
+```
+
+## Server Lifecycle
+
+<Steps>
+
+### Connection Initialization
+
+When Forge starts or when the MCP configuration changes:
+- The configuration is read from both user and local scopes
+- Configurations are merged with local settings taking precedence
+- Each enabled server is connected concurrently
+
+### Tool Discovery
+
+Once connected, Forge:
+- Retrieves the list of available tools from each server
+- Generates unique tool names prefixed with `mcp_{server_name}_tool_`
+- Makes these tools available to AI agents
+
+### Caching
+
+To improve performance:
+- MCP server tool lists are cached based on configuration hash
+- Cache is automatically invalidated when configuration changes
+- Use `forge mcp reload` to manually refresh the cache
+
+### Error Handling
+
+If a server fails to connect:
+- The error is logged but doesn't prevent other servers from connecting
+- Failed servers are tracked and their errors are available via `forge mcp list`
+- You can retry by reloading the MCP configuration
+
+</Steps>
+
+## Use Cases
+
+### Web Browser Automation
+
+Enable agents to control a web browser for testing, scraping, or automation tasks.
+
+```json
+{
+  "mcpServers": {
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
+```
+
+### External API Interactions
+
+Connect to REST APIs or other web services.
+
+```json
+{
+  "mcpServers": {
+    "github_api": {
+      "command": "node",
+      "args": ["/path/to/github-mcp-server/index.js"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+### Database Access
+
+Allow agents to query databases for information.
+
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://user:pass@localhost:5432/db"
+      }
+    }
+  }
+}
+```
+
+## Multi-Agent Workflows
+
+MCP tools can be used as part of multi-agent workflows, allowing specialized agents to interact with external systems:
+
+```bash
+# Agent can use MCP tools automatically
+forge "Use the browser tool to navigate to example.com and extract the page title"
+```
+
+<Warning>
+**Security Considerations**
+
+- MCP servers run with the same permissions as Forge
+- Only configure servers from trusted sources
+- Be cautious with environment variables containing sensitive data
+- Consider using local configuration for project-specific servers
+- Review server capabilities before enabling them
+</Warning>
+
+## Troubleshooting
+
+### Server Not Connecting
+
+1. Check that the command and arguments are correct
+2. Verify environment variables are set properly
+3. Use `forge mcp list` to see error details
+4. Check server logs if available
+
+### Tools Not Appearing
+
+1. Ensure the server connected successfully
+2. Verify the server implements the MCP protocol correctly
+3. Try reloading with `forge mcp reload`
+
+### Performance Issues
+
+1. Reduce the number of concurrent MCP servers
+2. Check if servers are responding slowly
+3. Consider disabling unused servers
+
+## Advanced Configuration
+
+### Disabling a Server
+
+To temporarily disable a server without removing it, add a `disabled` field:
+
+```json
+{
+  "mcpServers": {
+    "server_name": {
+      "command": "...",
+      "disabled": true
+    }
+  }
+}
+```
+
+### Environment Variable Expansion
+
+Environment variables in the `env` section use standard shell syntax:
+
+```json
+{
+  "mcpServers": {
+    "api_server": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": {
+        "API_KEY": "${MY_API_KEY}",
+        "DEBUG": "true"
+      }
+    }
+  }
+}
+```

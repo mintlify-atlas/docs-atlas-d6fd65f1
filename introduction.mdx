@@ -1,0 +1,216 @@
+---
+title: Introduction
+description: Forge is an AI-enhanced terminal development environment that brings intelligent coding assistance directly to your command line
+---
+
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="Forge Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="Forge Hero Dark"
+/>
+
+## Welcome to Forge
+
+Forge is a comprehensive coding agent that integrates AI capabilities with your development environment. Work seamlessly in your terminal with the power of modern language models at your fingertips.
+
+```bash
+curl -fsSL https://forgecode.dev/cli | sh
+```
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card
+    title="Zero Configuration"
+    icon="bolt"
+    href="/installation"
+  >
+    Just add your API key and you're ready to go. No complex setup required.
+  </Card>
+  <Card
+    title="Multi-Provider Support"
+    icon="network-wired"
+    href="/essentials/providers"
+  >
+    Use OpenAI, Anthropic, Google Vertex AI, or other LLM providers. Switch between models with ease.
+  </Card>
+  <Card
+    title="Secure by Design"
+    icon="shield-halved"
+    href="/essentials/security"
+  >
+    Your code stays on your machine. Run in restricted shell mode for enhanced security.
+  </Card>
+  <Card
+    title="Model Context Protocol"
+    icon="puzzle-piece"
+    href="/essentials/mcp"
+  >
+    Integrate external tools and services through MCP. Extend Forge with custom integrations.
+  </Card>
+  <Card
+    title="Terminal Integration"
+    icon="terminal"
+    href="/essentials/shell-integration"
+  >
+    ZSH plugin and theme for seamless shell integration. Transform natural language to commands.
+  </Card>
+  <Card
+    title="Semantic Search"
+    icon="magnifying-glass"
+    href="/essentials/workspaces"
+  >
+    Index your codebase for intelligent semantic search. Find code by meaning, not just keywords.
+  </Card>
+</CardGroup>
+
+## Why Forge?
+
+Forge is designed for developers who want to enhance their workflow with AI assistance while maintaining full control over their development environment.
+
+### Seamless Terminal Experience
+
+Work right in your terminal, where you already spend most of your time. No need to switch between tools or copy-paste code between applications.
+
+### Intelligent Code Understanding
+
+Forge analyzes your project structure and understands context. It can:
+- Explain how authentication systems work in your codebase
+- Suggest architectural improvements based on your current patterns
+- Debug errors with full understanding of your project context
+- Refactor legacy code while maintaining consistency
+
+### Flexible and Extensible
+
+Customize Forge to match your workflow:
+- Define custom rules for code generation
+- Create reusable commands for repetitive tasks
+- Configure temperature and model settings per agent
+- Add MCP servers for external tool integration
+
+## What You Can Do
+
+<AccordionGroup>
+  <Accordion title="Code Understanding" icon="book">
+    Ask Forge to explain complex authentication flows, trace function dependencies, or analyze your project architecture. It reads and understands your entire codebase.
+    
+    ```
+    > Can you explain how the authentication system works in this codebase?
+    ```
+  </Accordion>
+
+  <Accordion title="Feature Implementation" icon="code">
+    Describe the feature you want, and Forge will suggest the best approach based on your current codebase, scaffold components, and implement the functionality.
+    
+    ```
+    > I need to add a dark mode toggle to our React application
+    ```
+  </Accordion>
+
+  <Accordion title="Debugging" icon="bug">
+    Share error messages or unexpected behavior. Forge analyzes your code, identifies potential causes, and proposes solutions.
+    
+    ```
+    > I'm getting "TypeError: Cannot read property 'map' of undefined"
+    ```
+  </Accordion>
+
+  <Accordion title="Code Reviews" icon="magnifying-glass">
+    Get instant code reviews with suggestions for readability, performance, security, and maintainability improvements.
+    
+    ```
+    > Please review the code in src/components/UserProfile.js
+    ```
+  </Accordion>
+
+  <Accordion title="Git Operations" icon="code-branch">
+    Generate commit messages, resolve merge conflicts, and manage branches with AI assistance.
+    
+    ```bash
+    forge commit --preview
+    ```
+  </Accordion>
+
+  <Accordion title="Learning" icon="graduation-cap">
+    Learn new technologies with contextual tutorials based on your specific project structure.
+    
+    ```
+    > How do I integrate GraphQL into this Express application?
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Command Line Power
+
+Forge provides both interactive and non-interactive modes:
+
+<CodeGroup>
+
+```bash Interactive Mode
+# Start an interactive session
+forge
+
+# With specific agent
+forge --agent sage
+
+# Continue existing conversation
+forge --conversation-id abc-123
+```
+
+```bash Direct Prompts
+# Execute a single command
+forge -p "explain this error message"
+
+# Pipe content to forge
+cat error.log | forge -p "analyze this error"
+
+# Generate commit messages
+git diff | forge commit --preview
+```
+
+```bash Management
+# List available models and providers
+forge list model
+forge list provider
+
+# Configure providers
+forge provider login
+
+# Manage conversations
+forge conversation list
+forge conversation show abc-123
+```
+
+</CodeGroup>
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install Forge in seconds with our quick installer
+  </Card>
+  <Card
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running with your first Forge session
+  </Card>
+</CardGroup>
+
+## Open Source
+
+Forge is open-source and community-driven. Contributions are welcome!
+
+- **Transparent**: Inspect the code and understand exactly what's happening
+- **Extensible**: Add your own agents, tools, and integrations
+- **Community**: Join our Discord to connect with other users

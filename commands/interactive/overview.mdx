@@ -1,0 +1,166 @@
+---
+title: Interactive Commands Overview
+description: Learn how to use Forge's interactive mode with slash commands and keyboard shortcuts
+---
+
+## What is Interactive Mode?
+
+Forge's interactive mode is a powerful terminal interface that allows you to interact with AI agents through natural language and commands. When you run `forge` without arguments, you enter interactive mode where you can:
+
+- Chat with AI agents using natural language
+- Execute slash commands for system operations
+- Run shell commands directly with the `!` prefix
+- Switch between different AI agents and models
+- Manage conversations and view usage statistics
+
+## Types of Input
+
+Forge supports three types of input in interactive mode:
+
+### 1. Natural Language Messages
+
+Any text that doesn't start with `/` or `!` is treated as a message to the AI agent:
+
+```
+> Can you help me refactor this authentication module?
+```
+
+### 2. Slash Commands
+
+Commands that start with `/` are system commands that control Forge's behavior:
+
+```
+/new        # Start a new conversation
+/model      # Switch AI models
+/help       # Get help information
+```
+
+See the [Slash Commands](/commands/interactive/slash-commands) reference for a complete list.
+
+### 3. Shell Commands
+
+Commands that start with `!` are executed directly in your shell:
+
+```
+!git status
+!npm test
+!ls -la
+```
+
+## Agent Modes
+
+Forge includes several built-in agents, each optimized for different tasks:
+
+### Forge Agent (`/forge` or `/act`)
+
+**Implementation mode** - Makes code changes and executes operations:
+
+```
+/forge
+> Add error handling to the login function
+```
+
+### Muse Agent (`/muse` or `/plan`)
+
+**Planning mode** - Analyzes and plans without making changes:
+
+```
+/muse
+> How should I architect this new feature?
+```
+
+### Sage Agent (`/sage`)
+
+**Research mode** - Systematic codebase exploration and analysis:
+
+```
+/sage
+> Analyze the authentication flow in this codebase
+```
+
+### Help Agent (`/help`)
+
+**Tool assistance** - Answers questions about Forge itself:
+
+```
+/help
+> How do I configure a custom provider?
+```
+
+## Interactive Features
+
+### Tab Completion
+
+Press `Tab` to autocomplete commands, file paths, and agent names. If multiple options are available, a completion menu will appear.
+
+### Command History
+
+Forge maintains a history of your commands:
+
+- Press `Ctrl+R` to search through command history
+- Use arrow keys to navigate through previous commands
+- History is stored in your system config directory
+
+### Multi-line Input
+
+Press `Alt+Enter` to insert a newline without submitting:
+
+```
+> This is a multi-line
+  prompt that spans
+  several lines
+```
+
+### Context Management
+
+Forge automatically manages conversation context:
+
+- Use `/compact` to compress context when approaching limits
+- Use `/new` to start fresh while preserving history
+- Use `/conversation` to switch between conversations
+
+## Custom Commands
+
+You can define custom commands in your `forge.yaml` file:
+
+```yaml
+commands:
+  - name: "refactor"
+    description: "Refactor selected code"
+    prompt: "Please refactor this code to improve readability and performance"
+  - name: "review"
+    description: "Code review"
+    prompt: "Review this code for bugs and improvements"
+```
+
+Then use them with:
+
+```
+/refactor
+/review
+```
+
+## Agent Commands
+
+When you have custom agents configured, Forge automatically generates commands for switching to them:
+
+```
+/agent-custom-name    # Switch to agent named "custom-name"
+/agent-data-analyst   # Switch to agent named "data-analyst"
+```
+
+Use `/agent` to interactively select from available agents.
+
+## Workflow Commands
+
+Workflow commands defined in your workflow configuration appear with a ⚙ prefix:
+
+```
+/deploy       # ⚙ Deploy the application
+/run-tests    # ⚙ Run the test suite
+```
+
+## Next Steps
+
+- [Slash Commands Reference](/commands/interactive/slash-commands) - Complete list of all slash commands
+- [Keyboard Shortcuts](/commands/interactive/keyboard-shortcuts) - Keyboard shortcuts for efficient navigation

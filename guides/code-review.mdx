@@ -1,0 +1,311 @@
+---
+title: Code Review Workflows
+description: Leverage Forge for comprehensive code reviews and quality improvements
+---
+
+# Code Review Workflows
+
+Forge can help you maintain high code quality through AI-assisted code reviews, identifying issues in readability, performance, security, and maintainability.
+
+## Basic Code Review
+
+Request a comprehensive review of any file or component:
+
+```
+> Please review the code in src/components/UserProfile.js and suggest improvements
+```
+
+Forge will analyze the code and provide feedback on:
+- Code structure and organization
+- Potential bugs or edge cases
+- Performance optimizations
+- Security vulnerabilities
+- Best practices and conventions
+
+## Structured Review Workflow
+
+<Steps>
+  <Step title="Specify the scope">
+    Define what you want reviewed:
+    ```
+    > Review the authentication system in src/auth/ for security issues
+    ```
+  </Step>
+  
+  <Step title="Receive analysis">
+    Forge will analyze the code and provide categorized feedback with specific line references (e.g., `src/auth/login.ts:67`).
+  </Step>
+  
+  <Step title="Prioritize changes">
+    Review the suggestions and decide which to implement. Ask Forge to clarify or elaborate on any feedback.
+  </Step>
+  
+  <Step title="Apply improvements">
+    Let Forge implement the approved changes:
+    ```
+    > Apply the security improvements you suggested
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+Use code reviews as learning opportunities. Ask Forge to explain *why* a particular pattern is better.
+</Tip>
+
+## Review Categories
+
+### Security Review
+
+Focus on security vulnerabilities and best practices:
+
+```
+> Review this API endpoint for security vulnerabilities
+```
+
+Forge checks for:
+- Input validation and sanitization
+- Authentication and authorization issues
+- SQL injection or XSS vulnerabilities
+- Exposed secrets or credentials
+- Insecure cryptographic practices
+
+### Performance Review
+
+Identify performance bottlenecks and optimization opportunities:
+
+```
+> Analyze the performance of this data processing function
+```
+
+Forge examines:
+- Algorithm complexity
+- Unnecessary loops or operations
+- Memory usage patterns
+- Database query efficiency
+- Caching opportunities
+
+### Maintainability Review
+
+Ensure code is maintainable and follows best practices:
+
+```
+> Review this module for maintainability and code quality
+```
+
+Forge evaluates:
+- Code organization and structure
+- Naming conventions
+- Documentation completeness
+- Error handling patterns
+- Test coverage
+
+## Real-World Review Scenarios
+
+### Scenario 1: Pre-commit Review
+
+Before committing changes, get a quick review:
+
+<Steps>
+  <Step title="Review your changes">
+    ```
+    > Review my uncommitted changes for any issues
+    ```
+  </Step>
+  
+  <Step title="Address feedback">
+    Forge analyzes your git diff and suggests improvements before you commit.
+  </Step>
+  
+  <Step title="Commit with confidence">
+    After addressing issues, commit your polished code.
+  </Step>
+</Steps>
+
+### Scenario 2: Pull Request Review
+
+Use Forge to review a branch before creating a pull request:
+
+```
+> Review all changes in the feature/user-dashboard branch
+```
+
+Forge will:
+- Compare the branch against main
+- Identify potential issues across all modified files
+- Suggest improvements to documentation and tests
+- Help you create a comprehensive PR description
+
+<Tip>
+Forge can help you create pull requests with detailed descriptions. See the [GitHub integration documentation](/features/git) for details.
+</Tip>
+
+### Scenario 3: Legacy Code Review
+
+When working with existing code:
+
+```
+> Review this legacy authentication module and suggest modernization opportunities
+```
+
+Forge will:
+- Identify outdated patterns
+- Suggest modern alternatives
+- Highlight security concerns from older code
+- Propose incremental refactoring strategies
+
+## Review Checklists
+
+### General Code Review
+
+- [ ] Code follows project conventions and style guide
+- [ ] Functions and variables have clear, descriptive names
+- [ ] Complex logic includes explanatory comments
+- [ ] Error handling is comprehensive and appropriate
+- [ ] No hardcoded values; uses configuration
+- [ ] Code is DRY (Don't Repeat Yourself)
+
+### Security-Focused Review
+
+- [ ] All user inputs are validated and sanitized
+- [ ] Authentication and authorization are properly implemented
+- [ ] Sensitive data is encrypted at rest and in transit
+- [ ] No secrets or credentials in code
+- [ ] Rate limiting and DOS protection in place
+- [ ] Dependencies are up-to-date and vulnerability-free
+
+### Performance-Focused Review
+
+- [ ] Algorithms use appropriate complexity (O(n) vs O(n²))
+- [ ] Database queries are optimized with proper indexes
+- [ ] Caching is used where appropriate
+- [ ] Large datasets are paginated or streamed
+- [ ] Memory is managed efficiently (no leaks)
+- [ ] Unnecessary operations are eliminated
+
+## Integration with Development Workflow
+
+### Review During Development
+
+Get real-time feedback while coding:
+
+```
+> I just implemented user registration. Can you review it before I move on?
+```
+
+This helps catch issues early, when they're easier to fix.
+
+### Review Before Merging
+
+Ensure quality before merging to main:
+
+<Steps>
+  <Step title="Complete your feature">
+    Finish implementing and testing your changes.
+  </Step>
+  
+  <Step title="Request comprehensive review">
+    ```
+    > Perform a thorough review of all changes in this branch
+    ```
+  </Step>
+  
+  <Step title="Address all feedback">
+    Fix issues and improve code based on Forge's suggestions.
+  </Step>
+  
+  <Step title="Create pull request">
+    Use Forge to help draft a clear PR description.
+  </Step>
+</Steps>
+
+## Advanced Review Techniques
+
+### Comparative Reviews
+
+Compare different implementation approaches:
+
+```
+> I have two ways to implement this feature. Can you review both and recommend the better approach?
+```
+
+Forge will analyze both implementations and explain the trade-offs.
+
+### Architectural Reviews
+
+Review system design and architecture:
+
+```
+> Review the overall architecture of our microservices setup
+```
+
+Forge examines:
+- Service boundaries and responsibilities
+- Communication patterns
+- Data flow and consistency
+- Scalability considerations
+
+### Convention Compliance
+
+Ensure code follows project-specific conventions:
+
+```yaml
+# forge.yaml
+custom_rules: |
+  1. Always add comprehensive error handling to any code you write.
+  2. Include unit tests for all new functions.
+  3. Follow our team's naming convention: camelCase for variables, PascalCase for classes.
+```
+
+Forge will review code against these custom rules.
+
+<Tip>
+Define custom rules in `forge.yaml` to enforce team-specific standards across all reviews.
+</Tip>
+
+## Review Output Examples
+
+### Example: Security Issue Found
+
+```
+Forge: I found a potential SQL injection vulnerability in src/db/queries.ts:45
+
+The query is constructed using string concatenation:
+`SELECT * FROM users WHERE id = ${userId}`
+
+Recommendation: Use parameterized queries instead:
+`SELECT * FROM users WHERE id = ?` with parameters
+```
+
+### Example: Performance Improvement
+
+```
+Forge: The loop in src/utils/data.ts:23 has O(n²) complexity.
+
+Current approach uses nested loops for matching.
+Recommendation: Use a Map for O(n) lookup time, reducing overall complexity from O(n²) to O(n).
+```
+
+## Best Practices for Code Reviews
+
+1. **Review early and often**: Don't wait until code is "perfect"
+2. **Be specific in requests**: Focus reviews on particular concerns when needed
+3. **Learn from feedback**: Understand why changes are suggested
+4. **Iterate on feedback**: Ask follow-up questions for clarity
+5. **Automate where possible**: Use `forge.yaml` custom rules for consistent standards
+6. **Document decisions**: When you disagree with a suggestion, document why
+
+## Common Review Commands
+
+| Task | Example Prompt |
+|------|---------------|
+| General review | `Review src/components/Dashboard.tsx` |
+| Security focus | `Check this API for security issues` |
+| Performance focus | `How can I optimize this function?` |
+| Before commit | `Review my uncommitted changes` |
+| Architecture | `Review the structure of the auth module` |
+
+## Next Steps
+
+- Learn about [Refactoring](/guides/refactoring) with Forge
+- Explore [Testing](/guides/testing) strategies
+- Review [Best Practices](/guides/best-practices) for development workflows

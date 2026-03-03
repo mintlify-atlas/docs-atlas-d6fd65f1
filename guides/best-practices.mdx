@@ -1,0 +1,507 @@
+---
+title: Best Practices
+description: Essential best practices for effective AI-assisted development with Forge
+---
+
+# Best Practices
+
+This guide covers best practices for working effectively with Forge to maximize productivity and code quality.
+
+## Communication Best Practices
+
+### Be Specific and Clear
+
+The more specific your requests, the better Forge can assist:
+
+**Good:**
+```
+> Add error handling to the login function in src/auth/login.ts that shows user-friendly messages for network failures and invalid credentials
+```
+
+**Less effective:**
+```
+> Fix the login
+```
+
+### Provide Context
+
+Share relevant information about what you're trying to accomplish:
+
+```
+> I'm building a real-time chat feature. I need to handle WebSocket connections with reconnection logic and message queuing when offline.
+```
+
+This helps Forge understand your requirements and suggest appropriate solutions.
+
+### Iterate and Refine
+
+Don't hesitate to ask follow-up questions:
+
+```
+> That's close, but can you make the error messages more user-friendly?
+> Can you also add logging for debugging?
+```
+
+<Tip>
+Treat conversations with Forge as collaborative sessions. It's okay to iterate and refine solutions together.
+</Tip>
+
+## Development Workflow Best Practices
+
+### Start with Understanding
+
+Before making changes, understand the codebase:
+
+```
+> Can you explain how the authentication system works in this codebase?
+```
+
+Forge will analyze your project's structure, identify authentication-related files, and provide a detailed explanation of the authentication flow.
+
+### Plan Before Implementing
+
+For complex features, get a plan first:
+
+<Steps>
+  <Step title="Describe the feature">
+    ```
+    > I need to add a dark mode toggle to our React application. What's the best approach?
+    ```
+  </Step>
+  
+  <Step title="Review the plan">
+    Forge suggests the approach based on your codebase and explains the steps needed.
+  </Step>
+  
+  <Step title="Implement incrementally">
+    Work through the plan step-by-step, testing as you go.
+  </Step>
+</Steps>
+
+### Test as You Go
+
+Don't wait until the end to test:
+
+```
+> I just implemented the user registration form. Can you help me test it?
+```
+
+Forge can:
+- Write unit tests
+- Suggest test cases
+- Help identify edge cases
+- Review the implementation for potential issues
+
+### Commit Frequently
+
+Make small, focused commits with clear messages:
+
+```
+> Create a commit for the authentication changes we just made
+```
+
+Forge will:
+- Review changed files
+- Generate an appropriate commit message
+- Follow your repository's commit message style
+- Create the commit
+
+<Tip>
+Forge follows repository commit message styles and can help you maintain consistency.
+</Tip>
+
+## Code Quality Best Practices
+
+### Follow Project Conventions
+
+Configure Forge to follow your team's standards:
+
+```yaml
+# forge.yaml
+custom_rules: |
+  1. Always add comprehensive error handling to any code you write.
+  2. Include unit tests for all new functions.
+  3. Follow our team's naming convention: camelCase for variables, PascalCase for classes.
+  4. Add JSDoc comments for all exported functions.
+  5. Use TypeScript strict mode.
+```
+
+### Request Code Reviews
+
+Use Forge for pre-commit reviews:
+
+```
+> Review my uncommitted changes before I commit
+```
+
+This catches issues early when they're easiest to fix.
+
+### Write Self-Documenting Code
+
+Ask Forge to help improve code clarity:
+
+```
+> This function works but is hard to understand. Can you refactor it to be more readable?
+```
+
+Forge will:
+- Add descriptive variable names
+- Break complex logic into smaller functions
+- Add explanatory comments where needed
+- Simplify control flow
+
+### Handle Errors Properly
+
+Always include comprehensive error handling:
+
+```
+> Add proper error handling to this API call with user-friendly error messages
+```
+
+Forge ensures:
+- All error cases are handled
+- Users see helpful error messages
+- Errors are logged appropriately
+- The application fails gracefully
+
+## Security Best Practices
+
+### Never Commit Secrets
+
+Forge will warn you about committing sensitive files:
+
+```
+> Review changes and create a commit
+```
+
+If Forge detects files like `.env` or `credentials.json`, it will warn you before committing.
+
+### Review Security Implications
+
+Ask Forge to review security aspects:
+
+```
+> Review this authentication endpoint for security vulnerabilities
+```
+
+Forge checks for:
+- Input validation issues
+- SQL injection vulnerabilities
+- XSS vulnerabilities
+- Authentication/authorization flaws
+- Insecure cryptographic practices
+
+### Use Restricted Mode for Sensitive Work
+
+When working with sensitive codebases:
+
+```bash
+forge --restricted
+```
+
+This enables enhanced security mode while still providing development assistance.
+
+<Tip>
+Your code stays on your machine. Forge is secure by design and never stores your code remotely.
+</Tip>
+
+## Performance Best Practices
+
+### Request Performance Reviews
+
+```
+> Analyze the performance of this data processing function
+```
+
+Forge examines:
+- Algorithm complexity
+- Memory usage patterns
+- Database query efficiency
+- Unnecessary operations
+- Caching opportunities
+
+### Optimize Thoughtfully
+
+Don't optimize prematurely:
+
+```
+> I think this function is slow, but I'm not sure where the bottleneck is. Can you help?
+```
+
+Forge helps you:
+- Identify actual bottlenecks
+- Measure performance impact
+- Suggest targeted optimizations
+- Avoid premature optimization
+
+## Configuration Best Practices
+
+### Customize for Your Workflow
+
+Take advantage of `forge.yaml` configuration:
+
+```yaml
+# forge.yaml
+model: claude-3.7-sonnet
+temperature: 0.7
+max_walker_depth: 3
+
+custom_rules: |
+  1. Always add comprehensive error handling.
+  2. Include unit tests for all new functions.
+  3. Follow team naming conventions.
+
+commands:
+  - name: "review"
+    description: "Quick code review"
+    prompt: "Review this code for issues and suggest improvements"
+  - name: "test"
+    description: "Generate tests"
+    prompt: "Write comprehensive unit tests for this code"
+```
+
+### Use Custom Commands
+
+Create shortcuts for repetitive tasks:
+
+```yaml
+commands:
+  - name: "refactor"
+    description: "Refactor for readability"
+    prompt: "Refactor this code to improve readability and maintainability"
+```
+
+Then use: `/refactor` in Forge sessions.
+
+## Learning and Exploration Best Practices
+
+### Learn New Technologies
+
+Use Forge as a learning tool:
+
+```
+> I want to integrate GraphQL into this Express application. Can you explain how to get started?
+```
+
+Forge provides tailored tutorials using your specific project structure as context.
+
+### Understand Before Copying
+
+When Forge suggests code:
+
+```
+> Can you explain why this approach is better than what I had?
+```
+
+Understanding the reasoning helps you learn and make better decisions in the future.
+
+### Explore Multiple Approaches
+
+```
+> Show me two different ways to implement this feature and explain the trade-offs
+```
+
+Forge can present alternatives and help you choose the best approach for your situation.
+
+## Collaboration Best Practices
+
+### Document Decisions
+
+When working on team projects:
+
+```
+> Help me write a clear explanation of this architectural decision for the team
+```
+
+Good documentation helps team members understand why choices were made.
+
+### Create Clear Pull Requests
+
+When ready to merge:
+
+```
+> Help me create a pull request for these changes
+```
+
+Forge will:
+- Analyze all changes in your branch
+- Generate a comprehensive PR description
+- Highlight key changes
+- Push to remote and create the PR
+
+### Review Others' Code
+
+Use Forge to understand code from teammates:
+
+```
+> Explain what this PR changes and if there are any potential issues
+```
+
+## Git Workflow Best Practices
+
+### Understanding Git State
+
+Forge helps manage git operations:
+
+```
+> What's the current state of my repository?
+```
+
+Forge shows:
+- Uncommitted changes
+- Current branch
+- Relationship to remote
+- Recent commits
+
+### Resolving Conflicts
+
+When merge conflicts occur:
+
+```
+> I have merge conflicts in src/auth/login.ts. Help me resolve them.
+```
+
+Forge:
+- Explains the conflicting changes
+- Suggests resolution strategies
+- Helps implement the resolution
+- Verifies the result works
+
+### Branch Management
+
+```
+> Create a new feature branch for the user dashboard work
+```
+
+Forge handles branch creation and helps keep your git history clean.
+
+<Tip>
+Never use git commands with interactive flags (like `git rebase -i`) as they're not supported in Forge.
+</Tip>
+
+## Troubleshooting Best Practices
+
+### Provide Error Details
+
+When debugging, share complete information:
+
+```
+> I'm getting this error: "TypeError: Cannot read property 'map' of undefined" in src/components/Dashboard.tsx:45. The error occurs when loading the user's dashboard.
+```
+
+Include:
+- Complete error message
+- File path and line number
+- What you were doing when it occurred
+- Any relevant context
+
+### Systematic Debugging
+
+Let Forge guide systematic investigation:
+
+<Steps>
+  <Step title="Describe the issue">
+    Explain what should happen vs. what's actually happening.
+  </Step>
+  
+  <Step title="Follow investigation steps">
+    Forge will suggest specific things to check and files to examine.
+  </Step>
+  
+  <Step title="Test solutions">
+    Implement and test suggested fixes one at a time.
+  </Step>
+</Steps>
+
+## MCP Integration Best Practices
+
+Model Context Protocol (MCP) extends Forge's capabilities:
+
+### Configure MCP Servers
+
+```bash
+# List available MCP servers
+forge mcp list
+
+# Add a new server
+forge mcp add
+
+# Remove a server
+forge mcp remove
+```
+
+### Use Case Examples
+
+- Web browser automation for testing
+- External API integrations
+- Custom tool connections
+- Database management tools
+
+See the [MCP documentation](https://docs.anthropic.com/en/docs/claude-code/tutorials#set-up-model-context-protocol-mcp) for details.
+
+## Common Pitfalls to Avoid
+
+### Don't: Accept Without Understanding
+
+Always understand what changes are being made and why.
+
+### Don't: Skip Testing
+
+Test changes before committing, even if Forge wrote them.
+
+### Don't: Ignore Warnings
+
+If Forge warns about security issues or potential problems, investigate.
+
+### Don't: Over-Rely on AI
+
+Use Forge as a powerful assistant, but maintain your critical thinking and code review skills.
+
+## Quick Reference: Command Patterns
+
+| Goal | Example Prompt |
+|------|---------------|
+| Understand code | `Explain how the authentication system works` |
+| Implement feature | `Add dark mode toggle to the application` |
+| Debug issue | `Fix this TypeError in Dashboard.tsx:45` |
+| Review code | `Review my uncommitted changes` |
+| Write tests | `Write tests for the UserService` |
+| Refactor | `Refactor this function for better readability` |
+| Learn | `Explain the benefits of using GraphQL vs REST` |
+| Git operations | `Create a PR for my feature branch` |
+| Optimize | `Find performance bottlenecks in this module` |
+
+## Continuous Improvement
+
+### Learn from Interactions
+
+Pay attention to patterns in Forge's suggestions:
+- Common mistakes in your code
+- Better patterns to use
+- Security considerations
+- Performance optimizations
+
+### Customize Over Time
+
+Update your `forge.yaml` as you discover preferences:
+- Add custom rules
+- Create command shortcuts
+- Adjust model temperature
+- Configure file depth limits
+
+### Share Knowledge
+
+When Forge helps you solve a problem:
+- Document the solution for teammates
+- Add patterns to team guidelines
+- Update project documentation
+
+## Next Steps
+
+- Review specific workflow guides:
+  - [Debugging](/guides/debugging)
+  - [Code Review](/guides/code-review)
+  - [Refactoring](/guides/refactoring)
+  - [Testing](/guides/testing)
+- Explore [advanced configuration options](https://github.com/antinomyhq/forge/tree/main/docs)
+- Join the [Discord community](https://discord.gg/kRZBPpkgwq)

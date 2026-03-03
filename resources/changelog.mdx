@@ -1,0 +1,240 @@
+---
+title: Changelog
+description: Release notes and version history for Forge
+---
+
+This page tracks notable changes, new features, and bug fixes in Forge releases.
+
+## Recent Updates
+
+For the most up-to-date release information, visit the [GitHub Releases page](https://github.com/antinomyhq/forge/releases).
+
+## Latest Changes
+
+Here are the most recent updates to Forge:
+
+### Setup and Configuration
+
+**ZSH Integration Improvements**
+- Added `setup` and `doctor` alias commands for easier ZSH integration setup
+- Run `forge setup` or `forge doctor` to configure and diagnose your shell integration
+- Enhanced fzf preview with bottom layout and reverse mode for better command history display
+
+### Shell Plugin Features
+
+**Copy Command**
+- Added `:copy` command to copy the last assistant message to clipboard
+- Quickly copy AI-generated code or responses without manual selection
+
+### Model and Provider Management
+
+**Cross-Provider Model Switching**
+- Major enhancement: Switch between models across different providers seamlessly
+- Concurrent model information fetching for faster model catalog loading
+- Persistent cache for model availability across sessions
+- New CLI flags: `--model` and `--provider` for easy model/provider selection
+
+```bash
+forge --model claude-3.7-sonnet --provider anthropic
+forge --model o3-mini-high --provider openai
+```
+
+**Environment Variable Deprecation**
+- Provider configuration via environment variables is now deprecated
+- Use `forge provider login` for credential management
+- Automatic migration from `.env` files on first run
+
+### GitHub Integration
+
+**PR Description Command**
+- New `github-pr-description` command generates comprehensive PR descriptions
+- Analyzes commit history and code changes
+- Creates well-formatted PR summaries automatically
+- Renamed skill from `pr-description` to `github-pr-description`
+
+### Updates and Maintenance
+
+**Background Updates**
+- Forge now checks for updates in the background
+- Notifications when new versions are available
+- Seamless update experience
+
+**Installation Command Updates**
+- Updated doctor script with correct installation commands
+- Better diagnostic information for troubleshooting
+
+### Model Support
+
+**New Models**
+- Added support for `gpt-5.3-codex` in provider catalog
+
+**GitHub Copilot**
+- Enhanced error messaging when GitHub Copilot models are disabled
+- Clearer guidance for users encountering model restrictions
+
+### REPL Mode
+
+**Deprecation Warning**
+- Added deprecation notice for REPL mode
+- Users encouraged to use standard interactive mode
+
+### Bug Fixes
+
+**Conversation Management**
+- Fixed legacy variant support for conversation deserialization
+- Improved backwards compatibility with older conversation formats
+
+**Model Display**
+- Removed duplicate column from models output
+- Cleaner model listing interface
+
+**Dependencies**
+- Bumped minimatch from 9.0.5 to 9.0.7 (security update)
+
+## Version Format
+
+Forge follows [Semantic Versioning](https://semver.org/):
+
+- **Major** (X.0.0): Breaking changes
+- **Minor** (0.X.0): New features, backwards compatible
+- **Patch** (0.0.X): Bug fixes, backwards compatible
+
+## Previous Releases
+
+For a complete history of releases, including detailed changelogs, visit:
+
+[GitHub Releases](https://github.com/antinomyhq/forge/releases)
+
+## Stay Updated
+
+### Get Notified
+
+To stay informed about new releases:
+
+1. **Star the repository** on [GitHub](https://github.com/antinomyhq/forge)
+   - Enables GitHub notifications for new releases
+   
+2. **Join Discord** at [discord.gg/kRZBPpkgwq](https://discord.gg/kRZBPpkgwq)
+   - Release announcements in the announcements channel
+   
+3. **Watch the repository** on GitHub
+   - Configure notification preferences for releases
+   
+4. **Automatic update checks**
+   - Forge checks for updates in the background
+   - Notifications when new versions are available
+
+### Update Forge
+
+To update to the latest version:
+
+```bash
+# Using installation script
+curl -fsSL https://forgecode.dev/cli | sh
+
+# Using npm
+npm update -g forgecode
+
+# Building from source
+git pull origin main
+cargo build --release
+```
+
+## Release Cycle
+
+Forge releases follow a continuous deployment model:
+
+- **Continuous**: Features and fixes merged frequently
+- **Releases**: Tagged when significant features or fixes accumulate
+- **Hotfixes**: Critical bugs addressed immediately
+
+## Breaking Changes
+
+Major breaking changes are announced well in advance:
+
+- Documented in release notes
+- Migration guides provided
+- Deprecation warnings added before removal
+- Discussed in Discord community
+
+### Current Deprecations
+
+<Warning>
+  **Environment Variables for Provider Configuration** (Deprecated)
+  
+  Using `.env` files to configure AI providers is deprecated and will be removed in a future version.
+  
+  **Migration**: Use `forge provider login` instead.
+  
+  Credentials in environment variables will be automatically migrated on first run.
+</Warning>
+
+<Warning>
+  **REPL Mode** (Deprecated)
+  
+  REPL mode is deprecated. Use the standard interactive mode instead.
+  
+  **Migration**: Run `forge` without additional flags for interactive mode.
+</Warning>
+
+## Contributing to Releases
+
+You can contribute to future releases:
+
+- **Report bugs**: [GitHub Issues](https://github.com/antinomyhq/forge/issues/new?template=bug_report.yml)
+- **Request features**: [Feature Requests](https://github.com/antinomyhq/forge/issues/new?template=feature_request.yml)
+- **Submit PRs**: See [Contributing Guide](/resources/contributing)
+- **Test pre-releases**: Help test beta features and release candidates
+
+## Automated Release Process
+
+Forge uses automated tooling for releases:
+
+- **Release Drafter**: Automatically generates release notes from PRs
+- **Semantic Versioning**: Automatically determines version bumps
+- **Label-based**: PR labels determine changelog categories
+- **CI/CD**: Automated testing and building on release
+
+See [release-drafter.yml](https://github.com/antinomyhq/forge/blob/main/.github/release-drafter.yml) for configuration details.
+
+## Changelog Categories
+
+Release notes are organized by category:
+
+- 🚀 **Features**: New capabilities and enhancements
+- 🐛 **Bug Fixes**: Resolved issues and corrections
+- 📝 **Documentation**: Documentation improvements
+- 🔧 **Configuration**: Configuration and setup changes
+- ⚡ **Performance**: Performance improvements
+- 🔒 **Security**: Security updates and fixes
+- 🎨 **UI/UX**: Interface and experience improvements
+- 🏗️ **Refactoring**: Code improvements without behavior changes
+- 🧪 **Tests**: Test additions and improvements
+- 📦 **Dependencies**: Dependency updates
+
+## Version History
+
+For a complete version history with detailed release notes:
+
+[View All Releases on GitHub](https://github.com/antinomyhq/forge/releases)
+
+## Support
+
+If you encounter issues after updating:
+
+1. Check the [troubleshooting guide](/resources/troubleshooting)
+2. Review the release notes for breaking changes
+3. Search [GitHub Issues](https://github.com/antinomyhq/forge/issues) for similar problems
+4. Ask on [Discord](https://discord.gg/kRZBPpkgwq)
+5. Report a bug if needed
+
+## Feedback
+
+We value your feedback on releases:
+
+- Comment on [GitHub Releases](https://github.com/antinomyhq/forge/releases)
+- Share your thoughts on [Discord](https://discord.gg/kRZBPpkgwq)
+- Create [feature requests](https://github.com/antinomyhq/forge/issues/new?template=feature_request.yml)
+- Submit [bug reports](https://github.com/antinomyhq/forge/issues/new?template=bug_report.yml)
+
+Your feedback helps shape the future of Forge! 🚀

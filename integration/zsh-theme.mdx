@@ -1,0 +1,391 @@
+---
+title: 'ZSH Theme Setup'
+description: 'Enhance your ZSH prompt with AI context, model information, and token usage from Forge'
+---
+
+## Overview
+
+The Forge ZSH theme adds AI context to your prompt, displaying active agent information, model details, and token usage directly in your terminal. It integrates seamlessly with your existing ZSH theme by augmenting the right prompt (RPROMPT).
+
+## Features
+
+- Active agent and model display
+- Real-time token count tracking
+- Cost estimation per conversation
+- Nerd Font icon support (auto-detected)
+- Currency conversion support
+- Non-intrusive right-prompt integration
+- High-performance prompt rendering
+
+## Installation
+
+<Steps>
+  <Step title="Automatic Setup">
+    The theme is automatically installed when you set up the Forge ZSH plugin:
+
+    ```bash
+    forge zsh setup
+    ```
+
+    This adds the theme loader to your `~/.zshrc`:
+
+    ```bash
+    # Load forge shell theme (prompt with AI context)
+    if [[ -z "$_FORGE_THEME_LOADED" ]]; then
+        eval "$(forge zsh theme)"
+    fi
+    ```
+  </Step>
+
+  <Step title="Manual Setup (Alternative)">
+    To manually load just the theme, add this to your `~/.zshrc`:
+
+    ```bash
+    # Load Forge theme
+    source /path/to/forge/shell-plugin/forge.theme.zsh
+    ```
+
+    Or generate the theme dynamically:
+
+    ```bash
+    eval "$(forge zsh theme)"
+    ```
+  </Step>
+
+  <Step title="Reload Shell">
+    Apply the changes:
+
+    ```bash
+    source ~/.zshrc
+    ```
+  </Step>
+
+  <Step title="Verify Theme">
+    Start a conversation to see the theme in action:
+
+    ```bash
+    : hello
+    ```
+
+    You should see AI context information in your right prompt.
+  </Step>
+</Steps>
+
+## Theme Components
+
+The theme displays information in your right prompt (RPROMPT):
+
+```
+┌─[user@hostname] ~/project
+└─❯                                    🤖 agent-name • gpt-4 • 1.2K tokens • $0.05
+```
+
+### Information Display
+
+- **Agent Name**: Current active agent (if any)
+- **Model**: AI model being used
+- **Token Count**: Total tokens in conversation
+- **Cost**: Estimated cost in your configured currency
+- **Icons**: Nerd Font icons (when supported)
+
+## Configuration
+
+Customize the theme using environment variables:
+
+### Currency Settings
+
+```bash
+# Set currency symbol (default: $)
+export FORGE_CURRENCY_SYMBOL="€"
+
+# Set conversion rate from USD (default: 1.0)
+export FORGE_CURRENCY_CONVERSION_RATE="0.85"
+```
+
+### Font Settings
+
+```bash
+# Enable/disable Nerd Font icons
+export NERD_FONT="1"  # Enable
+export NERD_FONT="0"  # Disable
+
+# Alternative variable name
+export USE_NERD_FONT="true"  # Enable
+export USE_NERD_FONT="false"  # Disable
+```
+
+### Complete Configuration Example
+
+```bash ~/.zshrc
+# Forge Theme Configuration
+export FORGE_CURRENCY_SYMBOL="£"
+export FORGE_CURRENCY_CONVERSION_RATE="0.79"
+export NERD_FONT="1"
+
+# Load Forge theme
+eval "$(forge zsh theme)"
+```
+
+## Theme Implementation
+
+The theme is implemented as a single function that queries Forge for prompt information:
+
+```bash
+# Enable prompt substitution
+setopt PROMPT_SUBST
+
+# Get AI context from Forge
+function _forge_prompt_info() {
+    local forge_bin="${_FORGE_BIN:-${FORGE_BIN:-forge}}"
+    
+    # Get fully formatted prompt from forge
+    _FORGE_CONVERSATION_ID=$_FORGE_CONVERSATION_ID \
+      _FORGE_ACTIVE_AGENT=$_FORGE_ACTIVE_AGENT \
+      "$forge_bin" zsh rprompt
+}
+
+# Set right prompt
+RPROMPT='$(_forge_prompt_info)'"${RPROMPT:+ ${RPROMPT}}"
+```
+
+### Performance Optimization
+
+The theme is designed for minimal performance impact:
+
+- Single command execution per prompt
+- Fully formatted output from Rust (no shell string manipulation)
+- Cached conversation state
+- Fast binary execution (under 60ms)
+
+## Integration with Existing Themes
+
+### Oh My Zsh Themes
+
+The Forge theme works alongside Oh My Zsh themes:
+
+```bash ~/.zshrc
+# Oh My Zsh configuration
+ZSH_THEME="robbyrussell"  # or any theme
+
+source $ZSH/oh-my-zsh.sh
+
+# Load Forge theme (appends to RPROMPT)
+eval "$(forge zsh theme)"
+```
+
+### Powerlevel10k
+
+For Powerlevel10k users, the Forge theme appends to the right prompt:
+
+```bash ~/.zshrc
+# Powerlevel10k initialization
+source ~/powerlevel10k/powerlevel10k.zsh-theme
+
+# Forge theme adds AI context to right prompt
+eval "$(forge zsh theme)"
+```
+
+### Starship
+
+If using Starship, you can still use the Forge theme:
+
+```bash ~/.zshrc
+# Starship initialization
+eval "$(starship init zsh)"
+
+# Forge theme provides RPROMPT (Starship uses PROMPT)
+eval "$(forge zsh theme)"
+```
+
+### Pure Prompt
+
+The theme works with Pure and other async prompts:
+
+```bash ~/.zshrc
+# Pure prompt
+autoload -U promptinit; promptinit
+prompt pure
+
+# Forge theme on right side
+eval "$(forge zsh theme)"
+```
+
+## Customizing Display
+
+The theme output is controlled by the Forge CLI. You can influence what's displayed through configuration:
+
+### Show/Hide Elements
+
+```bash
+# The theme respects your Forge configuration
+# Edit ~/.config/forge/config.yaml to customize display preferences
+```
+
+### Custom Formatting
+
+The theme uses Forge's internal formatting, which includes:
+
+- ANSI color codes for styling
+- Icon rendering based on terminal capabilities
+- Automatic truncation for long values
+- Responsive width adjustment
+
+## Nerd Font Icons
+
+### Automatic Detection
+
+The theme automatically detects Nerd Font support by checking:
+
+1. `NERD_FONT` environment variable
+2. `USE_NERD_FONT` environment variable
+3. Terminal font capabilities
+4. Common terminal emulators known to support Nerd Fonts
+
+### Supported Icons
+
+When Nerd Fonts are available:
+
+- 🤖 Robot icon for agents
+- 💬 Chat bubble for conversations
+- 📊 Chart for token usage
+- 💵 Money bag for costs
+- 🔧 Wrench for system operations
+
+### Fallback Display
+
+Without Nerd Fonts, the theme uses:
+
+- Text labels (Agent:, Model:, Tokens:)
+- ASCII symbols
+- Plain text formatting
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Theme not showing">
+    Verify prompt substitution is enabled:
+
+    ```bash
+    setopt PROMPT_SUBST
+    ```
+
+    Check if theme is loaded:
+
+    ```bash
+    echo $_FORGE_THEME_LOADED
+    # Should output: 1
+    ```
+  </Accordion>
+
+  <Accordion title="Icons not displaying">
+    Install a Nerd Font and configure your terminal:
+
+    ```bash
+    # macOS with Homebrew
+    brew tap homebrew/cask-fonts
+    brew install --cask font-hack-nerd-font
+
+    # Then set your terminal to use the font
+    ```
+
+    Or disable icon display:
+
+    ```bash
+    export NERD_FONT="0"
+    ```
+  </Accordion>
+
+  <Accordion title="Slow prompt rendering">
+    Check Forge CLI performance:
+
+    ```bash
+    time forge zsh rprompt
+    ```
+
+    Should complete in under 60ms. If slower, check:
+    - Disk I/O performance
+    - Forge configuration file size
+    - System resource usage
+  </Accordion>
+
+  <Accordion title="Prompt conflicts with existing theme">
+    The Forge theme appends to RPROMPT. If you have conflicts:
+
+    ```bash
+    # Manually set order
+    RPROMPT='$(_forge_prompt_info) ${RPROMPT}'
+    ```
+
+    Or isolate the theme:
+
+    ```bash
+    # Only show Forge info
+    RPROMPT='$(_forge_prompt_info)'
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Performance Benchmarks
+
+The theme is optimized for performance:
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Theme render | &lt;60ms | Single Rust binary call |
+| RPROMPT update | ~50ms | Includes formatting |
+| No active conversation | ~10ms | Fast path for empty state |
+
+Performance is verified in CI using benchmark tests (see `.github/workflows/ci.yml:57`).
+
+## Examples
+
+### Minimal Setup
+
+```bash ~/.zshrc
+# Minimal Forge theme
+eval "$(forge zsh theme)"
+```
+
+### Full Setup with Customization
+
+```bash ~/.zshrc
+# Forge theme with custom settings
+export FORGE_CURRENCY_SYMBOL="€"
+export FORGE_CURRENCY_CONVERSION_RATE="0.85"
+export NERD_FONT="1"
+export FORGE_BIN="$HOME/.local/bin/forge"
+
+# Load theme
+eval "$(forge zsh theme)"
+```
+
+### Oh My Zsh Integration
+
+```bash ~/.zshrc
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="agnoster"
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
+source $ZSH/oh-my-zsh.sh
+
+# Forge plugin and theme
+eval "$(forge zsh plugin)"
+eval "$(forge zsh theme)"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="ZSH Plugin" icon="plug" href="/integration/zsh-plugin">
+    Install the complete ZSH plugin
+  </Card>
+  <Card title="Shell Completions" icon="terminal" href="/integration/shell-completions">
+    Set up shell completions
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Configure Forge settings
+  </Card>
+  <Card title="Customization" icon="paintbrush" href="/configuration/customization">
+    Customize Forge appearance
+  </Card>
+</CardGroup>

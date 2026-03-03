@@ -1,0 +1,546 @@
+---
+title: Model Context Protocol (MCP)
+description: Learn how to integrate external tools and services using MCP
+---
+
+# Model Context Protocol (MCP)
+
+Forge implements the Model Context Protocol (MCP), enabling AI agents to communicate with external tools and services. MCP provides a standardized way to extend Forge's capabilities beyond built-in tools.
+
+## What is MCP?
+
+MCP is an open protocol that allows AI agents to:
+
+- **Connect to external services** - Databases, APIs, cloud services
+- **Use specialized tools** - Browser automation, file systems, development tools
+- **Access custom integrations** - Your internal tools and services
+- **Maintain standardized interfaces** - Consistent communication patterns
+
+Forge's implementation follows [Anthropic's MCP specification](https://docs.anthropic.com/en/docs/claude-code/tutorials#set-up-model-context-protocol-mcp).
+
+## MCP Server Types
+
+Forge supports two types of MCP servers:
+
+### STDIO Servers
+
+Process-based servers that communicate via standard input/output:
+
+```rust
+pub struct McpStdioServer {
+    pub command: String,              // Command to execute
+    pub args: Vec<String>,            // Command arguments
+    pub env: BTreeMap<String, String>, // Environment variables
+    pub disable: bool,                // Temporarily disable
+}
+```
+
+### HTTP Servers
+
+Network-based servers using HTTP/SSE:
+
+```rust
+pub struct McpHttpServer {
+    pub url: String,                   // Server URL
+    pub headers: BTreeMap<String, String>, // HTTP headers
+    pub disable: bool,                 // Temporarily disable
+}
+```
+
+## Configuration
+
+MCP servers are configured in `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/files"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer {{.env.GITHUB_TOKEN}}",
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}
+```
+
+<Note>
+Forge looks for `.mcp.json` in two locations: project-local (`./.mcp.json`) and user-global (`~/.mcp.json`). Local configuration takes precedence.
+</Note>
+
+## Managing MCP Servers
+
+Use the Forge CLI to manage MCP servers:
+
+### List Servers
+
+```bash
+forge mcp list
+```
+
+Shows all configured MCP servers with their types and status.
+
+### Add Server
+
+Interactive mode:
+
+```bash
+forge mcp add
+```
+
+JSON mode:
+
+```bash
+forge mcp add-json
+```
+
+### Get Server Details
+
+```bash
+forge mcp get <server-name>
+```
+
+### Remove Server
+
+```bash
+forge mcp remove <server-name>
+```
+
+<Warning>
+Removing an MCP server immediately affects any agents or workflows that depend on its tools. Update your configurations accordingly.
+</Warning>
+
+## STDIO Server Example
+
+Create a custom filesystem server:
+
+```json
+{
+  "mcpServers": {
+    "my-files": {
+      "command": "node",
+      "args": ["server.js"],
+      "env": {
+        "BASE_PATH": "/home/user/projects",
+        "READ_ONLY": "false"
+      }
+    }
+  }
+}
+```
+
+The server process communicates via stdin/stdout:
+
+```javascript
+// server.js
+const { McpServer } = require('@modelcontextprotocol/sdk');
+
+const server = new McpServer({
+  name: 'my-files',
+  version: '1.0.0',
+});
+
+server.tool('read_file', async ({ path }) => {
+  const content = await fs.readFile(path, 'utf-8');
+  return { content };
+});
+
+server.listen();
+```
+
+## HTTP Server Example
+
+Connect to a web-based MCP server:
+
+```json
+{
+  "mcpServers": {
+    "database": {
+      "url": "https://mcp.example.com/events",
+      "headers": {
+        "Authorization": "Bearer {{.env.DB_API_KEY}}",
+        "X-Client-ID": "forge"
+      }
+    }
+  }
+}
+```
+
+Forge auto-detects HTTP vs SSE transport based on the server's response.
+
+<Info>
+HTTP servers are useful for cloud-hosted MCP services or when you need centralized tool management across multiple clients.
+</Info>
+
+## Environment Variables in Headers
+
+MCP HTTP headers support Mustache templates for environment variables:
+
+```json
+{
+  "headers": {
+    "Authorization": "Bearer {{.env.API_TOKEN}}",
+    "X-User-ID": "{{.env.USER_ID}}",
+    "X-Project": "{{.env.PROJECT_NAME}}"
+  }
+}
+```
+
+Forge resolves these at runtime from your environment.
+
+## Disabling Servers
+
+Temporarily disable servers without removing configuration:
+
+```json
+{
+  "mcpServers": {
+    "slow-service": {
+      "url": "https://slow.example.com/mcp",
+      "disable": true
+    }
+  }
+}
+```
+
+Disabled servers are ignored but remain in configuration for easy re-enabling.
+
+## Server Discovery
+
+Forge automatically discovers tools from MCP servers:
+
+1. **Connection** - Forge connects to configured servers on startup
+2. **Tool Discovery** - Servers expose available tools via MCP protocol
+3. **Registration** - Tools are added to the agent's tool catalog
+4. **Invocation** - Agents can call MCP tools like built-in tools
+
+## Configuration Scope
+
+MCP configurations can be scoped:
+
+### Local Configuration
+
+Project-specific servers in `./.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "project-db": {
+      "command": "npm",
+      "args": ["run", "mcp-server"]
+    }
+  }
+}
+```
+
+### User Configuration
+
+Global servers in `~/.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "personal-tools": {
+      "url": "https://my-tools.example.com/mcp"
+    }
+  }
+}
+```
+
+<Note>
+Local configuration takes precedence over user configuration. Use local for project-specific tools and user for personal utilities.
+</Note>
+
+## Cache Management
+
+Forge caches MCP server configurations:
+
+```rust
+impl McpConfig {
+    pub fn cache_key(&self) -> u64 {
+        // Deterministic hash of configuration
+        // Changes invalidate the cache
+    }
+}
+```
+
+The cache key is computed from:
+- Server names
+- Server types (STDIO/HTTP)
+- Commands and arguments
+- URLs and headers
+
+Changing any configuration invalidates the cache and triggers reconnection.
+
+## Use Cases
+
+### Browser Automation
+
+```json
+{
+  "mcpServers": {
+    "browser": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
+```
+
+Enables agents to control web browsers for testing and automation.
+
+### Database Access
+
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "mcp-server-postgres",
+      "env": {
+        "DATABASE_URL": "{{.env.DATABASE_URL}}"
+      }
+    }
+  }
+}
+```
+
+Gives agents SQL query capabilities.
+
+### External APIs
+
+```json
+{
+  "mcpServers": {
+    "stripe": {
+      "url": "https://mcp-stripe.example.com/events",
+      "headers": {
+        "Authorization": "Bearer {{.env.STRIPE_KEY}}"
+      }
+    }
+  }
+}
+```
+
+Integrates with payment processing and other services.
+
+### Custom Internal Tools
+
+```json
+{
+  "mcpServers": {
+    "company-tools": {
+      "url": "https://internal.company.com/mcp",
+      "headers": {
+        "X-Auth-Token": "{{.env.INTERNAL_TOKEN}}"
+      }
+    }
+  }
+}
+```
+
+Connects to your organization's internal tooling.
+
+## Security Considerations
+
+### Principle of Least Privilege
+
+Only grant necessary access:
+
+```json
+{
+  "mcpServers": {
+    "readonly-db": {
+      "command": "mcp-db-server",
+      "env": {
+        "READONLY": "true",
+        "ALLOWED_TABLES": "users,posts"
+      }
+    }
+  }
+}
+```
+
+### Environment Variables
+
+Never hardcode secrets:
+
+❌ Bad:
+```json
+{
+  "headers": {
+    "Authorization": "Bearer sk-1234567890abcdef"
+  }
+}
+```
+
+✅ Good:
+```json
+{
+  "headers": {
+    "Authorization": "Bearer {{.env.API_KEY}}"
+  }
+}
+```
+
+### Validate External Servers
+
+Before adding external MCP servers:
+
+1. Verify the server source
+2. Review the tools it exposes
+3. Understand what data it can access
+4. Check for security updates
+
+<Warning>
+MCP servers run with your user's permissions. Only configure servers from trusted sources.
+</Warning>
+
+## Multi-Agent Workflows with MCP
+
+MCP tools are available to all agents in a workflow:
+
+```yaml
+# forge.yaml
+tool_supported: true  # Enable MCP tools
+```
+
+Agents automatically discover and use MCP tools:
+
+```
+> Use the browser tool to test the login flow
+
+[Agent uses MCP browser server to automate testing]
+```
+
+## Troubleshooting
+
+### Server Won't Start
+
+Check the command and arguments:
+
+```bash
+# Test the command manually
+node server.js
+```
+
+### Connection Timeouts
+
+For HTTP servers, verify the URL:
+
+```bash
+curl https://mcp-server.example.com/health
+```
+
+### Tool Not Found
+
+Verify the server is running:
+
+```bash
+forge mcp list
+# Check for "connected" status
+```
+
+### Environment Variables Not Resolving
+
+Check variable names and syntax:
+
+```bash
+# Verify environment variable exists
+echo $API_KEY
+
+# Correct template syntax
+"Authorization": "Bearer {{.env.API_KEY}}"
+```
+
+## Best Practices
+
+### Document Your MCP Servers
+
+Maintain documentation for team servers:
+
+```markdown
+# MCP Servers
+
+## project-db
+- Purpose: Development database access
+- Tools: query, migrate, seed
+- Configuration: Local .mcp.json
+```
+
+### Version Your Configuration
+
+Commit `.mcp.json` to version control:
+
+```bash
+git add .mcp.json
+git commit -m "Add MCP database server configuration"
+```
+
+### Test Servers in Isolation
+
+Validate MCP servers before integration:
+
+```bash
+# Test the server directly
+node server.js
+# Then test with Forge
+forge -p "List available tools"
+```
+
+### Monitor Server Health
+
+Implement health checks for HTTP servers:
+
+```javascript
+server.get('/health', (req, res) => {
+  res.json({ status: 'healthy', version: '1.0.0' });
+});
+```
+
+### Use Descriptive Names
+
+Name servers clearly:
+
+✅ Good:
+- `production-db`
+- `staging-api`
+- `browser-automation`
+
+❌ Bad:
+- `server1`
+- `test`
+- `thing`
+
+<Accordion title="FAQ">
+  <AccordionItem title="Can I use multiple MCP servers simultaneously?">
+    Yes! Forge connects to all configured servers and makes their tools available to agents. Agents can use tools from different servers in the same conversation.
+  </AccordionItem>
+  
+  <AccordionItem title="How do I create a custom MCP server?">
+    Use the official MCP SDK for your language (Node.js, Python, etc.). Implement the MCP protocol, expose your tools, and configure Forge to connect. See the MCP specification for details.
+  </AccordionItem>
+  
+  <AccordionItem title="What happens if an MCP server crashes?">
+    Forge detects server disconnections and reports errors. For STDIO servers, Forge can attempt to restart them. For HTTP servers, tools become unavailable until the server is restored.
+  </AccordionItem>
+  
+  <AccordionItem title="Can MCP servers access my local filesystem?">
+    Only if you explicitly grant access. STDIO servers run with your user permissions, so they can access files you can access. Use environment variables to restrict paths.
+  </AccordionItem>
+  
+  <AccordionItem title="Are MCP tools slower than built-in tools?">
+    MCP tools have additional overhead from IPC or network communication. However, this is usually negligible compared to the tool's actual work. HTTP servers may have higher latency than STDIO servers.
+  </AccordionItem>
+  
+  <AccordionItem title="Can I share MCP configurations across my team?">
+    Yes! Commit `.mcp.json` to your repository. Team members need to set up their own credentials via environment variables, but the server configuration can be shared.
+  </AccordionItem>
+</Accordion>

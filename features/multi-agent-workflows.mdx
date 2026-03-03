@@ -1,0 +1,653 @@
+---
+title: Multi-Agent Workflows
+description: Orchestrate specialized AI agents for complex, collaborative problem-solving
+icon: users
+---
+
+Multi-agent workflows enable you to leverage specialized agents working together on complex tasks. Each agent brings domain expertise, and Forge orchestrates their collaboration to solve problems that require multiple perspectives and skill sets.
+
+## Overview
+
+Forge supports multiple specialized agents:
+
+- **Forge (default)** - General-purpose coding agent
+- **Sage** - Code analysis and architecture expert
+- **Muse** - Strategic planning and design thinking
+- **Planner** - Task breakdown and project management
+- **Custom agents** - Define your own specialized agents
+
+<Card title="Multi-Agent Advantage" icon="sparkles">
+  Complex tasks often require different types of thinking: strategic planning, detailed implementation, code review, and testing. Multi-agent workflows let you tap into the right expertise at each stage.
+</Card>
+
+## Agent Basics
+
+### Switching Agents
+
+<Tabs>
+  <Tab title="Interactive Mode">
+    ```bash
+    forge
+    > /agent sage
+    # Now using Sage agent
+    
+    > Explain the authentication architecture
+    ```
+  </Tab>
+  
+  <Tab title="Shell Plugin">
+    ```bash
+    # Specify agent in command
+    :sage Explain how caching works
+    
+    # Switch agent mid-conversation
+    : /agent muse
+    : Design a new feature architecture
+    ```
+  </Tab>
+  
+  <Tab title="Direct Command">
+    ```bash
+    # Use specific agent from CLI
+    forge -p "Explain authentication" --agent sage
+    ```
+  </Tab>
+</Tabs>
+
+### Available Agents
+
+<AccordionGroup>
+  <Accordion title="Forge (Default)" icon="hammer">
+    **Best for:** General coding, debugging, implementation
+    
+    **Capabilities:**
+    - Code generation and modification
+    - Bug fixing and debugging
+    - Test writing
+    - Documentation creation
+    - File operations
+    
+    **Use when:** You need hands-on coding assistance
+    
+    ```bash
+    : Implement a user authentication system
+    : Debug this error in @[src/parser.rs]
+    : Add unit tests for the new feature
+    ```
+  </Accordion>
+  
+  <Accordion title="Sage" icon="book-open">
+    **Best for:** Code analysis, architecture review, deep understanding
+    
+    **Capabilities:**
+    - Architecture analysis
+    - Code quality assessment
+    - Design pattern identification
+    - System understanding
+    - Best practices guidance
+    
+    **Use when:** You need to understand complex systems
+    
+    ```bash
+    :sage Explain the authentication flow in this codebase
+    :sage Review this architecture for scalability issues
+    :sage What design patterns are used in @[src/core/]
+    ```
+  </Accordion>
+  
+  <Accordion title="Muse" icon="lightbulb">
+    **Best for:** Strategic planning, design thinking, innovation
+    
+    **Capabilities:**
+    - Feature design and planning
+    - System architecture proposals
+    - Technology recommendations
+    - Impact assessment
+    - Strategic decision-making
+    
+    **Use when:** You're planning new features or major changes
+    
+    ```bash
+    :muse Design a caching strategy for this API
+    :muse How should we approach multi-tenancy?
+    :muse Evaluate database options for our use case
+    ```
+  </Accordion>
+  
+  <Accordion title="Planner" icon="list-check">
+    **Best for:** Task breakdown, project management, milestone planning
+    
+    **Capabilities:**
+    - Breaking down large tasks
+    - Creating implementation plans
+    - Estimating complexity
+    - Identifying dependencies
+    - Milestone definition
+    
+    **Use when:** You need to organize complex projects
+    
+    ```bash
+    :planner Break down building a REST API into tasks
+    :planner Create implementation plan for authentication
+    :planner What's the dependency graph for this feature?
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Multi-Agent Workflows
+
+### Sequential Agent Flow
+
+Use different agents for different stages:
+
+<Steps>
+  <Step title="Planning with Muse">
+    ```bash
+    :muse Design a new caching layer for the application
+    ```
+    
+    **Output:** Architecture proposal, technology choices, design patterns
+  </Step>
+  
+  <Step title="Task Breakdown with Planner">
+    ```bash
+    : /agent planner
+    : Break down the caching layer implementation into tasks
+    ```
+    
+    **Output:** Ordered task list with dependencies
+  </Step>
+  
+  <Step title="Implementation with Forge">
+    ```bash
+    : /agent forge
+    : Implement the cache interface from the plan
+    ```
+    
+    **Output:** Code implementation with tests
+  </Step>
+  
+  <Step title="Review with Sage">
+    ```bash
+    : /agent sage
+    : Review the caching implementation for issues
+    ```
+    
+    **Output:** Code review, improvement suggestions
+  </Step>
+</Steps>
+
+### Parallel Agent Consultation
+
+Get multiple perspectives on the same problem:
+
+```bash
+# Start with general exploration
+: Analyze the authentication system
+
+# Get architectural perspective
+: /agent sage
+: What are the security implications?
+
+# Get strategic perspective  
+: /agent muse
+: How can we improve this for scale?
+
+# Back to implementation
+: /agent forge
+: Implement the security improvements
+```
+
+### Iterative Refinement
+
+Refine solutions through agent collaboration:
+
+```bash
+# Initial design
+:muse Design an API rate limiting system
+
+# Get implementation plan
+: /agent planner
+: Create a step-by-step implementation plan
+
+# Review feasibility
+: /agent sage
+: Analyze this plan for potential issues
+
+# Adjust design based on review
+: /agent muse
+: Revise the design addressing those concerns
+
+# Implement refined design
+: /agent forge
+: Implement the revised rate limiting system
+```
+
+## Creating Custom Agents
+
+Define specialized agents for your team's needs:
+
+### Agent Definition File
+
+Create agents in your project or globally:
+
+```yaml
+# .forge/agents/security-expert.yaml
+id: security-expert
+title: Security Expert
+description: Specialized in security analysis and vulnerability detection
+
+system_prompt: |
+  You are a security expert specializing in application security.
+  Focus on:
+  - Identifying security vulnerabilities
+  - Suggesting security best practices
+  - Analyzing authentication and authorization
+  - Reviewing cryptographic implementations
+  - Detecting common security pitfalls
+  
+  Provide actionable security recommendations with severity levels.
+
+tools:
+  - fs_search
+  - sem_search
+  - read
+  - bash
+
+max_turns: 20
+temperature: 0.3  # Lower temperature for focused security analysis
+```
+
+### Agent Configuration Options
+
+<CodeGroup>
+  ```yaml Basic Agent
+  id: reviewer
+  title: Code Reviewer
+  description: Reviews code for quality and best practices
+  
+  system_prompt: |
+    You are a code reviewer focusing on:
+    - Code quality and readability
+    - Performance optimization
+    - Best practices adherence
+  ```
+  
+  ```yaml Advanced Agent
+  id: performance-expert
+  title: Performance Expert
+  description: Optimizes code for performance
+  
+  system_prompt: |
+    You specialize in performance optimization.
+    Analyze code for bottlenecks and suggest improvements.
+  
+  tools:
+    - sem_search
+    - read
+    - bash
+    - web_fetch
+  
+  max_turns: 25
+  temperature: 0.4
+  max_tokens: 8000
+  
+  custom_rules: |
+    - Always benchmark suggestions
+    - Prioritize algorithmic improvements
+    - Consider memory vs CPU trade-offs
+  ```
+  
+  ```yaml Domain-Specific Agent
+  id: database-expert
+  title: Database Expert
+  description: Database schema and query optimization
+  
+  system_prompt: |
+    You are a database expert specializing in:
+    - Schema design and normalization
+    - Query optimization
+    - Index strategy
+    - Transaction management
+    - Database-specific features
+  
+  tools:
+    - sem_search
+    - read
+    - write
+    - bash
+  
+  provider: anthropic
+  model: claude-3.7-sonnet
+  temperature: 0.5
+  ```
+</CodeGroup>
+
+### Agent Properties
+
+| Property | Description | Default |
+|----------|-------------|--------|
+| `id` | Unique agent identifier | Required |
+| `title` | Display name | Same as id |
+| `description` | Agent purpose | None |
+| `system_prompt` | Instructions for agent behavior | Default prompt |
+| `tools` | Available tools for agent | All tools |
+| `max_turns` | Maximum conversation turns | 50 |
+| `temperature` | Model creativity (0.0-2.0) | 0.7 |
+| `max_tokens` | Maximum response length | Model default |
+| `provider` | AI provider to use | Config default |
+| `model` | Specific model to use | Config default |
+| `custom_rules` | Additional constraints | None |
+
+## Workflow Patterns
+
+### Research → Plan → Build
+
+```bash
+# Phase 1: Research
+:sage Analyze current authentication implementation
+:sage What are the limitations and issues?
+
+# Phase 2: Design
+: /agent muse
+: Design an improved authentication system
+: addressing the identified issues
+
+# Phase 3: Planning
+: /agent planner
+: Break down the authentication redesign
+: into implementable tasks
+
+# Phase 4: Implementation
+: /agent forge
+: Implement task 1 from the plan
+```
+
+### Explore → Understand → Modify
+
+```bash
+# Explore codebase
+:sync  # Index for semantic search
+:sage Map out the user management system
+
+# Deep understanding
+:sage Explain how user sessions work
+:sage What security measures are in place?
+
+# Make changes
+: /agent forge
+: Add rate limiting to login endpoint
+: following the existing patterns
+```
+
+### Design → Validate → Refine
+
+```bash
+# Initial design
+:muse Design a notification system
+
+# Validate feasibility
+: /agent sage
+: Review this design for potential issues
+: in our current architecture
+
+# Refine based on feedback
+: /agent muse
+: Adjust the design addressing those concerns
+
+# Implementation planning
+: /agent planner
+: Create implementation roadmap
+```
+
+## Advanced Techniques
+
+### Context Preservation
+
+Maintain context across agent switches:
+
+```bash
+# Build context
+:sage Analyze the payment processing flow
+
+# Switch agent, context preserved
+: /agent muse
+: Based on the analysis, how can we improve reliability?
+# Muse has access to Sage's analysis
+
+: /agent forge
+: Implement the suggested improvements
+# Forge has access to both previous conversations
+```
+
+### Agent-Specific Tools
+
+Some agents may have specialized tool access:
+
+```yaml
+# Security agent with limited tools
+id: security-auditor
+tools:
+  - sem_search  # Find security-related code
+  - read        # Read files for analysis
+  - grep        # Search for patterns
+  # Deliberately no 'write' or 'edit' - analysis only
+```
+
+### Workflow Files
+
+Create reusable multi-agent workflows:
+
+```yaml
+# .forge/workflows/feature-development.yaml
+name: Feature Development Workflow
+description: End-to-end feature development
+
+steps:
+  - agent: muse
+    prompt: Design the feature architecture
+    
+  - agent: planner
+    prompt: Break down into implementation tasks
+    
+  - agent: forge
+    prompt: Implement the feature
+    
+  - agent: sage
+    prompt: Review for quality and security
+```
+
+Execute workflow:
+
+```bash
+forge --workflow .forge/workflows/feature-development.yaml \
+      --event "Build user profile feature"
+```
+
+## Best Practices
+
+<Steps>
+  <Step title="Choose the Right Agent">
+    Match agent expertise to task type:
+    
+    - **Understanding** → Sage
+    - **Planning** → Muse or Planner
+    - **Implementation** → Forge
+    - **Review** → Sage
+    - **Strategy** → Muse
+  </Step>
+  
+  <Step title="Build Context Early">
+    Let agents understand the system first:
+    
+    ```bash
+    # Good: Build context
+    :sage Understand the auth system
+    : /agent forge
+    : Now modify the login handler
+    
+    # Bad: Dive in blind
+    : Modify the login handler
+    ```
+  </Step>
+  
+  <Step title="Use Sequential Flow">
+    Follow natural development stages:
+    
+    Plan → Implement → Review → Refine
+    
+    Not: Implement → Plan → Review
+  </Step>
+  
+  <Step title="Leverage Specialization">
+    Use agents for their strengths:
+    
+    ```bash
+    # Good
+    :muse What's the best architecture?
+    :forge Implement it
+    
+    # Less optimal
+    :forge Design and implement architecture
+    ```
+  </Step>
+</Steps>
+
+## Performance Considerations
+
+### Agent Model Selection
+
+Different agents can use different models:
+
+```yaml
+# Planning agent with fast model
+id: quick-planner
+model: claude-3-haiku
+temperature: 0.5
+
+# Analysis agent with powerful model
+id: deep-analyzer  
+model: claude-3.7-sonnet
+temperature: 0.3
+```
+
+### Tool Optimization
+
+Limit tools for focused agents:
+
+```yaml
+# Read-only analysis agent (faster)
+id: code-analyzer
+tools:
+  - sem_search
+  - read
+  - grep
+
+# Full-featured implementation agent
+id: developer
+tools:
+  - sem_search
+  - read
+  - write
+  - edit
+  - bash
+  - git
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not found">
+    - List available agents: `forge agent list`
+    - Check agent file exists in `.forge/agents/`
+    - Verify YAML syntax is valid
+    - Reload Forge to pick up new agents
+  </Accordion>
+  
+  <Accordion title="Context lost between agents">
+    - Verify conversation continuity with `:info`
+    - Don't use `:new` when switching agents
+    - Use `/agent` command within same session
+    - Check conversation ID remains consistent
+  </Accordion>
+  
+  <Accordion title="Agent behavior unexpected">
+    - Review agent's `system_prompt`
+    - Check `temperature` setting (lower = more focused)
+    - Verify `custom_rules` don't conflict
+    - Test with default agent for comparison
+  </Accordion>
+</AccordionGroup>
+
+## Examples
+
+### Building a New Feature
+
+```bash
+# Start with strategic thinking
+:new
+:muse I need to add real-time notifications
+:muse What's the best approach for WebSockets vs SSE?
+
+# Get implementation plan
+: /agent planner
+: Create a detailed implementation plan
+
+# Implement core functionality
+: /agent forge
+: Implement the WebSocket server
+
+# Review and improve
+: /agent sage
+: Review for scalability and error handling
+
+# Iterate
+: /agent forge
+: Apply the suggested improvements
+```
+
+### Debugging Complex Issues
+
+```bash
+# Understand the system
+:sage Explain how the payment flow works @[src/payments/]
+
+# Investigate issue
+:sage Why might transactions fail intermittently?
+
+# Design solution
+: /agent muse
+: Design a robust retry mechanism
+
+# Implement fix
+: /agent forge
+: Implement the retry logic with exponential backoff
+```
+
+### Refactoring Legacy Code
+
+```bash
+# Analyze current state
+:sage Analyze the legacy user module @[src/legacy/user.rs]
+:sage What are the main issues?
+
+# Design modern approach
+: /agent muse
+: Design a modern replacement architecture
+
+# Plan migration
+: /agent planner
+: Create a step-by-step refactoring plan
+: that maintains backward compatibility
+
+# Execute refactoring
+: /agent forge
+: Start with step 1 of the refactoring plan
+```
+
+## Related Features
+
+- [Custom Commands](/features/custom-commands) - Automate multi-agent workflows
+- [Semantic Search](/features/semantic-search) - Help agents understand codebases
+- [Shell Integration](/features/shell-integration) - Quick agent switching
+- [Git Operations](/features/git-operations) - Collaborative git workflows

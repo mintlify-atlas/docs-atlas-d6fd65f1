@@ -1,0 +1,215 @@
+---
+title: forge
+description: Main Forge command and global flags
+---
+
+The `forge` command is the main entry point for the Forge CLI. When run without arguments, it starts an interactive AI-enhanced terminal session.
+
+## Usage
+
+```bash
+forge [FLAGS] [OPTIONS] [SUBCOMMAND]
+```
+
+## Interactive Mode
+
+Start an interactive session:
+
+```bash
+forge
+```
+
+The session starts in interactive mode when no prompt, piped input, or subcommand is provided.
+
+## Global Flags
+
+<ParamField path="--prompt" type="string" default="none">
+  Direct prompt to process without entering interactive mode. When provided, executes a single command and exits.
+  
+  Alias: `-p`
+  
+  ```bash
+  forge -p "List all files in the current directory"
+  forge --prompt "Explain this error message"
+  ```
+  
+  Supports prompts with leading hyphens:
+  ```bash
+  forge -p "- hi"
+  forge -p "--something"
+  ```
+</ParamField>
+
+<ParamField path="--conversation" type="path" default="none">
+  Path to a JSON file containing the conversation to execute.
+  
+  ```bash
+  forge --conversation ./conversation.json
+  ```
+</ParamField>
+
+<ParamField path="--conversation-id" type="uuid" default="none">
+  Conversation ID to use for this session. When provided, resumes or continues an existing conversation instead of generating a new ID.
+  
+  Alias: `--cid`
+  
+  ```bash
+  forge --cid 550e8400-e29b-41d4-a716-446655440000
+  forge --conversation-id 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--directory" type="path" default="none">
+  Working directory to use before starting the session. When provided, changes to this directory before starting forge.
+  
+  Alias: `-C`
+  
+  ```bash
+  forge -C ~/projects/myapp
+  forge --directory /path/to/project
+  ```
+</ParamField>
+
+<ParamField path="--sandbox" type="string" default="none">
+  Name for an isolated git worktree to create for experimentation.
+  
+  ```bash
+  forge --sandbox experiment-1
+  ```
+</ParamField>
+
+<ParamField path="--verbose" type="boolean" default="false">
+  Enable verbose logging output.
+  
+  ```bash
+  forge --verbose
+  ```
+</ParamField>
+
+<ParamField path="--restricted" type="boolean" default="false">
+  Use restricted shell (rbash) for enhanced security.
+  
+  Alias: `-r`
+  
+  ```bash
+  forge -r
+  forge --restricted
+  ```
+</ParamField>
+
+<ParamField path="--agent" type="string" default="none">
+  Agent ID to use for this session.
+  
+  Alias: `--aid`
+  
+  ```bash
+  forge --agent sage
+  forge --aid muse
+  ```
+</ParamField>
+
+<ParamField path="--model" type="string" default="none">
+  Override the model to use for this session. This is a runtime override and does not change the permanent configuration.
+  
+  ```bash
+  forge --model anthropic/claude-sonnet-4
+  forge --model openai/gpt-4
+  ```
+</ParamField>
+
+<ParamField path="--provider" type="string" default="none">
+  Override the provider to use for this session. This is a runtime override and does not change the permanent configuration.
+  
+  ```bash
+  forge --provider OpenAI
+  forge --provider Anthropic
+  ```
+</ParamField>
+
+<ParamField path="--workflow" type="path" default="none">
+  Path to a file containing the workflow to execute.
+  
+  Alias: `-w`
+  
+  ```bash
+  forge -w ./workflow.yaml
+  forge --workflow /path/to/workflow.yaml
+  ```
+</ParamField>
+
+<ParamField path="--event" type="json" default="none">
+  Event to dispatch to the workflow in JSON format.
+  
+  Alias: `-e`
+  
+  ```bash
+  forge -w workflow.yaml -e '{"type": "start", "data": {}}'
+  ```
+</ParamField>
+
+## Examples
+
+### One-Shot Commands
+
+Execute a single command without interactive mode:
+
+```bash
+forge -p "What are the recent changes in this repo?"
+```
+
+### Piped Input
+
+Pipe content to forge:
+
+```bash
+cat error.log | forge
+echo "Explain this code" | forge
+```
+
+### Resume Conversation
+
+Continue an existing conversation:
+
+```bash
+forge --cid 550e8400-e29b-41d4-a716-446655440000
+```
+
+### Change Directory
+
+Start forge in a specific directory:
+
+```bash
+forge -C ~/projects/webapp -p "Show me the main entry point"
+```
+
+### Use Specific Agent
+
+Start with a specific agent:
+
+```bash
+forge --agent sage
+forge --aid muse -p "Help me write documentation"
+```
+
+### Override Model
+
+Use a different model for this session:
+
+```bash
+forge --model anthropic/claude-sonnet-4
+```
+
+## Output
+
+Forge provides rich terminal output with:
+
+- Syntax-highlighted code blocks
+- Markdown rendering
+- Progress indicators for long-running operations
+- Interactive prompts and menus
+
+## Exit Codes
+
+- `0` - Successful execution
+- `1` - General error
+- `2` - Command line parsing error

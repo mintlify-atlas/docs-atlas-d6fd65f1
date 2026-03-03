@@ -1,0 +1,234 @@
+---
+title: forge config
+description: Get, set, or list configuration values
+---
+
+The `config` command group manages Forge configuration settings including default model, provider, and other preferences.
+
+## Usage
+
+```bash
+forge config [SUBCOMMAND] [OPTIONS]
+```
+
+## Subcommands
+
+### set
+
+Set a configuration value.
+
+```bash
+forge config set <FIELD> <VALUE>
+```
+
+<ParamField path="field" type="enum" required>
+  Configuration field to set. Available fields:
+  - `model` - The active model
+  - `provider` - The active provider
+  
+  ```bash
+  forge config set model anthropic/claude-sonnet-4
+  forge config set provider OpenAI
+  ```
+</ParamField>
+
+<ParamField path="value" type="string" required>
+  Value to set for the configuration field.
+  
+  ```bash
+  forge config set model anthropic/claude-sonnet-4
+  forge config set provider OpenAI
+  ```
+</ParamField>
+
+### get
+
+Get a configuration value.
+
+```bash
+forge config get <FIELD>
+```
+
+<ParamField path="field" type="enum" required>
+  Configuration field to get. Available fields:
+  - `model` - The active model
+  - `provider` - The active provider
+  
+  ```bash
+  forge config get model
+  forge config get provider
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge config get model --porcelain
+  ```
+</ParamField>
+
+### list
+
+List all configuration values.
+
+```bash
+forge config list
+```
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge config list --porcelain
+  ```
+</ParamField>
+
+## Examples
+
+### Set Default Model
+
+```bash
+forge config set model anthropic/claude-sonnet-4
+```
+
+Example output:
+
+```
+✓ Configuration updated
+  model: anthropic/claude-sonnet-4
+```
+
+### Set Default Provider
+
+```bash
+forge config set provider OpenAI
+```
+
+Example output:
+
+```
+✓ Configuration updated
+  provider: OpenAI
+```
+
+### Get Current Model
+
+```bash
+forge config get model
+```
+
+Example output:
+
+```
+Model: anthropic/claude-sonnet-4
+```
+
+### List All Configuration
+
+```bash
+forge config list
+```
+
+Example output:
+
+```
+Forge Configuration:
+
+  model:    anthropic/claude-sonnet-4
+  provider: OpenAI
+```
+
+### Machine-Readable Output
+
+Get configuration in JSON format:
+
+```bash
+forge config list --porcelain
+```
+
+Example output:
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4",
+  "provider": "OpenAI"
+}
+```
+
+Get single field:
+
+```bash
+forge config get model --porcelain
+```
+
+Example output:
+
+```
+anthropic/claude-sonnet-4
+```
+
+## Alternative Commands
+
+You can also use the `list` command:
+
+```bash
+forge list config
+forge list configs
+```
+
+## Configuration Fields
+
+### model
+
+The default AI model to use for conversations. Format: `provider/model-name`
+
+```bash
+forge config set model anthropic/claude-sonnet-4
+forge config set model openai/gpt-4
+forge config set model google/gemini-pro
+```
+
+### provider
+
+The default API provider to use.
+
+```bash
+forge config set provider OpenAI
+forge config set provider Anthropic
+forge config set provider Google
+```
+
+## Runtime Overrides
+
+Configuration values can be overridden for a single session:
+
+```bash
+forge --model anthropic/claude-sonnet-4 -p "Hello"
+forge --provider OpenAI -p "Test"
+```
+
+These overrides don't change the permanent configuration.
+
+## Configuration File
+
+Configuration is stored in:
+
+- **User config**: `~/.config/forge/config.toml`
+- **Local config**: `./.forge/config.toml`
+
+Local configuration takes precedence over user configuration.
+
+## Related Commands
+
+- `forge info` - View current configuration and environment
+- `forge list model` - List available models
+- `forge list provider` - List available providers
+- `forge --model <MODEL>` - Override model for a session
+- `forge --provider <PROVIDER>` - Override provider for a session
+
+## Notes
+
+- Configuration changes take effect immediately
+- Use runtime overrides (`--model`, `--provider`) for temporary changes
+- Configuration is stored per-user and can be project-specific

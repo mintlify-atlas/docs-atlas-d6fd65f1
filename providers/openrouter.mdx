@@ -1,0 +1,145 @@
+---
+title: OpenRouter Setup
+description: Configure OpenRouter to access multiple AI models through a single API
+---
+
+OpenRouter provides a unified API to access models from multiple providers including OpenAI, Anthropic, Google, Meta, and more. It's an excellent choice for flexibility and model variety.
+
+## Why Use OpenRouter?
+
+- **Multiple Models**: Access GPT-4, Claude, Gemini, Llama, and dozens of other models
+- **Single API Key**: One key for all models
+- **Cost Effective**: Pay only for what you use
+- **No Subscriptions**: No monthly fees required
+- **Model Routing**: Automatically route to the best available model
+
+## Setup Steps
+
+<Steps>
+  <Step title="Get Your API Key">
+    1. Visit [OpenRouter](https://openrouter.ai/)
+    2. Sign up or log in to your account
+    3. Navigate to the [API Keys](https://openrouter.ai/keys) page
+    4. Create a new API key
+    5. Copy your API key (starts with `sk-or-v1-...`)
+  </Step>
+
+  <Step title="Configure Forge">
+    Run the interactive login command:
+    ```bash
+    forge provider login
+    ```
+    
+    Select **OpenRouter** from the list and paste your API key when prompted.
+  </Step>
+
+  <Step title="Select a Model">
+    OpenRouter supports many models. Popular choices include:
+    
+    - `anthropic/claude-sonnet-4-20250514` - Latest Claude Sonnet
+    - `openai/gpt-4o` - GPT-4 Omni
+    - `google/gemini-2.5-pro` - Gemini Pro
+    - `meta-llama/llama-3.3-70b-instruct` - Llama 3.3
+    
+    Set your default model in `forge.yaml`:
+    ```yaml
+    model: anthropic/claude-sonnet-4-20250514
+    ```
+  </Step>
+
+  <Step title="Verify Connection">
+    Start Forge and test your setup:
+    ```bash
+    forge
+    ```
+    
+    Try a simple prompt:
+    ```
+    > Hello! Can you confirm this is working?
+    ```
+  </Step>
+</Steps>
+
+## Available Models
+
+OpenRouter provides access to hundreds of models. To see all available models:
+
+```bash
+forge
+# Then in the Forge session:
+/model
+```
+
+Or visit the [OpenRouter Models](https://openrouter.ai/models) page.
+
+## Configuration
+
+### API Endpoint
+
+- **Chat Completions**: `https://openrouter.ai/api/v1/chat/completions`
+- **Models List**: `https://openrouter.ai/api/v1/models`
+
+### Authentication
+
+OpenRouter uses API key authentication via the `Authorization` header.
+
+## Advanced Features
+
+### Model Selection
+
+You can switch between models at any time using the `/model` command:
+
+```
+/model openai/gpt-4o
+```
+
+### Cost Tracking
+
+OpenRouter provides detailed usage and cost information in your dashboard. You can:
+- Monitor spending in real-time
+- Set spending limits
+- View usage by model
+
+## Troubleshooting
+
+### Invalid API Key
+
+If you see an authentication error:
+1. Verify your API key is correct
+2. Check that the key starts with `sk-or-v1-`
+3. Ensure you've added credits to your OpenRouter account
+
+### Model Not Available
+
+Some models require additional setup or credits:
+1. Check the [OpenRouter Models](https://openrouter.ai/models) page
+2. Ensure the model supports the features you need
+3. Verify you have sufficient credits
+
+### Rate Limits
+
+OpenRouter has rate limits that vary by model and plan:
+- Check your current limits in the dashboard
+- Consider upgrading your plan for higher limits
+- Implement retry logic for production use
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility, you can still use:
+
+```bash
+# .env
+OPENROUTER_API_KEY=sk-or-v1-your-api-key
+```
+
+This will be automatically migrated to file-based storage on first run.
+
+## Next Steps
+
+- Explore [available models](https://openrouter.ai/models)
+- Learn about [cost optimization](https://openrouter.ai/docs/limits)
+- Set up [custom providers](/providers/custom-providers) for additional flexibility

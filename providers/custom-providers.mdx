@@ -1,0 +1,403 @@
+---
+title: Custom Provider Configuration  
+description: Configure custom OpenAI-compatible and Anthropic-compatible providers
+---
+
+Forge supports any AI provider that implements OpenAI-compatible or Anthropic-compatible APIs. This includes commercial services, open-source models, and local inference engines.
+
+## Overview
+
+Custom providers allow you to:
+- Use alternative AI services
+- Run models locally
+- Connect to self-hosted endpoints
+- Access specialized model providers
+- Integrate with enterprise AI platforms
+
+## OpenAI-Compatible Providers
+
+Many services implement the OpenAI Chat Completions API format. Forge can work with any such service.
+
+### Setup Steps
+
+<Steps>
+  <Step title="Get Provider Details">
+    Collect from your provider:
+    - API base URL (e.g., `https://api.example.com/v1`)
+    - API key or authentication token
+    - Available model names
+  </Step>
+
+  <Step title="Configure in Forge">
+    ```bash
+    forge provider login
+    ```
+    
+    Select **OpenAI-Compatible** and provide:
+    - **OPENAI_URL**: Your provider's base URL
+    - **API Key**: Your authentication key
+  </Step>
+
+  <Step title="Set Model">
+    Configure your model in `forge.yaml`:
+    ```yaml
+    model: your-model-name
+    ```
+  </Step>
+
+  <Step title="Test Connection">
+    ```bash
+    forge
+    ```
+    
+    Try a simple prompt to verify it works.
+  </Step>
+</Steps>
+
+### Supported Services
+
+Popular OpenAI-compatible services:
+
+#### Cloud Services
+- **Groq** - Ultra-fast inference
+- **Together AI** - Open model hosting
+- **Fireworks AI** - Production inference
+- **Anyscale Endpoints** - Ray-powered serving
+
+#### Local Inference
+- **Ollama** - Easy local deployment
+- **LM Studio** - Desktop GUI for local models
+- **llama.cpp** - C++ inference engine
+- **vLLM** - Fast LLM serving
+- **Jan AI** - Privacy-focused desktop app
+
+### Example: Groq
+
+[Groq](https://groq.com) provides ultra-fast inference:
+
+```bash
+forge provider login
+# Select: OpenAI-Compatible
+# OPENAI_URL: https://api.groq.com/openai/v1
+# API Key: gsk_your_groq_api_key
+```
+
+```yaml
+# forge.yaml
+model: deepseek-r1-distill-llama-70b
+```
+
+### Example: Ollama
+
+[Ollama](https://ollama.ai) runs models locally:
+
+1. Install and start Ollama:
+   ```bash
+   # Pull a model
+   ollama pull llama3.2
+   ```
+
+2. Configure Forge:
+   ```bash
+   forge provider login
+   # Select: OpenAI-Compatible
+   # OPENAI_URL: http://localhost:11434/v1
+   # API Key: (leave empty or use "ollama")
+   ```
+
+3. Set model:
+   ```yaml
+   # forge.yaml
+   model: llama3.2
+   ```
+
+### Example: LM Studio
+
+[LM Studio](https://lmstudio.ai) provides a desktop GUI:
+
+1. Download and start LM Studio
+2. Load a model in the GUI
+3. Start the local server (default port: 1234)
+4. Configure Forge:
+   ```bash
+   forge provider login
+   # Select: OpenAI-Compatible
+   # OPENAI_URL: http://localhost:1234/v1
+   # API Key: lm-studio
+   ```
+
+## Anthropic-Compatible Providers
+
+Some services implement Anthropic's Messages API format.
+
+### Setup Steps
+
+<Steps>
+  <Step title="Get Provider Details">
+    Collect:
+    - API base URL
+    - API key
+    - Model names
+  </Step>
+
+  <Step title="Configure in Forge">
+    ```bash
+    forge provider login
+    ```
+    
+    Select **Anthropic-Compatible** and provide:
+    - **ANTHROPIC_URL**: Provider base URL
+    - **API Key**: Authentication key
+  </Step>
+
+  <Step title="Set Model">
+    ```yaml
+    # forge.yaml
+    model: provider-model-name
+    ```
+  </Step>
+</Steps>
+
+## Advanced Configuration
+
+### Multiple Custom Providers
+
+You can configure multiple custom providers by creating a `provider.json` file:
+
+```json
+[
+  {
+    "id": "my_custom_provider",
+    "api_key_vars": "MY_PROVIDER_API_KEY",
+    "url_param_vars": ["MY_PROVIDER_URL"],
+    "response_type": "OpenAI",
+    "url": "{{MY_PROVIDER_URL}}/chat/completions",
+    "models": "{{MY_PROVIDER_URL}}/models",
+    "auth_methods": ["api_key"]
+  }
+]
+```
+
+Place this file at:
+- `~/.config/forge/provider.json` (user-wide)
+- `./provider.json` (project-specific)
+
+### Custom Model Definitions
+
+Define model metadata for custom providers:
+
+```json
+[
+  {
+    "id": "my_provider",
+    "api_key_vars": "MY_API_KEY",
+    "url": "https://api.example.com/v1/chat/completions",
+    "response_type": "OpenAI",
+    "models": [
+      {
+        "id": "my-model-1",
+        "name": "My Custom Model",
+        "description": "A custom model for specific tasks",
+        "context_length": 8192,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "input_modalities": ["text"]
+      }
+    ],
+    "auth_methods": ["api_key"]
+  }
+]
+```
+
+## Local Model Configuration
+
+### Ollama (Detailed)
+
+Complete Ollama setup:
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull models
+ollama pull llama3.2
+ollama pull codellama
+ollama pull mistral
+
+# Verify running
+ollama list
+```
+
+Configure in Forge:
+```bash
+forge provider login
+# OPENAI_URL: http://localhost:11434/v1
+# API Key: ollama
+```
+
+### llama.cpp Server
+
+Run llama.cpp server:
+
+```bash
+# Download llama.cpp
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+
+# Download a model (GGUF format)
+# Run server
+./server -m path/to/model.gguf -c 2048 --host 0.0.0.0 --port 8080
+```
+
+Configure in Forge:
+```bash
+forge provider login
+# OPENAI_URL: http://localhost:8080/v1
+# API Key: (empty or any value)
+```
+
+### vLLM
+
+Deploy vLLM server:
+
+```bash
+# Install vLLM
+pip install vllm
+
+# Start server
+python -m vllm.entrypoints.openai.api_server \
+  --model meta-llama/Llama-2-7b-chat-hf \
+  --port 8000
+```
+
+Configure in Forge:
+```bash
+forge provider login  
+# OPENAI_URL: http://localhost:8000/v1
+# API Key: (empty or any value)
+```
+
+## Troubleshooting
+
+### Connection Refused
+
+If Forge can't connect:
+1. Verify the server is running
+2. Check the URL and port are correct
+3. Ensure no firewall blocking
+4. Test with curl:
+   ```bash
+   curl http://localhost:11434/v1/models
+   ```
+
+### Invalid Model Name
+
+If model not found:
+1. List available models:
+   ```bash
+   # Ollama
+   ollama list
+   
+   # Generic OpenAI-compatible
+   curl http://localhost:8080/v1/models
+   ```
+2. Verify spelling in `forge.yaml`
+3. Check model is loaded/running
+
+### Unsupported Features
+
+Some providers may not support:
+- Tool calling / function calling
+- Parallel tool execution
+- Streaming responses
+- Vision/multimodal input
+
+Check provider documentation for feature support.
+
+### Authentication Errors
+
+If authentication fails:
+1. Verify API key is correct
+2. Check if key is required (some local servers don't need keys)
+3. Try with and without the key
+4. Check provider-specific auth format
+
+### Performance Issues
+
+For slow local inference:
+1. Use GPU acceleration if available
+2. Reduce context length
+3. Use quantized models (e.g., GGUF Q4)
+4. Increase server worker threads
+5. Consider cloud providers for production
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility:
+
+```bash
+# .env
+OPENAI_API_KEY=your-api-key
+OPENAI_URL=https://api.provider.com/v1
+```
+
+or
+
+```bash
+# .env  
+ANTHROPIC_API_KEY=your-api-key
+ANTHROPIC_URL=https://api.provider.com
+```
+
+## Best Practices
+
+### Security
+
+<Warning>
+  Never expose local inference servers to the internet without authentication.
+</Warning>
+
+- Use authentication even for local servers
+- Keep API keys in secure storage
+- Use HTTPS in production
+- Implement rate limiting
+
+### Performance
+
+**Local Inference**:
+- Use GPU when available (CUDA, Metal, ROCm)
+- Choose appropriate quantization (Q4, Q5, Q8)
+- Tune context length to your needs
+- Monitor memory usage
+
+**Cloud Services**:
+- Choose providers near your location
+- Monitor response times
+- Implement caching when possible
+- Use streaming for long responses
+
+### Cost Management
+
+**Local Models**:
+- Free inference (after hardware cost)
+- Pay only for electricity
+- No rate limits
+- Full privacy
+
+**Cloud Providers**:
+- Compare per-token pricing
+- Monitor usage carefully  
+- Set spending limits
+- Use cheaper models when appropriate
+
+## Next Steps
+
+- Explore [Ollama models](https://ollama.ai/library)
+- Try [Groq](https://groq.com) for fast inference
+- Set up [monitoring](/configuration/monitoring) for your custom provider
+- Configure [retry logic](/configuration/retry-config) for reliability

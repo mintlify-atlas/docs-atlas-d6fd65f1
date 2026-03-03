@@ -1,0 +1,417 @@
+---
+title: Multi-Agent Workflows
+description: Learn how to orchestrate multiple agents for complex tasks
+---
+
+# Multi-Agent Workflows
+
+Forge's workflow system enables you to orchestrate multiple specialized agents working together to accomplish complex tasks. Workflows define the configuration, agents, and coordination patterns for collaborative AI problem-solving.
+
+## What is a Workflow?
+
+A workflow in Forge is a configuration that specifies:
+
+- **Global settings** - Shared configuration for all agents
+- **Custom commands** - Shortcuts for common operations
+- **Update settings** - How Forge checks for updates
+- **Template paths** - Where to find custom prompt templates
+
+## Workflow Configuration
+
+Workflows are typically defined in `forge.yaml` at your project root:
+
+```yaml
+# Global model settings
+temperature: 0.7
+max_tokens: 4000
+tool_supported: true
+
+# Custom rules applied to all agents
+custom_rules: |
+  1. Always add comprehensive error handling
+  2. Follow the project's naming conventions
+  3. Write tests for new functionality
+
+# Custom commands
+commands:
+  - name: "review"
+    description: "Review code for quality and security"
+    prompt: "Review this code and provide detailed feedback"
+  
+  - name: "optimize"
+    description: "Optimize code for performance"
+    prompt: "Analyze and optimize this code for better performance"
+
+# Context compaction for all agents
+compact:
+  token_threshold: 100000
+  retention_window: 10
+  eviction_window: 0.5
+
+# Turn limits
+max_tool_failure_per_turn: 3
+max_requests_per_turn: 50
+
+# Update configuration
+updates:
+  auto_update: false
+  frequency: weekly  # daily, weekly, or always
+```
+
+## Loading Workflows
+
+You can load a workflow file explicitly:
+
+```bash
+forge -w path/to/workflow.yaml
+```
+
+Or place `forge.yaml` in your project root for automatic detection.
+
+## Global Configuration
+
+### Model Parameters
+
+Set default model parameters for all agents:
+
+```yaml
+temperature: 0.7    # Creativity level (0.0-2.0)
+top_p: 0.9         # Nucleus sampling (0.0-1.0)
+top_k: 50          # Token selection diversity (1-1000)
+max_tokens: 4000   # Maximum response length (1-100000)
+```
+
+<Note>
+Individual agents can override workflow-level settings. Agent-specific configuration takes precedence.
+</Note>
+
+### Tool Support
+
+Enable or disable tools globally:
+
+```yaml
+tool_supported: true  # Enable tools for all agents
+```
+
+You can override this per-agent:
+
+```yaml
+agents:
+  - id: read-only-agent
+    tool_supported: false  # This agent cannot use tools
+```
+
+### Safety Limits
+
+Prevent runaway executions:
+
+```yaml
+max_tool_failure_per_turn: 3   # Stop after 3 failed tool calls
+max_requests_per_turn: 50      # Stop after 50 API requests
+```
+
+<Warning>
+Setting these limits too high can result in excessive API usage and costs. Setting them too low may prevent agents from completing complex tasks.
+</Warning>
+
+## Custom Commands
+
+Define reusable commands for your team:
+
+```yaml
+commands:
+  - name: "refactor"
+    description: "Refactor code for better maintainability"
+    prompt: |
+      Refactor this code to:
+      1. Improve readability
+      2. Reduce complexity
+      3. Enhance maintainability
+      4. Follow SOLID principles
+  
+  - name: "security"
+    description: "Security audit of code"
+    prompt: |
+      Perform a security audit checking for:
+      - SQL injection vulnerabilities
+      - XSS vulnerabilities
+      - Authentication/authorization issues
+      - Sensitive data exposure
+      - Dependency vulnerabilities
+  
+  - name: "test"
+    description: "Generate comprehensive tests"
+    prompt: |
+      Generate unit tests that cover:
+      - Happy path scenarios
+      - Edge cases
+      - Error conditions
+      - Boundary values
+```
+
+Use commands in interactive mode:
+
+```bash
+forge
+> /refactor src/utils/parser.ts
+```
+
+## Event-Driven Workflows
+
+Trigger workflows based on events:
+
+```bash
+forge -w workflow.yaml -e build-failed
+```
+
+This allows integration with CI/CD pipelines and git hooks.
+
+## Template Configuration
+
+Specify custom template locations:
+
+```yaml
+templates: "prompts/**/*.md"  # Glob pattern for template files
+```
+
+Templates let you create reusable prompt components:
+
+```markdown
+<!-- prompts/code-review.md -->
+Review the following code for:
+- Code quality
+- Performance
+- Security
+- Best practices
+
+Code to review:
+{{code}}
+```
+
+## Multi-Agent Patterns
+
+### Sequential Workflow
+
+Agents work one after another:
+
+1. **Analyzer** - Understands the problem
+2. **Implementer** - Writes the code
+3. **Tester** - Generates tests
+4. **Reviewer** - Reviews and refines
+
+### Parallel Workflow
+
+Multiple agents work simultaneously:
+
+- **Backend Agent** - Builds API endpoints
+- **Frontend Agent** - Creates UI components  
+- **Database Agent** - Designs schema
+
+### Hierarchical Workflow
+
+A coordinator agent delegates to specialists:
+
+```
+       [Coordinator]
+            |
+    +-------+-------+
+    |       |       |
+[Backend] [UI] [Tests]
+```
+
+## Context Compaction
+
+Manage conversation length across all agents:
+
+```yaml
+compact:
+  # Trigger compaction when any threshold is met
+  token_threshold: 100000      # Total tokens
+  message_threshold: 100       # Number of messages
+  turn_threshold: 50          # Conversation turns
+  
+  # Compaction behavior
+  retention_window: 10        # Always keep last N messages
+  eviction_window: 0.5        # Compact up to 50% of history
+  
+  # Use cheaper model for summarization
+  model: claude-3-haiku
+  
+  # Extract content from specific tags when summarizing
+  summary_tag: "summary"
+  
+  # Compact when user turn ends
+  on_turn_end: true
+```
+
+<Info>
+Compaction preserves important context while reducing token usage. It's essential for long-running workflows or extensive codebases.
+</Info>
+
+## Update Management
+
+Control how Forge checks for updates:
+
+```yaml
+updates:
+  auto_update: false
+  frequency: weekly  # Options: daily, weekly, always
+```
+
+- **daily** - Check once per day
+- **weekly** - Check once per week  
+- **always** - Check on every execution
+
+## Workflow Schema
+
+Forge validates workflows against a JSON schema. The schema is available at:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workflow",
+  "type": "object",
+  "properties": {
+    "commands": { ... },
+    "custom_rules": { ... },
+    "temperature": { ... },
+    "max_tokens": { ... },
+    "tool_supported": { ... },
+    "compact": { ... }
+  }
+}
+```
+
+This enables IDE autocomplete and validation when editing `forge.yaml`.
+
+## Real-World Example
+
+Here's a complete workflow for a web application:
+
+```yaml
+# forge.yaml
+temperature: 0.7
+max_tokens: 4000
+tool_supported: true
+
+custom_rules: |
+  1. Follow React best practices
+  2. Use TypeScript for type safety
+  3. Write Jest tests for all components
+  4. Use CSS modules for styling
+  5. Follow accessibility guidelines
+
+commands:
+  - name: "component"
+    description: "Create a new React component"
+    prompt: |
+      Create a new React component with:
+      - TypeScript types
+      - Proper prop validation
+      - Jest tests
+      - CSS module for styling
+      - Accessibility attributes
+  
+  - name: "api"
+    description: "Create an API endpoint"
+    prompt: |
+      Create an API endpoint with:
+      - Input validation
+      - Error handling
+      - Database queries
+      - TypeScript types
+      - Integration tests
+  
+  - name: "refactor"
+    description: "Refactor for better code quality"
+    prompt: "Refactor this code following our project conventions"
+
+compact:
+  token_threshold: 80000
+  retention_window: 15
+  model: claude-3-haiku
+
+max_tool_failure_per_turn: 3
+max_requests_per_turn: 40
+```
+
+## Best Practices
+
+### Start Simple
+
+Begin with basic configuration and add complexity as needed:
+
+```yaml
+# Start here
+temperature: 0.7
+custom_rules: |
+  Follow project conventions
+
+# Add more as you learn what you need
+```
+
+### Document Your Commands
+
+Good command descriptions help your team:
+
+```yaml
+commands:
+  - name: "security-check"
+    description: "Run security audit: OWASP Top 10, dependency scan, secret detection"
+    prompt: "..."
+```
+
+### Version Control Your Workflows
+
+Commit `forge.yaml` to your repository:
+
+```bash
+git add forge.yaml
+git commit -m "Add Forge workflow configuration"
+```
+
+This ensures consistency across your team.
+
+### Set Appropriate Limits
+
+Balance capability with safety:
+
+```yaml
+# Development environment - higher limits
+max_requests_per_turn: 50
+
+# Production scripts - conservative limits
+max_requests_per_turn: 20
+```
+
+### Use Templates for Consistency
+
+Create templates for common patterns:
+
+```yaml
+templates: "team-prompts/**/*.md"
+```
+
+This standardizes how your team interacts with AI.
+
+<Accordion title="FAQ">
+  <AccordionItem title="Can I have multiple workflow files?">
+    Yes! You can specify different workflow files for different purposes and load them with `-w workflow.yaml`. This is useful for having separate development, testing, and production workflows.
+  </AccordionItem>
+  
+  <AccordionItem title="How do workflow settings merge with agent settings?">
+    Agent settings take precedence over workflow settings. Workflow settings provide defaults that agents inherit unless they specify their own values.
+  </AccordionItem>
+  
+  <AccordionItem title="Can workflows call other workflows?">
+    Currently, workflows cannot directly call other workflows. However, you can use custom commands to achieve similar functionality or chain workflow executions in scripts.
+  </AccordionItem>
+  
+  <AccordionItem title="What happens when compaction is triggered?">
+    When compaction triggers, Forge summarizes older messages in the conversation using the specified model. Recent messages (within retention_window) are preserved as-is. This reduces token count while maintaining context.
+  </AccordionItem>
+  
+  <AccordionItem title="How do I share workflows across projects?">
+    You can create a shared workflow file and symlink it in each project, or use a git submodule to share workflow configurations. Another approach is to maintain organization-wide templates in a separate repository.
+  </AccordionItem>
+</Accordion>

@@ -1,0 +1,231 @@
+---
+title: Anthropic/Claude Setup
+description: Configure Anthropic's Claude models for advanced reasoning and coding tasks
+---
+
+Anthropic's Claude models are known for their advanced reasoning capabilities, long context windows, and excellent performance on coding tasks. Forge supports both direct Anthropic API access and Claude Code integration.
+
+## Available Models
+
+Anthropic offers several Claude model families:
+
+### Claude 4 Series (Latest)
+- **claude-sonnet-4-20250514** - Balanced performance and speed
+- **claude-opus-4-20250514** - Most capable for complex tasks
+- **claude-opus-4-1-20250805** - Enhanced reasoning capabilities
+- **claude-opus-4-5-20251101** - Latest flagship with advanced analysis
+- **claude-haiku-4-5-20251001** - Fast and efficient
+
+### Claude 3 Series
+- **claude-3-7-sonnet-20250219** - Enhanced third generation
+- **claude-3-5-haiku-20241022** - Fast and efficient
+- **claude-3-haiku-20240307** - Quick responses
+
+All Claude 4 models support:
+- 200K context window
+- Tool calling and parallel tool execution
+- Extended thinking/reasoning
+- Vision (text + image input)
+
+## Setup Methods
+
+Forge supports two ways to use Claude:
+
+### 1. Direct API Access (Recommended)
+
+<Steps>
+  <Step title="Get Your API Key">
+    1. Visit [Anthropic Console](https://console.anthropic.com/)
+    2. Sign up or log in to your account
+    3. Navigate to API Keys section
+    4. Create a new API key
+    5. Copy your API key (starts with `sk-ant-...`)
+  </Step>
+
+  <Step title="Configure Forge">
+    Run the interactive login command:
+    ```bash
+    forge provider login
+    ```
+    
+    Select **Anthropic** from the list and paste your API key when prompted.
+  </Step>
+
+  <Step title="Select a Model">
+    Set your default model in `forge.yaml`:
+    ```yaml
+    model: claude-sonnet-4-20250514
+    ```
+  </Step>
+
+  <Step title="Verify Connection">
+    Start Forge and test:
+    ```bash
+    forge
+    ```
+    
+    Try a prompt:
+    ```
+    > Explain how async/await works in Rust
+    ```
+  </Step>
+</Steps>
+
+### 2. Claude Code Integration
+
+Claude Code provides OAuth-based authentication for seamless integration with Anthropic's ecosystem.
+
+<Steps>
+  <Step title="Initiate OAuth Flow">
+    ```bash
+    forge provider login
+    ```
+    
+    Select **Claude Code** from the provider list.
+  </Step>
+
+  <Step title="Authorize Access">
+    Follow the prompts to:
+    1. Open the authorization URL in your browser
+    2. Log in to your Anthropic account
+    3. Grant Forge access to your Claude Code session
+  </Step>
+
+  <Step title="Complete Authentication">
+    Once authorized, Forge will automatically receive and store your access token.
+  </Step>
+</Steps>
+
+## Configuration
+
+### API Endpoint
+
+- **Messages API**: `https://api.anthropic.com/v1/messages`
+- **Models List**: `https://api.anthropic.com/v1/models`
+
+### Authentication
+
+Anthropic uses API key authentication via the `x-api-key` header or OAuth tokens for Claude Code.
+
+## Model Selection
+
+### Choosing the Right Model
+
+**For Coding and Agents**:
+- `claude-sonnet-4-20250514` - Best balance of speed and capability
+- `claude-opus-4-6` - Most intelligent for complex coding tasks
+
+**For Fast Responses**:
+- `claude-haiku-4-5-20251001` - Quick, efficient responses
+- `claude-3-5-haiku-20241022` - Fast third-generation model
+
+**For Maximum Capability**:
+- `claude-opus-4-5-20251101` - Enhanced reasoning and analysis
+- `claude-opus-4-1-20250805` - Advanced problem-solving
+
+### Switching Models
+
+Change models during a Forge session:
+
+```
+/model claude-opus-4-20250514
+```
+
+## Features
+
+### Extended Thinking
+
+Claude 4 models support extended thinking for complex reasoning tasks. The model will show its reasoning process before providing the final answer.
+
+### Vision Capabilities
+
+All Claude 4 models support both text and image inputs:
+- Analyze code screenshots
+- Process diagrams and charts
+- Review UI mockups
+- Examine error messages in images
+
+### Tool Calling
+
+Claude models excel at using tools:
+- File operations
+- Code execution
+- API calls
+- Multi-step workflows
+
+### Long Context
+
+With 200K context windows, Claude can:
+- Analyze entire codebases
+- Process long documents
+- Maintain conversation history
+- Work with large data files
+
+## Best Practices
+
+<Warning>
+  Claude API keys should be kept secure and never committed to version control.
+</Warning>
+
+### Rate Limits
+
+Be aware of rate limits:
+- **Requests per minute**: Varies by plan
+- **Tokens per minute**: Varies by plan and model
+- Check your [usage dashboard](https://console.anthropic.com/) for current limits
+
+### Cost Optimization
+
+- Use Haiku models for simple tasks
+- Use Sonnet for balanced performance
+- Reserve Opus for complex reasoning tasks
+- Monitor token usage in the console
+
+## Troubleshooting
+
+### Invalid API Key
+
+If authentication fails:
+1. Verify your API key starts with `sk-ant-`
+2. Check that the key is active in the console
+3. Ensure you have sufficient credits
+
+### Rate Limit Errors
+
+If you hit rate limits:
+1. Check your current limits in the console
+2. Implement exponential backoff
+3. Consider upgrading your plan
+4. Spread requests over time
+
+### Token Limit Exceeded
+
+If requests exceed token limits:
+1. Reduce context size
+2. Summarize previous conversation
+3. Split large requests into smaller chunks
+4. Use models with appropriate context windows
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility:
+
+```bash
+# .env
+ANTHROPIC_API_KEY=sk-ant-your-api-key
+```
+
+```yaml
+# forge.yaml
+model: claude-sonnet-4-20250514
+```
+
+## Next Steps
+
+- Learn about [Claude's capabilities](https://docs.anthropic.com/claude/docs)
+- Explore [prompt engineering](https://docs.anthropic.com/claude/docs/prompt-engineering)
+- Set up [custom rules](/configuration/custom-rules) for your projects

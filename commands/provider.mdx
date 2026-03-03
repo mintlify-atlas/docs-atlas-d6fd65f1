@@ -1,0 +1,222 @@
+---
+title: forge provider
+description: Manage API provider authentication and credentials
+---
+
+The `provider` command group manages authentication with AI API providers like OpenAI, Anthropic, and others.
+
+## Usage
+
+```bash
+forge provider [SUBCOMMAND] [OPTIONS]
+```
+
+## Subcommands
+
+### login
+
+Authenticate with an API provider. Shows an interactive menu when no provider name is specified.
+
+```bash
+forge provider login [PROVIDER]
+```
+
+<ParamField path="provider" type="string" default="none">
+  Provider name to authenticate with. If omitted, shows an interactive selection menu.
+  
+  ```bash
+  forge provider login OpenAI
+  forge provider login Anthropic
+  forge provider login           # Interactive menu
+  ```
+</ParamField>
+
+### logout
+
+Remove provider credentials. Shows an interactive menu when no provider name is specified.
+
+```bash
+forge provider logout [PROVIDER]
+```
+
+<ParamField path="provider" type="string" default="none">
+  Provider name to log out from. If omitted, shows an interactive selection menu.
+  
+  ```bash
+  forge provider logout OpenAI
+  forge provider logout          # Interactive menu
+  ```
+</ParamField>
+
+### list
+
+List all available API providers.
+
+```bash
+forge provider list [OPTIONS]
+```
+
+<ParamField path="--type" type="string[]" default="none">
+  Filter providers by type (e.g., `llm`, `context_engine`). Can be specified multiple times.
+  
+  Alias: `-t`
+  
+  ```bash
+  forge provider list --type llm
+  forge provider list -t llm -t context_engine
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge provider list --porcelain
+  ```
+</ParamField>
+
+## Examples
+
+### Interactive Login
+
+Start interactive provider selection:
+
+```bash
+forge provider login
+```
+
+Example output:
+
+```
+Select a provider to authenticate:
+
+  ❯ OpenAI
+    Anthropic
+    Google
+    Azure OpenAI
+```
+
+### Login to Specific Provider
+
+Authenticate with OpenAI:
+
+```bash
+forge provider login OpenAI
+```
+
+Example output:
+
+```
+Authenticate with OpenAI
+
+Enter your OpenAI API key: ••••••••••••••••••••
+✓ Successfully authenticated with OpenAI
+```
+
+### List All Providers
+
+```bash
+forge provider list
+```
+
+Example output:
+
+```
+Available Providers:
+
+LLM Providers:
+  ✓ OpenAI          - Authenticated
+  ✓ Anthropic       - Authenticated
+  ✗ Google          - Not authenticated
+  ✗ Azure OpenAI    - Not authenticated
+
+Context Engine Providers:
+  ✓ Voyage AI       - Authenticated
+  ✗ Cohere          - Not authenticated
+```
+
+### Filter by Provider Type
+
+List only LLM providers:
+
+```bash
+forge provider list --type llm
+```
+
+### Machine-Readable Output
+
+```bash
+forge provider list --porcelain
+```
+
+Example output:
+
+```json
+{
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "type": "llm",
+      "authenticated": true
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "type": "llm",
+      "authenticated": true
+    }
+  ]
+}
+```
+
+### Logout from Provider
+
+```bash
+forge provider logout OpenAI
+```
+
+Example output:
+
+```
+✓ Successfully logged out from OpenAI
+```
+
+## Alternative Command
+
+You can also use the `list` command:
+
+```bash
+forge list provider
+forge list providers
+forge list provider --type llm
+```
+
+## Provider Types
+
+Available provider types:
+
+- `llm` - Large Language Model providers (OpenAI, Anthropic, etc.)
+- `context_engine` - Embedding and semantic search providers (Voyage AI, Cohere, etc.)
+
+## Credential Storage
+
+Credentials are stored securely:
+
+- **macOS**: Keychain
+- **Linux**: Secret Service API (gnome-keyring, kwallet, etc.)
+- **Windows**: Windows Credential Manager
+
+Fallback to encrypted file storage if system keyring is unavailable.
+
+## Related Commands
+
+- `forge config set provider <ID>` - Set the default provider
+- `forge --provider <ID>` - Override provider for a session
+- `forge list model` - List available models for configured providers
+
+## Notes
+
+- Some providers require additional setup (e.g., Azure OpenAI requires endpoint configuration)
+- API keys are never displayed in plain text after initial entry
+- Use `--porcelain` flag for scripting and automation

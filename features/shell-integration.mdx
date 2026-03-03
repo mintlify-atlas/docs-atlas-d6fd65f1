@@ -1,0 +1,451 @@
+---
+title: Shell Integration
+description: Powerful ZSH plugin for seamless Forge integration in your terminal
+icon: code
+---
+
+The Forge ZSH plugin transforms your shell into an AI-enhanced development environment. Execute Forge commands naturally with `:` prefix syntax, tag files with `@[filename]`, and maintain conversation context across sessions.
+
+## Overview
+
+The shell integration provides:
+
+- **Smart command transformation** - Convert `:command` syntax into Forge executions
+- **File tagging** - Reference files with `@[filename]` and interactive selection
+- **Conversation continuity** - Automatic session management across commands
+- **Syntax highlighting** - Visual feedback for commands and tagged files
+- **Agent selection** - Tab completion for available agents
+- **Background syncing** - Automatic workspace indexing
+
+<Card title="Quick Start" icon="rocket">
+  ```bash
+  # Start a conversation
+  : What is the current time?
+  
+  # Use specific agent
+  :sage How does caching work in this system?
+  
+  # Tag files for context
+  : Review this code @[src/main.rs]
+  ```
+</Card>
+
+## Installation
+
+### Prerequisites
+
+Install required dependencies:
+
+<Tabs>
+  <Tab title="macOS (Homebrew)">
+    ```bash
+    brew install fzf fd
+    ```
+  </Tab>
+  
+  <Tab title="Ubuntu/Debian">
+    ```bash
+    sudo apt install fzf fd-find
+    ```
+  </Tab>
+  
+  <Tab title="Arch Linux">
+    ```bash
+    sudo pacman -S fzf fd
+    ```
+  </Tab>
+</Tabs>
+
+### Plugin Setup
+
+The plugin is automatically installed with Forge. Enable it in your `~/.zshrc`:
+
+```bash
+# Load Forge plugin
+source <(forge shell-init zsh)
+```
+
+Reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+## Core Features
+
+### Conversation Commands
+
+Start conversations with the `:` prefix:
+
+<CodeGroup>
+  ```bash Basic Prompt
+  : Explain how authentication works
+  ```
+  
+  ```bash With Agent
+  :sage What are the best practices for error handling?
+  ```
+  
+  ```bash Multi-line
+  : I need to refactor the user service
+  : to improve performance and readability
+  ```
+</CodeGroup>
+
+### Agent Selection
+
+Specify agents by name with tab completion:
+
+```bash
+# Type and press TAB for completion
+:sag<TAB>  # Completes to :sage
+:mus<TAB>  # Completes to :muse
+
+# Use agent for specialized tasks
+:sage How does caching work?
+:muse Create a deployment strategy
+:planner Break down this feature into tasks
+```
+
+<Tip>
+  Type `:` followed by partial agent name and press TAB to see all available agents.
+</Tip>
+
+### File Tagging
+
+Reference files in your commands:
+
+<Tabs>
+  <Tab title="Manual Tagging">
+    ```bash
+    : Review this implementation @[src/auth.rs]
+    : Explain the config @[config.yaml]
+    : Compare @[old.rs] with @[new.rs]
+    ```
+  </Tab>
+  
+  <Tab title="Interactive Selection">
+    ```bash
+    # Type @ and press TAB for fuzzy finder
+    : Review this code @<TAB>
+    
+    # Fuzzy search through your files
+    # Select with arrow keys and Enter
+    ```
+  </Tab>
+</Tabs>
+
+**File tagging features:**
+- Automatic context loading for referenced files
+- Multiple files in single command
+- Fuzzy finding with `fzf` integration
+- Syntax highlighting for tagged files (green bold)
+
+### Session Management
+
+<Tabs>
+  <Tab title="New Session">
+    Start fresh conversation:
+    
+    ```bash
+    :new
+    # or shorthand
+    :n
+    # With immediate prompt
+    :new Explain the architecture
+    ```
+    
+    This will:
+    - Clear current conversation context
+    - Show banner with helpful info
+    - Reset session state
+    - Display confirmation with timestamp
+  </Tab>
+  
+  <Tab title="Switch Conversations">
+    Browse and switch conversations:
+    
+    ```bash
+    # Interactive list with preview
+    :conversation
+    # or shorthand
+    :c
+    
+    # Switch to specific ID
+    :conversation abc123
+    
+    # Toggle to previous conversation (like cd -)
+    :conversation -
+    :c -
+    ```
+  </Tab>
+  
+  <Tab title="Clone Conversations">
+    Copy existing conversation:
+    
+    ```bash
+    # Interactive selection
+    :clone
+    
+    # Clone specific conversation
+    :clone abc123
+    ```
+    
+    Useful for:
+    - Creating backups before changes
+    - Starting new branches from context
+    - Experimenting with approaches
+  </Tab>
+</Tabs>
+
+### Workspace Operations
+
+<CodeGroup>
+  ```bash Sync Workspace
+  # Index current directory for semantic search
+  :sync
+  ```
+  
+  ```bash Environment Info
+  # View system and project information
+  :info
+  # or shorthand
+  :i
+  ```
+  
+  ```bash Diagnostics
+  # Run comprehensive environment check
+  :doctor
+  ```
+</CodeGroup>
+
+## Syntax Highlighting
+
+The plugin provides visual feedback:
+
+<Card title="Highlighting Legend" icon="palette">
+  - **Tagged Files** (`@[filename]`): Green bold
+  - **Agent Commands** (`:agent`): Yellow bold for agent name
+  - **Command Text**: White bold
+</Card>
+
+## Configuration
+
+Customize plugin behavior with environment variables:
+
+```bash
+# Custom forge binary location
+export FORGE_BIN="/path/to/custom/forge"
+
+# Editor for :edit command
+export FORGE_EDITOR="code"
+
+# Enable/disable automatic workspace sync (default: true)
+export FORGE_SYNC_ENABLED=true
+
+# Maximum diff size for commit messages in bytes (default: 100000)
+export FORGE_MAX_COMMIT_DIFF=100000
+
+# Currency display in theme
+export FORGE_CURRENCY_SYMBOL="$"
+export FORGE_CURRENCY_CONVERSION_RATE=1.0
+
+# Nerd Font support (default: auto-detected)
+export NERD_FONT=1  # or USE_NERD_FONT=1
+```
+
+## Theme Customization
+
+The Forge theme adds right-side prompt with agent and model info:
+
+```bash
+# Load theme in ~/.zshrc
+source <(forge shell-init zsh)
+```
+
+**Right prompt displays:**
+- Active agent name
+- Current model
+- Token count
+- Cost estimation
+
+**Theme features:**
+- Nerd Font icons (auto-detected)
+- Color-coded status
+- Real-time updates
+- Currency conversion
+
+## Advanced Features
+
+### Command History
+
+All transformed commands save to ZSH history:
+
+```bash
+# Navigate with arrow keys
+↑ : Review code @[src/main.rs]
+↓
+
+# Search with Ctrl+R
+^R semantic
+# Shows: : Explain semantic search implementation
+```
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| **Tab** | Interactive completion (files, agents) |
+| **Enter** | Transform and execute `:commands` |
+| **Ctrl+C** | Interrupt running Forge commands |
+| **Ctrl+R** | Search command history |
+| **↑/↓** | Navigate command history |
+
+### Background Operations
+
+The plugin handles background tasks:
+
+- **Auto-sync**: Periodic workspace indexing
+- **Update checks**: Notify about new Forge versions
+- **Conversation saving**: Automatic session persistence
+
+```bash
+# Control background sync
+export FORGE_SYNC_ENABLED=false  # Disable auto-sync
+```
+
+### Git Integration
+
+Shell plugin integrates with git workflows:
+
+```bash
+# Generate commit messages
+: Generate a commit message for staged changes
+
+# Review PR changes
+: Review the current branch changes
+
+# Resolve conflicts
+: Help me resolve git conflicts in @[src/app.rs]
+```
+
+See [Git Operations](/features/git-operations) for more details.
+
+## Diagnostics
+
+Run `:doctor` for comprehensive environment check:
+
+```bash
+:doctor
+```
+
+**Checks performed:**
+- ZSH version and terminal info
+- Forge installation and version
+- Plugin and theme loading status
+- Completions availability
+- Dependencies (fzf, fd, bat)
+- ZSH plugins (autosuggestions, syntax-highlighting)
+- Editor configuration
+- PATH setup
+- Nerd Font support
+
+## Usage Examples
+
+### Basic Workflow
+
+```bash
+# Start your day
+:new
+: What tasks are in my TODO comments?
+
+# Explore codebase
+:sync
+: Explain how authentication works
+
+# Make changes
+: Refactor the user service @[src/user.rs]
+
+# Review changes
+: Review my changes and suggest improvements
+```
+
+### Multi-File Analysis
+
+```bash
+# Compare implementations
+: Compare the error handling in @[api/v1.rs] and @[api/v2.rs]
+
+# Debug across files
+: Why is @[config.toml] not loading properly? Check @[src/config.rs]
+
+# Generate tests
+: Create unit tests for @[src/parser.rs] following patterns in @[tests/lexer_test.rs]
+```
+
+### Session Management
+
+```bash
+# Work on feature
+: Design the new caching system
+: Implement the cache layer
+
+# Switch to bug fix
+:new
+: Debug the authentication issue in @[src/auth.rs]
+
+# Return to feature
+:c -  # Toggle back to previous conversation
+
+# Later, resume specific conversation
+:c abc123
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Commands not transforming">
+    1. Verify plugin is loaded: `type _forge_line_init`
+    2. Check ZSH version: `zsh --version` (requires 5.0+)
+    3. Reload config: `source ~/.zshrc`
+    4. Look for errors in plugin loading
+  </Accordion>
+  
+  <Accordion title="File completion not working">
+    1. Install `fzf`: `brew install fzf` (or platform equivalent)
+    2. Install `fd`: `brew install fd`
+    3. Test fzf: `echo test | fzf`
+    4. Verify PATH includes fzf and fd
+  </Accordion>
+  
+  <Accordion title="Conversation context lost">
+    1. Check `_FORGE_CONVERSATION_ID` is set: `echo $_FORGE_CONVERSATION_ID`
+    2. Verify `.forge` directory exists in project
+    3. Don't mix `:new` with `:c` - they manage context differently
+    4. Use `:info` to see current conversation status
+  </Accordion>
+  
+  <Accordion title="Theme not showing">
+    1. Verify theme loaded: `echo $_FORGE_THEME_LOADED`
+    2. Check RPROMPT: `echo $RPROMPT`
+    3. Enable prompt substitution: `setopt PROMPT_SUBST`
+    4. Reload shell config
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+1. **Use `:sync` early** - Index workspace when entering new projects
+2. **Leverage `:new`** - Start fresh for unrelated tasks
+3. **Tag files liberally** - Provide context with `@[file]` references
+4. **Use descriptive prompts** - Clear instructions get better results
+5. **Switch agents** - Use specialized agents for specific tasks
+6. **Review with `:info`** - Check current session context
+7. **Run `:doctor`** - Diagnose issues before reporting bugs
+
+## Related Features
+
+- [Custom Commands](/features/custom-commands) - Create reusable command workflows
+- [Semantic Search](/features/semantic-search) - Power behind `:sync` and code exploration
+- [Git Operations](/features/git-operations) - Integrated git workflows
+- [Multi-Agent Workflows](/features/multi-agent-workflows) - Orchestrate specialized agents

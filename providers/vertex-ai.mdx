@@ -1,0 +1,363 @@
+---
+title: Google Vertex AI Setup
+description: Configure Google Vertex AI to access Gemini and Claude models on Google Cloud Platform
+---
+
+Google Vertex AI provides access to Google's Gemini models and third-party models like Claude through Google Cloud Platform. It offers enterprise-grade reliability, security, and integration with GCP services.
+
+## Available Models
+
+### Gemini 3 Series (Latest)
+- **gemini-3.1-pro-preview** - Most capable with advanced reasoning (1M context)
+- **gemini-3-pro-preview** - Advanced reasoning and thinking
+- **gemini-3-flash-preview** - Fast with thinking support
+
+### Gemini 2 Series
+- **gemini-2.5-pro** - Most capable Gemini 2.5 (1M context)
+- **gemini-2.5-flash** - Fast and efficient (1M context)
+- **gemini-2.0-flash** - Fast and versatile (1M context)
+
+### Gemini 1.5 Series
+- **gemini-1.5-pro** - Capable and reliable (1M context)
+- **gemini-1.5-flash** - Fast and efficient (1M context)
+- **gemini-1.5-flash-8b** - Compact and efficient (1M context)
+
+All Gemini models support:
+- Massive 1M token context windows
+- Multimodal input (text + images)
+- Tool calling and parallel execution
+- Thinking/reasoning (Gemini 3 series)
+
+## Prerequisites
+
+Before configuring Vertex AI in Forge:
+
+1. **Google Cloud Account**: Active GCP account with billing enabled
+2. **GCP Project**: Project with Vertex AI API enabled
+3. **Authentication**: Google Cloud CLI installed and configured
+
+## Setup Steps
+
+<Steps>
+  <Step title="Install Google Cloud CLI">
+    If not already installed:
+    
+    **macOS**:
+    ```bash
+    brew install google-cloud-sdk
+    ```
+    
+    **Linux**:
+    ```bash
+    curl https://sdk.cloud.google.com | bash
+    exec -l $SHELL
+    ```
+    
+    **Windows**:
+    Download from [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+  </Step>
+
+  <Step title="Authenticate and Configure GCP">
+    Set up your GCP credentials:
+    ```bash
+    # Authenticate with Google
+    gcloud auth login
+    
+    # Set your project ID
+    gcloud config set project YOUR_PROJECT_ID
+    
+    # Enable Vertex AI API (if not already enabled)
+    gcloud services enable aiplatform.googleapis.com
+    ```
+  </Step>
+
+  <Step title="Configure Application Default Credentials">
+    For Forge to access Vertex AI, set up ADC:
+    ```bash
+    gcloud auth application-default login
+    ```
+    
+    This creates credentials that Forge can use automatically.
+  </Step>
+
+  <Step title="Configure Forge">
+    Run the interactive login command:
+    ```bash
+    forge provider login
+    ```
+    
+    Select **Vertex AI** and provide:
+    - **Project ID**: Your GCP project ID
+    - **Location**: GCP region (e.g., `us-central1` or `global`)
+    - **Auth Method**: Choose "Google ADC" (recommended)
+  </Step>
+
+  <Step title="Select a Model">
+    Set your default model in `forge.yaml`:
+    ```yaml
+    model: gemini-2.5-pro
+    ```
+  </Step>
+
+  <Step title="Verify Connection">
+    Start Forge and test:
+    ```bash
+    forge
+    ```
+    
+    Try a prompt:
+    ```
+    > What are the key features of Vertex AI?
+    ```
+  </Step>
+</Steps>
+
+## Configuration
+
+### Required Parameters
+
+- **PROJECT_ID**: Your Google Cloud project ID
+- **LOCATION**: GCP region (e.g., `us-central1`, `europe-west1`, or `global`)
+
+### API Endpoints
+
+The endpoint format varies by location:
+
+**Global location**:
+```
+https://aiplatform.googleapis.com/v1beta1/projects/{PROJECT_ID}/locations/global/publishers/google
+```
+
+**Regional location**:
+```
+https://{LOCATION}-aiplatform.googleapis.com/v1beta1/projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google
+```
+
+### Authentication Methods
+
+#### Google Application Default Credentials (Recommended)
+
+Forge automatically uses ADC when configured with "Google ADC" method:
+- Tokens are refreshed automatically
+- No manual token management needed
+- Works seamlessly with GCP services
+
+#### Manual API Token
+
+You can also provide a token manually:
+```bash
+# Get access token
+gcloud auth print-access-token
+
+# Use with forge provider login
+forge provider login
+# Select Vertex AI
+# Choose "API Key" method
+# Paste the token
+```
+
+<Warning>
+  Manual tokens expire after 1 hour. Use Google ADC for automatic token refresh.
+</Warning>
+
+## Model Selection
+
+### For Maximum Context
+
+All Gemini models support 1M context:
+- `gemini-3.1-pro-preview` - Best overall
+- `gemini-2.5-pro` - Excellent capability
+- `gemini-1.5-pro` - Reliable choice
+
+### For Speed
+
+- `gemini-3-flash-preview` - Fast with thinking
+- `gemini-2.5-flash` - Fast and capable
+- `gemini-1.5-flash` - Quick responses
+- `gemini-1.5-flash-8b` - Ultra-fast
+
+### For Reasoning
+
+Gemini 3 models support extended thinking:
+- `gemini-3.1-pro-preview` - Advanced reasoning
+- `gemini-3-pro-preview` - Strong reasoning
+- `gemini-3-flash-preview` - Fast reasoning
+
+### Switching Models
+
+Change models during a session:
+```
+/model gemini-3.1-pro-preview
+```
+
+## Regions and Availability
+
+### Recommended Regions
+
+- **us-central1** - US Central (Iowa)
+- **us-east4** - US East (Virginia) 
+- **europe-west1** - Europe (Belgium)
+- **asia-northeast1** - Asia (Tokyo)
+- **global** - Global endpoint (auto-routing)
+
+### Choosing a Region
+
+**Use `global`** if:
+- You want automatic routing
+- Latency is not critical
+- You don't need regional data residency
+
+**Use specific region** if:
+- You need low latency
+- Compliance requires data residency
+- You're using other regional GCP services
+
+## Features
+
+### Massive Context Windows
+
+Gemini models support 1M tokens:
+- Process entire codebases
+- Analyze large documents
+- Long conversation history
+- Complex multi-file operations
+
+### Multimodal Capabilities
+
+- Image understanding
+- Diagram analysis
+- Screenshot interpretation
+- Combined text and visual reasoning
+
+### Thinking Mode
+
+Gemini 3 models show reasoning:
+- Explicit thought process
+- Step-by-step logic
+- Problem decomposition
+- Self-verification
+
+### Enterprise Features
+
+- **Audit Logging**: Full request/response logging
+- **VPC Service Controls**: Network security
+- **Customer-Managed Keys**: Data encryption
+- **SLA**: 99.9% uptime guarantee
+
+## Best Practices
+
+### Authentication
+
+<Warning>
+  Never commit GCP credentials to version control. Always use ADC or service accounts.
+</Warning>
+
+**For Development**:
+- Use `gcloud auth application-default login`
+- Let Forge automatically refresh tokens
+
+**For Production**:
+- Use service accounts with minimal permissions
+- Rotate credentials regularly
+- Enable audit logging
+
+### Cost Management
+
+**Model Selection**:
+- Use Flash models for simple tasks (lower cost)
+- Use Pro models for complex reasoning (higher cost)
+- Monitor usage in GCP Console
+
+**Token Optimization**:
+- Use smaller context when possible
+- Cache common prompts
+- Batch similar requests
+
+### Rate Limits
+
+Vertex AI enforces quotas:
+- **Requests per minute**: Varies by model and region
+- **Tokens per minute**: Varies by model
+
+Check quotas in [GCP Console](https://console.cloud.google.com/iam-admin/quotas).
+
+## Troubleshooting
+
+### Authentication Errors
+
+If authentication fails:
+```bash
+# Re-authenticate
+gcloud auth application-default login
+
+# Verify credentials
+gcloud auth application-default print-access-token
+
+# Check project
+gcloud config get-value project
+```
+
+### API Not Enabled
+
+If you see "API not enabled":
+```bash
+# Enable Vertex AI API
+gcloud services enable aiplatform.googleapis.com
+
+# Verify it's enabled
+gcloud services list --enabled | grep aiplatform
+```
+
+### Permission Denied
+
+If you lack permissions:
+1. Check IAM roles in [GCP Console](https://console.cloud.google.com/iam-admin/iam)
+2. Ensure you have `Vertex AI User` role
+3. Contact your GCP admin for access
+
+### Region Not Available
+
+If a model isn't available in your region:
+1. Try the `global` location
+2. Check [model availability](https://cloud.google.com/vertex-ai/docs/generative-ai/learn/models)
+3. Switch to an available region
+
+### Token Expiration
+
+If using manual tokens and they expire:
+```bash
+# Get new token
+gcloud auth print-access-token
+
+# Or switch to ADC
+forge provider login
+# Select Vertex AI
+# Choose "Google ADC"
+```
+
+## Deprecated: Environment Variable Setup
+
+<Warning>
+  Using environment variables is deprecated. Please use `forge provider login` instead.
+</Warning>
+
+For backward compatibility:
+
+```bash
+# .env
+PROJECT_ID=your-project-id
+LOCATION=us-central1
+VERTEX_AI_AUTH_TOKEN=your-token
+```
+
+```yaml
+# forge.yaml  
+model: gemini-2.5-pro
+```
+
+## Next Steps
+
+- Learn about [Gemini capabilities](https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini)
+- Explore [prompt design](https://cloud.google.com/vertex-ai/docs/generative-ai/learn/prompts/prompt-design-strategies)
+- Set up [billing alerts](https://cloud.google.com/billing/docs/how-to/budgets) to monitor costs
+- Configure [VPC Service Controls](https://cloud.google.com/vpc-service-controls/docs) for security

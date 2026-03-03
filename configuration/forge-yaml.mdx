@@ -1,0 +1,412 @@
+---
+title: forge.yaml Reference
+description: Complete reference for forge.yaml configuration options
+---
+
+The `forge.yaml` file is the main configuration file for customizing Forge's behavior in your project.
+
+## Configuration Schema
+
+Forge uses a JSON schema for validation. You can enable schema validation in your editor:
+
+```yaml
+# yaml-language-server: $schema=./forge.schema.json
+
+model: claude-3.7-sonnet
+temperature: 0.7
+```
+
+## Core Configuration
+
+### model
+
+<ParamField path="model" type="string">
+  The AI model to use for all agents. Must match a model available from your configured provider.
+
+  **Example:**
+  ```yaml
+  model: claude-3.7-sonnet
+  ```
+  
+  Use `/model` command in Forge CLI to see available models.
+</ParamField>
+
+### custom_rules
+
+<ParamField path="custom_rules" type="string">
+  Custom guidelines that all agents should follow when generating responses. Applied in addition to each agent's individual rules.
+
+  **Example:**
+  ```yaml
+  custom_rules: |
+    1. Always add comprehensive error handling to code
+    2. Include unit tests for all new functions
+    3. Follow team naming convention: camelCase for variables
+  ```
+</ParamField>
+
+### commands
+
+<ParamField path="commands" type="array">
+  Define custom commands as shortcuts for repetitive prompts.
+
+  **Schema:**
+  - `name` (string, required) - Command name
+  - `description` (string, required) - Command description
+  - `prompt` (string, optional) - Prompt text to execute
+
+  **Example:**
+  ```yaml
+  commands:
+    - name: refactor
+      description: Refactor selected code
+      prompt: "Improve readability and performance of this code"
+    - name: review
+      description: Review code for issues
+      prompt: "Review for bugs, security issues, and best practices"
+  ```
+</ParamField>
+
+### templates
+
+<ParamField path="templates" type="string">
+  Path pattern for custom template files (supports glob patterns).
+
+  **Example:**
+  ```yaml
+  templates: .forge/templates/**/*.md
+  ```
+</ParamField>
+
+## Model Parameters
+
+### temperature
+
+<ParamField path="temperature" type="number" default="model default">
+  Controls randomness in the model's output.
+  
+  - **Range:** 0.0 to 2.0
+  - **Lower values** (0.0-0.3): More focused, deterministic, coherent
+  - **Higher values** (0.7-2.0): More creative, diverse, exploratory
+
+  **Example:**
+  ```yaml
+  temperature: 0.7  # Balanced creativity and focus
+  ```
+</ParamField>
+
+### top_p
+
+<ParamField path="top_p" type="number" default="model default">
+  Controls diversity via nucleus sampling.
+  
+  - **Range:** 0.0 to 1.0
+  - **Lower values** (0.1): More focused on probable tokens
+  - **Higher values** (0.9): More diverse token selection
+
+  **Example:**
+  ```yaml
+  top_p: 0.8  # Balanced diversity
+  ```
+</ParamField>
+
+### top_k
+
+<ParamField path="top_k" type="integer" default="model default">
+  Controls the number of highest probability tokens to keep.
+  
+  - **Range:** 1 to 1000
+  - **Lower values** (10): More focused responses
+  - **Higher values** (100): More diverse responses
+
+  **Example:**
+  ```yaml
+  top_k: 30
+  ```
+</ParamField>
+
+### max_tokens
+
+<ParamField path="max_tokens" type="integer" default="model default">
+  Maximum number of tokens the model can generate.
+  
+  - **Range:** 1 to 100,000
+  - **Lower values** (100): Concise outputs
+  - **Higher values** (20480): Detailed responses
+
+  **Example:**
+  ```yaml
+  max_tokens: 20480  # Allow detailed responses
+  ```
+</ParamField>
+
+## Request Limits
+
+### max_requests_per_turn
+
+<ParamField path="max_requests_per_turn" type="integer" default="50">
+  Maximum number of requests an agent can make in a single conversation turn.
+  
+  Prevents runaway conversations and controls API usage. When reached, Forge prompts to continue or stop.
+
+  **Example:**
+  ```yaml
+  max_requests_per_turn: 100
+  ```
+</ParamField>
+
+### max_tool_failure_per_turn
+
+<ParamField path="max_tool_failure_per_turn" type="integer" default="3">
+  Maximum times a tool can fail before forcing completion.
+  
+  Prevents infinite retry loops when operations repeatedly fail.
+
+  **Example:**
+  ```yaml
+  max_tool_failure_per_turn: 5  # Allow more retries
+  ```
+</ParamField>
+
+## Project Settings
+
+### max_walker_depth
+
+<ParamField path="max_walker_depth" type="integer" default="3">
+  Controls how deeply Forge traverses your project directory structure.
+  
+  - **Lower values** (1): Only immediate subdirectories
+  - **Higher values** (5+): Deep traversal (may be slower)
+
+  **Example:**
+  ```yaml
+  max_walker_depth: 3  # Balance context and performance
+  ```
+</ParamField>
+
+### tool_supported
+
+<ParamField path="tool_supported" type="boolean" default="true">
+  Enable/disable tool support for all agents.
+
+  **Example:**
+  ```yaml
+  tool_supported: true
+  ```
+</ParamField>
+
+## Context Compaction
+
+<ParamField path="compact" type="object">
+  Configuration for automatic context compaction to manage conversation length.
+
+  <Expandable title="Compact Configuration Options">
+    <ParamField path="compact.token_threshold" type="integer">
+      Maximum tokens before triggering compaction.
+      
+      **Example:** `100000`
+    </ParamField>
+
+    <ParamField path="compact.message_threshold" type="integer">
+      Maximum messages before triggering compaction.
+      
+      **Example:** `200`
+    </ParamField>
+
+    <ParamField path="compact.turn_threshold" type="integer">
+      Maximum conversation turns before triggering compaction.
+      
+      **Example:** `50`
+    </ParamField>
+
+    <ParamField path="compact.max_tokens" type="integer">
+      Maximum tokens to keep after compaction.
+      
+      **Example:** `2000`
+    </ParamField>
+
+    <ParamField path="compact.retention_window" type="integer" default="0">
+      Number of most recent messages to preserve during compaction.
+      
+      **Example:** `6`
+    </ParamField>
+
+    <ParamField path="compact.eviction_window" type="number" default="0.0">
+      Maximum percentage of context that can be summarized (0.0 to 1.0).
+      
+      **Example:** `0.2` (20% can be compacted)
+    </ParamField>
+
+    <ParamField path="compact.on_turn_end" type="boolean">
+      Trigger compaction when the last message is from a user.
+      
+      **Example:** `false`
+    </ParamField>
+
+    <ParamField path="compact.model" type="string">
+      Model to use for compaction (useful for cheaper/faster models).
+      
+      **Example:** `claude-3-haiku`
+    </ParamField>
+
+    <ParamField path="compact.summary_tag" type="string">
+      Optional tag name to extract content from when summarizing.
+      
+      **Example:** `summary`
+    </ParamField>
+  </Expandable>
+
+  **Example:**
+  ```yaml
+  compact:
+    token_threshold: 100000
+    max_tokens: 2000
+    retention_window: 6
+    message_threshold: 200
+    eviction_window: 0.2
+    on_turn_end: false
+  ```
+</ParamField>
+
+## Update Configuration
+
+<ParamField path="updates" type="object">
+  Configuration for Forge update checks.
+
+  <Expandable title="Update Options">
+    <ParamField path="updates.auto_update" type="boolean" default="false">
+      Enable automatic updates.
+      
+      **Example:** `true`
+    </ParamField>
+
+    <ParamField path="updates.frequency" type="string" default="daily">
+      Update check frequency: `daily`, `weekly`, or `always`.
+      
+      **Example:** `weekly`
+    </ParamField>
+  </Expandable>
+
+  **Example:**
+  ```yaml
+  updates:
+    frequency: daily
+    auto_update: false
+  ```
+</ParamField>
+
+## Complete Example
+
+<CodeGroup>
+  ```yaml Balanced Configuration
+  # yaml-language-server: $schema=./forge.schema.json
+  
+  # Core settings
+  model: anthropic/claude-sonnet-4
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 30
+  max_tokens: 20480
+  
+  # Request limits
+  max_requests_per_turn: 100
+  max_tool_failure_per_turn: 3
+  
+  # Project settings
+  max_walker_depth: 3
+  tool_supported: true
+  
+  # Custom rules
+  custom_rules: |
+    1. Add error handling to all code
+    2. Include unit tests for new functions
+    3. Use camelCase for variables, PascalCase for classes
+  
+  # Custom commands
+  commands:
+    - name: refactor
+      description: Refactor code for readability
+      prompt: "Refactor this code to improve readability and performance"
+  
+  # Context compaction
+  compact:
+    token_threshold: 100000
+    max_tokens: 2000
+    retention_window: 6
+    message_threshold: 200
+    eviction_window: 0.2
+    on_turn_end: false
+  
+  # Update settings
+  updates:
+    frequency: daily
+    auto_update: false
+  ```
+
+  ```yaml Performance Optimized
+  # Optimized for speed and cost
+  model: claude-3-haiku
+  temperature: 0.3
+  max_tokens: 4096
+  max_requests_per_turn: 50
+  max_walker_depth: 2
+  
+  compact:
+    token_threshold: 50000
+    max_tokens: 1000
+    retention_window: 4
+    eviction_window: 0.3
+  ```
+
+  ```yaml Creative Mode
+  # Optimized for exploration and creativity
+  model: claude-3.7-sonnet
+  temperature: 0.9
+  top_p: 0.95
+  max_tokens: 20480
+  max_requests_per_turn: 150
+  
+  custom_rules: |
+    1. Suggest multiple alternative approaches
+    2. Explain trade-offs for each solution
+    3. Include links to documentation
+  ```
+</CodeGroup>
+
+## Advanced Usage
+
+### Variables
+
+Use YAML anchors to reuse configuration values:
+
+```yaml
+variables:
+  operating_agent: Forge
+  advanced_model: &advanced_model anthropic/claude-sonnet-4
+
+model: *advanced_model
+
+compact:
+  model: claude-3-haiku  # Use cheaper model for compaction
+```
+
+### Schema Validation
+
+Enable schema validation in your editor:
+
+1. Ensure `forge.schema.json` is in your project root
+2. Add schema reference to the top of your `forge.yaml`:
+   ```yaml
+   # yaml-language-server: $schema=./forge.schema.json
+   ```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Custom Rules" icon="arrow-right" href="/configuration/custom-rules">
+    Define project-specific coding guidelines
+  </Card>
+  <Card title="Environment Variables" icon="arrow-right" href="/configuration/environment-variables">
+    Configure runtime behavior
+  </Card>
+</CardGroup>

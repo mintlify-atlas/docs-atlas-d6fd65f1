@@ -1,0 +1,414 @@
+---
+title: Custom Rules Configuration
+description: Define project-specific coding guidelines and standards for Forge agents
+---
+
+Custom rules allow you to define project-specific guidelines that all Forge agents follow when generating code and responses.
+
+## Overview
+
+Custom rules are defined in your `forge.yaml` file and are applied in addition to each agent's built-in instructions. They help enforce:
+
+- **Coding standards** - Language conventions and style guides
+- **Team practices** - Architecture patterns and design principles
+- **Quality requirements** - Testing, documentation, and error handling
+- **Business logic** - Domain-specific rules and constraints
+
+## Basic Usage
+
+Add custom rules to your `forge.yaml`:
+
+```yaml
+custom_rules: |
+  1. Always add comprehensive error handling to any code you write.
+  2. Include unit tests for all new functions.
+  3. Follow our team's naming convention: camelCase for variables, PascalCase for classes.
+```
+
+## Rule Writing Guidelines
+
+### Keep Rules Clear and Concise
+
+<CodeGroup>
+  ```yaml Good
+  custom_rules: |
+    1. Use TypeScript strict mode
+    2. Add JSDoc comments to all public functions
+    3. Prefer functional components in React
+  ```
+
+  ```yaml Avoid
+  custom_rules: |
+    1. You should probably try to use TypeScript's strict mode if possible
+    2. It would be nice if you could add JSDoc comments sometimes
+    3. Maybe use functional components when you think it makes sense
+  ```
+</CodeGroup>
+
+### Be Specific
+
+<CodeGroup>
+  ```yaml Good
+  custom_rules: |
+    1. Maximum line length is 100 characters
+    2. Use async/await instead of promises
+    3. Import order: React, third-party, local
+  ```
+
+  ```yaml Avoid
+  custom_rules: |
+    1. Keep code readable
+    2. Use modern JavaScript
+    3. Organize imports properly
+  ```
+</CodeGroup>
+
+### Use Numbered Lists
+
+Numbered lists help agents parse and reference specific rules:
+
+```yaml
+custom_rules: |
+  1. First important rule
+  2. Second important rule
+  3. Third important rule
+```
+
+## Example Rule Sets
+
+### General Code Quality
+
+```yaml
+custom_rules: |
+  1. Add error handling to all async operations
+  2. Include input validation for all public functions
+  3. Add unit tests for business logic
+  4. Document complex algorithms with comments
+  5. Use meaningful variable and function names
+```
+
+### TypeScript/JavaScript
+
+```yaml
+custom_rules: |
+  1. Use TypeScript strict mode
+  2. Prefer interfaces over type aliases for objects
+  3. Use async/await instead of .then() chains
+  4. Avoid 'any' type - use 'unknown' or proper types
+  5. Add JSDoc comments to all exported functions
+  6. Maximum line length: 100 characters
+```
+
+### React Development
+
+```yaml
+custom_rules: |
+  1. Use functional components with hooks
+  2. Extract complex logic into custom hooks
+  3. Use React.memo for expensive components
+  4. Prefer composition over inheritance
+  5. Keep components focused and single-purpose
+  6. Use TypeScript for all component props
+```
+
+### Python
+
+```yaml
+custom_rules: |
+  1. Follow PEP 8 style guide
+  2. Use type hints for all function signatures
+  3. Add docstrings to all public functions and classes
+  4. Prefer f-strings over .format() or %
+  5. Use pathlib for file path operations
+  6. Maximum line length: 88 characters (Black formatter)
+```
+
+### API Development
+
+```yaml
+custom_rules: |
+  1. Validate all input parameters
+  2. Return consistent error response format
+  3. Use HTTP status codes correctly
+  4. Add OpenAPI documentation for endpoints
+  5. Implement rate limiting on public endpoints
+  6. Log all errors with request context
+```
+
+### Testing
+
+```yaml
+custom_rules: |
+  1. Write tests using Arrange-Act-Assert pattern
+  2. Use descriptive test names: test_should_return_error_when_invalid_input
+  3. Mock external dependencies in unit tests
+  4. Aim for 80% code coverage on business logic
+  5. Add both positive and negative test cases
+```
+
+### Security
+
+```yaml
+custom_rules: |
+  1. Never log sensitive data (passwords, tokens, PII)
+  2. Validate and sanitize all user input
+  3. Use parameterized queries for database operations
+  4. Store secrets in environment variables, not code
+  5. Implement proper authentication and authorization
+```
+
+### Documentation
+
+```yaml
+custom_rules: |
+  1. Add README.md to all new packages
+  2. Document all configuration options
+  3. Include code examples in documentation
+  4. Keep documentation in sync with code changes
+  5. Add inline comments for complex business logic
+```
+
+## Advanced Usage
+
+### Architecture Patterns
+
+```yaml
+custom_rules: |
+  Architecture:
+  1. Use clean architecture with domain/application/infrastructure layers
+  2. Services should never depend on other services directly
+  3. Use dependency injection for all infrastructure dependencies
+  4. Keep domain logic free of framework dependencies
+  
+  Testing:
+  5. Write tests in three steps: setup, execute, assert
+  6. Use fixtures for test data creation
+  7. Test domain logic without mocking
+```
+
+### Domain-Specific Rules
+
+```yaml
+custom_rules: |
+  E-commerce Domain:
+  1. All prices must be stored as integers (cents/smallest unit)
+  2. Calculate tax using TaxService, never inline
+  3. Log all payment transactions with correlation ID
+  4. Inventory checks must use transactions to prevent race conditions
+  
+  Error Handling:
+  5. Use domain-specific error types (OrderNotFoundError, etc.)
+  6. Never expose internal errors to API clients
+```
+
+### Team Workflow
+
+```yaml
+custom_rules: |
+  Code Style:
+  1. Run formatter before committing (npm run format)
+  2. Fix all linter warnings
+  3. Use conventional commits format: type(scope): message
+  
+  Review Process:
+  4. Add tests for all bug fixes
+  5. Update documentation for API changes
+  6. Request review from domain expert for complex changes
+```
+
+## Combining with Commands
+
+Use custom rules with custom commands for consistent workflows:
+
+```yaml
+custom_rules: |
+  1. All functions must have error handling
+  2. Add unit tests for business logic
+  3. Use TypeScript strict mode
+
+commands:
+  - name: review
+    description: Review code against team standards
+    prompt: "Review this code and check compliance with our custom rules"
+  
+  - name: implement
+    description: Implement a new feature
+    prompt: "Implement this feature following all custom rules, including tests and error handling"
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Start Small">
+    Begin with 3-5 critical rules and expand as needed. Too many rules can reduce effectiveness.
+    
+    ```yaml
+    # Start with essentials
+    custom_rules: |
+      1. Add error handling to all operations
+      2. Include unit tests
+      3. Use TypeScript strict mode
+    ```
+  </Accordion>
+
+  <Accordion title="Make Rules Actionable">
+    Rules should be specific enough that an agent can follow them directly.
+    
+    Good: "Maximum line length is 100 characters"
+    
+    Bad: "Keep code readable"
+  </Accordion>
+
+  <Accordion title="Group Related Rules">
+    Organize rules by category for better clarity.
+    
+    ```yaml
+    custom_rules: |
+      Code Style:
+      1. Use camelCase for variables
+      2. Maximum line length: 100
+      
+      Testing:
+      3. Add unit tests for all functions
+      4. Use descriptive test names
+    ```
+  </Accordion>
+
+  <Accordion title="Version Control">
+    Commit `forge.yaml` to your repository so the team shares the same rules.
+    
+    ```bash
+    git add forge.yaml
+    git commit -m "Add custom coding rules"
+    ```
+  </Accordion>
+
+  <Accordion title="Review and Update">
+    Regularly review rules with your team and update as standards evolve.
+    
+    - Remove rules that are consistently ignored
+    - Add rules for recurring issues
+    - Clarify ambiguous rules
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Rules Not Being Followed">
+    If agents aren't following rules:
+    
+    1. Make rules more specific and actionable
+    2. Reduce the total number of rules (fewer is better)
+    3. Phrase rules as direct instructions
+    4. Verify rules are in the correct YAML format
+  </Accordion>
+
+  <Accordion title="YAML Syntax Errors">
+    Use the pipe character (`|`) for multi-line rules:
+    
+    ```yaml
+    # Correct
+    custom_rules: |
+      1. First rule
+      2. Second rule
+    
+    # Incorrect
+    custom_rules:
+      1. First rule
+      2. Second rule
+    ```
+  </Accordion>
+
+  <Accordion title="Conflicting Rules">
+    Ensure rules don't contradict each other:
+    
+    ```yaml
+    # Avoid conflicts
+    custom_rules: |
+      1. Use async/await for async operations
+      2. Never use promises  # Conflicts with #1
+    ```
+    
+    Instead:
+    ```yaml
+    custom_rules: |
+      1. Use async/await instead of .then() chains
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Examples by Project Type
+
+<Tabs>
+  <Tab title="Web Application">
+    ```yaml
+    custom_rules: |
+      Frontend:
+      1. Use React with TypeScript
+      2. Implement responsive design (mobile-first)
+      3. Add loading states for all async operations
+      4. Use CSS modules for component styles
+      
+      Backend:
+      5. Validate all API inputs with Zod
+      6. Return consistent error responses
+      7. Add OpenAPI documentation
+      8. Implement rate limiting
+      
+      Testing:
+      9. Write E2E tests for critical user flows
+      10. Mock external API calls in tests
+    ```
+  </Tab>
+
+  <Tab title="CLI Tool">
+    ```yaml
+    custom_rules: |
+      1. Use clap for command-line argument parsing
+      2. Add --help text for all commands
+      3. Return appropriate exit codes (0 = success)
+      4. Provide progress indicators for long operations
+      5. Support both verbose and quiet modes
+      6. Write errors to stderr, output to stdout
+      7. Add shell completion scripts
+    ```
+  </Tab>
+
+  <Tab title="Library/SDK">
+    ```yaml
+    custom_rules: |
+      1. Document all public APIs with examples
+      2. Follow semantic versioning strictly
+      3. Maintain backward compatibility in minor versions
+      4. Add TypeScript definitions for all exports
+      5. Keep dependencies minimal
+      6. Provide migration guides for breaking changes
+      7. Include README with quick start guide
+    ```
+  </Tab>
+
+  <Tab title="Data Pipeline">
+    ```yaml
+    custom_rules: |
+      1. Add retry logic with exponential backoff
+      2. Implement idempotent operations
+      3. Log all data transformations
+      4. Validate data schemas at pipeline boundaries
+      5. Add monitoring and alerting hooks
+      6. Handle partial failures gracefully
+      7. Support backfill operations
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="forge.yaml Reference" icon="arrow-right" href="/configuration/forge-yaml">
+    Explore all configuration options
+  </Card>
+  <Card title="Commands" icon="arrow-right" href="/configuration/forge-yaml#commands">
+    Create custom commands
+  </Card>
+</CardGroup>

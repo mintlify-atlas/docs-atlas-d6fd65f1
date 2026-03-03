@@ -1,0 +1,228 @@
+---
+title: Semantic Code Search
+description: AI-powered semantic search to find code by meaning, not just keywords
+icon: magnifying-glass
+---
+
+Semantic search is Forge's AI-powered code discovery tool that understands what your code does, not just what it says. Instead of searching for exact keywords, you can describe the functionality you're looking for in natural language.
+
+## Overview
+
+Semantic search uses vector embeddings to understand the meaning and purpose of your code. It's your default tool for exploring unfamiliar codebases, finding implementations, and discovering patterns across multiple files.
+
+<Card title="Key Benefit" icon="sparkles">
+  Find code by describing what it does: "OAuth token refresh logic" or "JWT expiry handling" instead of searching for exact function names.
+</Card>
+
+## When to Use Semantic Search
+
+Semantic search excels at:
+
+- **Finding implementations** of specific features or algorithms
+- **Understanding systems** across multiple files and modules
+- **Discovering patterns** and architectural approaches
+- **Locating examples** like test fixtures or usage patterns
+- **Finding technology usage** where specific libraries are used
+- **Exploring codebases** to learn structure and organization
+- **Finding documentation** like README files, setup guides, and API docs
+
+## When NOT to Use It
+
+Use `fs_search` (file system search) instead when you need:
+
+- Exact string matching (TODOs, specific function names)
+- All occurrences of a variable or identifier
+- Regex pattern matching
+- Searches in specific file paths
+- Known exact text to find
+
+## Getting Started
+
+### Indexing Your Workspace
+
+Before using semantic search, index your codebase:
+
+<Tabs>
+  <Tab title="Shell Plugin">
+    ```bash
+    # Sync current directory for semantic search
+    :sync
+    ```
+  </Tab>
+  
+  <Tab title="CLI Command">
+    ```bash
+    # Index the current workspace
+    forge workspace sync
+    ```
+  </Tab>
+</Tabs>
+
+The indexing process:
+- Scans all source files in your project
+- Generates vector embeddings for code semantics
+- Creates a searchable index stored locally
+- Typically completes in seconds for most projects
+
+### Configuration
+
+Control semantic search behavior with environment variables:
+
+```bash
+# Maximum results from initial vector search (default: 200)
+FORGE_SEM_SEARCH_LIMIT=200
+
+# Top-k parameter for relevance filtering (default: 20)
+FORGE_SEM_SEARCH_TOP_K=20
+```
+
+## Writing Effective Queries
+
+### Query Structure
+
+Each semantic search consists of paired queries:
+
+1. **Embedding Query**: Describes WHAT the code does (converted to vector embedding)
+2. **Use Case**: Describes WHY you need it (used for reranking results)
+
+<Card title="Example Query Pair" icon="code">
+  **Embedding**: "semantic search reranker using cross-encoder model"
+  
+  **Use Case**: "Show me the function implementation for semantic search reranker so I can understand how relevance scoring works"
+</Card>
+
+### Tips for Success
+
+<Tabs>
+  <Tab title="Be Specific">
+    **Good**: "OAuth token refresh logic", "JWT expiry handling"
+    
+    **Bad**: "authentication" (too broad)
+    
+    Balance specificity with generality to avoid missing relevant code.
+  </Tab>
+  
+  <Tab title="Use Multiple Queries">
+    Use 2-3 varied queries to capture different aspects:
+    
+    ```
+    - "OAuth token refresh"
+    - "JWT expiry handling" 
+    - "authentication middleware"
+    ```
+    
+    Different perspectives improve coverage.
+  </Tab>
+  
+  <Tab title="Match Your Intent">
+    **For documentation**:
+    - "setup guide configuration"
+    - "README installation instructions"
+    
+    **For code**:
+    - "token refresh implementation"
+    - "error handling logic"
+  </Tab>
+</Tabs>
+
+### What Makes a Good Query
+
+**Effective embedding queries:**
+- Focus on behavior and purpose
+- Include relevant technical terms
+- Describe functionality, not structure
+- Examples:
+  - "semantic search reranker using cross-encoder model"
+  - "README documentation configuration setup"
+  - "HTTP request retry with exponential backoff"
+
+**Effective use cases:**
+- Add intent and context
+- Different from embedding query
+- Explain what you'll do with results
+- Examples:
+  - "Show me the function implementation so I can understand the algorithm"
+  - "I need documentation explaining configuration, not implementation code"
+  - "Find the struct definitions for the data models"
+
+## Search Results
+
+Semantic search returns:
+
+- File paths and line numbers
+- Code context around matches
+- Relevance ranking per query
+- Results reranked by your stated intent
+
+```rust
+// Example result format
+src/auth/token.rs:45
+  Relevance: 0.92
+  Context: Token refresh implementation with retry logic
+```
+
+## Scope and Limitations
+
+<Warning>
+  Semantic search only works within the indexed workspace. It searches from your current working directory and subdirectories.
+</Warning>
+
+For searches outside the workspace or when you need exact string matching, use `fs_search` with the path parameter.
+
+### Performance Considerations
+
+- **Avoid overly broad queries** like "tools" or "utilities"
+- **Keep query count reasonable** - too many queries can timeout
+- **Target your search** - describe the specific aspect you need
+- **Reindex periodically** as your codebase changes
+
+## Integration with Forge
+
+Semantic search is Forge's default tool for code exploration. When you ask questions like:
+
+> "How does authentication work in this codebase?"
+
+Forge automatically uses semantic search to:
+1. Find relevant authentication code
+2. Understand the implementation patterns
+3. Provide comprehensive explanations
+
+## Advanced Usage
+
+### Workspace Management
+
+Manage indexed workspaces:
+
+```bash
+# List indexed workspaces
+forge workspace list
+
+# Remove workspace index
+forge workspace remove <path>
+
+# Query workspace directly
+forge workspace query "your search query"
+```
+
+### Background Syncing
+
+The shell plugin can automatically sync workspaces:
+
+```bash
+# Enable/disable auto-sync (default: true)
+export FORGE_SYNC_ENABLED=true
+```
+
+## Best Practices
+
+1. **Index early** - Run `:sync` when entering a new project
+2. **Update regularly** - Re-sync after major code changes
+3. **Be descriptive** - Use natural language to describe what you're looking for
+4. **Iterate queries** - Refine searches based on initial results
+5. **Combine with other tools** - Use alongside `fs_search` for comprehensive exploration
+
+## Related Features
+
+- [Custom Commands](/features/custom-commands) - Create commands that leverage semantic search
+- [Shell Integration](/features/shell-integration) - Quick access via `:sync` command
+- [Git Operations](/features/git-operations) - Understand changes with semantic context

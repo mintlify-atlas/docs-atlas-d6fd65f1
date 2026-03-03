@@ -1,0 +1,413 @@
+---
+title: Contributing to Forge
+description: How to contribute to the Forge project
+---
+
+Thank you for your interest in contributing to Forge! This guide will help you get started with contributing to our AI-enhanced terminal development environment.
+
+## Ways to Contribute
+
+There are many ways to contribute to Forge:
+
+- 🐛 **Report bugs** - Help us identify and fix issues
+- 💡 **Suggest features** - Share ideas for new capabilities
+- 📝 **Improve documentation** - Make our docs clearer and more comprehensive
+- 🔧 **Submit code** - Fix bugs or implement new features
+- 🧪 **Write tests** - Improve test coverage and reliability
+- 🎨 **Enhance UI/UX** - Improve the terminal interface and user experience
+- 🌍 **Help others** - Answer questions on Discord and GitHub
+- ⭐ **Spread the word** - Star the repository and share with others
+
+## Getting Started
+
+### Prerequisites
+
+Before contributing, ensure you have:
+
+- **Rust toolchain** (1.75+) - Install from [rustup.rs](https://rustup.rs/)
+- **Git** - For version control
+- **GitHub account** - For submitting contributions
+- **Node.js** (16+) - For npm-related tasks
+- **Optional**: GitHub CLI (`gh`) for PR operations
+
+### Setting Up Development Environment
+
+1. **Fork the repository**
+
+   Visit [github.com/antinomyhq/forge](https://github.com/antinomyhq/forge) and click "Fork"
+
+2. **Clone your fork**
+
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/forge.git
+   cd forge
+   ```
+
+3. **Add upstream remote**
+
+   ```bash
+   git remote add upstream https://github.com/antinomyhq/forge.git
+   ```
+
+4. **Install dependencies**
+
+   ```bash
+   cargo build
+   ```
+
+5. **Verify setup**
+
+   ```bash
+   cargo check
+   cargo test
+   ```
+
+## Development Guidelines
+
+### Code Style
+
+Forge follows standard Rust conventions with some project-specific guidelines:
+
+- **Formatting**: Use `rustfmt` for code formatting
+  
+  ```bash
+  cargo fmt
+  ```
+
+- **Linting**: Run `clippy` before submitting
+  
+  ```bash
+  cargo clippy --all-targets --all-features
+  ```
+
+- **Documentation**: Write Rust docs (`///`) for all public APIs
+  - Document parameters with `# Arguments`
+  - Document errors with `# Errors`
+  - Focus on clear functionality descriptions
+  - Avoid code examples (docs are for LLMs)
+
+### Error Handling
+
+- Use `anyhow::Result` for error handling in services and repositories
+- Create domain errors using `thiserror`
+- Never implement `From` for converting domain errors; convert them manually
+
+### Writing Tests
+
+All tests should follow a three-step pattern:
+
+```rust
+use pretty_assertions::assert_eq;
+
+#[test]
+fn test_user_creation() {
+    // 1. Setup - Create fixtures
+    let fixture = UserFixture::default()
+        .with_name("Alice")
+        .with_age(30);
+    
+    // 2. Execute - Run the code under test
+    let actual = create_user(fixture);
+    
+    // 3. Assert - Compare with expected result
+    let expected = User::new("Alice").age(30);
+    assert_eq!(actual, expected);
+}
+```
+
+**Testing guidelines:**
+
+- Use `pretty_assertions` for better error messages
+- Use fixtures to create test data
+- Keep tests in the same file as source code
+- Use `Default`, `new()`, and `derive_setters::Setters` for test objects
+- Prefer `unwrap()` in tests; use `expect()` when error context is useful
+- Assert on full objects rather than individual fields
+
+### Running Tests
+
+```bash
+# Run all tests
+cargo test
+
+# Run tests with snapshot testing
+cargo insta test --accept
+
+# Run specific crate tests
+cargo test -p forge_main
+```
+
+### Building
+
+<Warning>
+  **NEVER** run `cargo build --release` during development unless absolutely necessary (performance testing, creating distribution binaries). Use `cargo check` or `cargo build` (debug mode) for verification.
+</Warning>
+
+```bash
+# Fast validation (recommended)
+cargo check
+
+# Debug build
+cargo build
+
+# Release build (only when necessary)
+cargo build --release
+```
+
+### Project Structure
+
+Forge follows a modular architecture:
+
+```
+forge/
+├── crates/
+│   ├── forge_main/        # CLI and main application
+│   ├── forge_domain/      # Core domain models
+│   ├── forge_services/    # Business services
+│   ├── forge_tool/        # Tool implementations
+│   └── forge_walker/      # File system operations
+├── docs/                  # Documentation
+├── shell-plugin/          # ZSH integration
+└── templates/             # Project templates
+```
+
+### Service Implementation Guidelines
+
+When implementing services:
+
+**Core principles:**
+
+- No service-to-service dependencies
+- Services depend only on infrastructure abstractions
+- Single type parameter for infrastructure
+- No trait objects (`Box<dyn ...>`)
+- Constructor pattern without type bounds
+- Use `Arc<T>` for infrastructure
+- Tuple struct pattern for simple services
+
+**Example:**
+
+```rust
+// Simple service without infrastructure
+pub struct ValidationService;
+
+impl ValidationService {
+    pub fn new() -> Self { Self }
+    
+    pub fn validate_email(&self, email: &str) -> Result<()> {
+        // Implementation
+    }
+}
+
+// Service with infrastructure dependency
+pub struct UserService<R> {
+    repository: Arc<R>,
+}
+
+impl<R> UserService<R> {
+    pub fn new(repository: Arc<R>) -> Self {
+        Self { repository }
+    }
+}
+
+impl<R: UserRepository> UserService<R> {
+    pub fn create_user(&self, email: &str) -> Result<User> {
+        // Implementation
+    }
+}
+```
+
+## Making Changes
+
+### Creating a Branch
+
+```bash
+# Update your fork
+git checkout main
+git pull upstream main
+
+# Create a feature branch
+git checkout -b feature/your-feature-name
+```
+
+### Commit Guidelines
+
+- Write clear, descriptive commit messages
+- Use conventional commit format:
+  
+  ```
+  feat: add new semantic search feature
+  fix: resolve provider authentication issue
+  docs: update installation guide
+  test: add tests for conversation service
+  refactor: simplify error handling logic
+  ```
+
+- Include co-author attribution:
+  
+  ```bash
+  git commit -m "feat: add feature" -m "Co-Authored-By: ForgeCode <noreply@forgecode.dev>"
+  ```
+
+### Submitting Pull Requests
+
+1. **Push your changes**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. **Create a pull request**
+   
+   - Visit your fork on GitHub
+   - Click "New Pull Request"
+   - Select your feature branch
+   - Fill out the PR template
+
+3. **PR checklist**
+   
+   - [ ] Tests pass (`cargo test`)
+   - [ ] Code is formatted (`cargo fmt`)
+   - [ ] No clippy warnings (`cargo clippy`)
+   - [ ] Documentation is updated
+   - [ ] Commit messages follow conventions
+   - [ ] PR description explains changes clearly
+   - [ ] Co-author attribution included
+
+4. **Sign the CLA**
+   
+   First-time contributors must sign the Contributor License Agreement. The CLA assistant bot will guide you through this process.
+
+### Code Review Process
+
+- Maintainers will review your PR
+- Address feedback by pushing new commits
+- Once approved, your PR will be merged
+- Squash commits may be used for cleaner history
+
+## Reporting Issues
+
+### Bug Reports
+
+Use the [bug report template](https://github.com/antinomyhq/forge/issues/new?template=bug_report.yml) and include:
+
+- **Clear description** of the bug
+- **Steps to reproduce** the issue
+- **Expected behavior** vs actual behavior
+- **Error logs** (run with `--verbose`)
+- **Forge version** (`forge --version`)
+- **Operating system** and version
+- **AI provider** and model
+- **Configuration** (`forge.yaml`, with secrets removed)
+
+### Feature Requests
+
+Use the [feature request template](https://github.com/antinomyhq/forge/issues/new?template=feature_request.yml) and describe:
+
+- **Use case** - What problem does this solve?
+- **Proposed solution** - How should it work?
+- **Alternatives** - What other solutions have you considered?
+- **Additional context** - Screenshots, examples, references
+
+### Other Issue Types
+
+We also have templates for:
+
+- **Documentation improvements**
+- **Performance issues**
+- **Provider integration requests**
+
+Select the appropriate template when creating an issue.
+
+## Documentation Contributions
+
+Documentation lives in the `docs/` directory and uses Mintlify.
+
+### Setting Up Documentation Environment
+
+```bash
+cd docs
+npm install -g mint
+mint dev
+```
+
+View documentation at `http://localhost:3000`
+
+### Documentation Guidelines
+
+- **Use active voice**: "Run the command" not "The command should be run"
+- **Address the reader directly**: Use "you" instead of "the user"
+- **Keep sentences concise**: One idea per sentence
+- **Lead with the goal**: Start with what the user wants to accomplish
+- **Use consistent terminology**: Don't alternate between synonyms
+- **Include examples**: Show, don't just tell
+- **Use sentence case for headings**
+- **Bold UI elements**: Click **Settings**
+- **Code formatting**: For file names, commands, paths
+
+See [CONTRIBUTING.md](https://github.com/antinomyhq/forge/blob/main/docs/CONTRIBUTING.md) in the docs directory for more details.
+
+## Community Guidelines
+
+### Code of Conduct
+
+We expect all contributors to:
+
+- Be respectful and inclusive
+- Welcome newcomers and help them learn
+- Accept constructive criticism gracefully
+- Focus on what's best for the community
+- Show empathy towards other community members
+
+### Getting Help
+
+- **Discord**: [discord.gg/kRZBPpkgwq](https://discord.gg/kRZBPpkgwq) - Chat with the community
+- **GitHub Discussions**: Ask questions and share ideas
+- **GitHub Issues**: Report bugs and request features
+
+### Recognition
+
+Contributors are recognized through:
+
+- GitHub contributor graph
+- Release notes acknowledgments
+- Community shoutouts on Discord
+
+Every contribution, no matter how small, is valued!
+
+## Release Process
+
+Releases are managed by maintainers:
+
+1. Version is bumped following [Semantic Versioning](https://semver.org/)
+2. Changelog is updated with release notes
+3. Release is tagged and published to GitHub
+4. NPM package is updated
+5. Documentation is updated
+
+See [release-drafter.yml](https://github.com/antinomyhq/forge/blob/main/.github/release-drafter.yml) for automation details.
+
+## Git Operations
+
+- Git and GitHub CLI (`gh`) are pre-installed in the development environment
+- Always use `Co-Authored-By: ForgeCode <noreply@forgecode.dev>` for commits
+- Use GitHub CLI for PR operations when possible
+
+## Additional Resources
+
+- **Source Code**: [github.com/antinomyhq/forge](https://github.com/antinomyhq/forge)
+- **Documentation**: [forgecode.dev/docs](https://forgecode.dev/docs)
+- **Discord**: [discord.gg/kRZBPpkgwq](https://discord.gg/kRZBPpkgwq)
+- **Issue Templates**: [GitHub Issues](https://github.com/antinomyhq/forge/issues/new/choose)
+- **Agent Guidelines**: See `AGENTS.md` in the repository
+
+## Questions?
+
+If you have questions about contributing:
+
+1. Check this guide and the [FAQ](/resources/faq)
+2. Search [existing issues](https://github.com/antinomyhq/forge/issues)
+3. Ask on [Discord](https://discord.gg/kRZBPpkgwq)
+4. Create a [GitHub Discussion](https://github.com/antinomyhq/forge/discussions)
+
+We're excited to have you contribute to Forge! 🚀

@@ -1,0 +1,383 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Forge
+---
+
+## Common Issues
+
+This guide covers common problems you might encounter while using Forge and their solutions.
+
+### Installation Issues
+
+<Warning>
+  Always ensure you're running the latest version of Forge. Run `forge --version` to check your current version.
+</Warning>
+
+#### Installation Script Fails
+
+If the installation script fails:
+
+```bash
+curl -fsSL https://forgecode.dev/cli | sh
+```
+
+**Solutions:**
+
+1. Check your internet connection
+2. Ensure you have the necessary permissions (try with `sudo` if needed)
+3. Verify your system meets the requirements
+4. Try building from source:
+
+```bash
+git clone https://github.com/antinomyhq/forge
+cd forge
+cargo build --release
+```
+
+#### npm Installation Issues
+
+For users installing via npm:
+
+```bash
+# Try clearing npm cache
+npm cache clean --force
+
+# Reinstall globally
+npm install -g forgecode
+```
+
+### Provider Configuration Issues
+
+<Warning>
+  Environment variable-based provider configuration is deprecated. Use `forge provider login` instead.
+</Warning>
+
+#### Provider Login Fails
+
+If `forge provider login` fails:
+
+1. **Check API key validity**: Ensure your API key is correct and active
+2. **Network issues**: Verify you can reach the provider's API endpoint
+3. **Run with verbose logging**:
+
+```bash
+forge --verbose provider login
+```
+
+#### Migration from Environment Variables
+
+If you're experiencing issues after migrating from `.env` files:
+
+1. Remove old environment variables from your `.env` file
+2. Run `forge provider login` to set up credentials properly
+3. Restart your terminal session
+
+### Model Selection Issues
+
+#### Model Not Found
+
+```bash
+Error: Model 'xyz' not found
+```
+
+**Solution:** Use the `/model` command in the Forge CLI to see available models:
+
+```bash
+forge
+> /model
+```
+
+Or use the new model switching command:
+
+```bash
+forge --model claude-3.7-sonnet --provider anthropic
+```
+
+#### GitHub Copilot Disabled Model Error
+
+If you see an error about GitHub Copilot models being disabled, ensure you're using a supported model for your provider.
+
+### Runtime Issues
+
+#### Session Hangs or Times Out
+
+<Warning>
+  Tool operations timeout after 300 seconds by default. You can adjust this with `FORGE_TOOL_TIMEOUT`.
+</Warning>
+
+If Forge hangs during operation:
+
+1. Check if a tool is taking too long (default timeout: 300s)
+2. Adjust timeout if needed:
+
+```bash
+export FORGE_TOOL_TIMEOUT=600  # 10 minutes
+```
+
+3. Run with verbose logging to identify the issue:
+
+```bash
+forge --verbose
+```
+
+#### Maximum Requests Per Turn Reached
+
+If you see "Maximum requests per turn reached":
+
+1. This is a safety limit (default: 50 requests)
+2. You'll be prompted to continue or stop
+3. Adjust the limit in `forge.yaml`:
+
+```yaml
+max_requests_per_turn: 100
+```
+
+#### Tool Failures
+
+If tools repeatedly fail:
+
+1. Check the error message for specific details
+2. Verify file permissions for file operations
+3. Ensure required dependencies are installed
+4. Adjust failure limit in `forge.yaml`:
+
+```yaml
+max_tool_failure_per_turn: 5
+```
+
+### File Operation Issues
+
+#### Permission Denied Errors
+
+```bash
+Error: Permission denied
+```
+
+**Solutions:**
+
+1. Check file/directory permissions
+2. Ensure you have write access to the target directory
+3. For restricted environments, use restricted shell mode:
+
+```bash
+forge --restricted
+```
+
+#### File Size Limits
+
+Forge has default limits for file operations:
+
+- Image files: 256 KB (configurable with `FORGE_MAX_IMAGE_SIZE`)
+- Search results: 10 KB (configurable with `FORGE_MAX_SEARCH_RESULT_BYTES`)
+- Line length: 2000 characters (configurable with `FORGE_MAX_LINE_LENGTH`)
+
+Adjust these in your environment:
+
+```bash
+export FORGE_MAX_IMAGE_SIZE=524288  # 512 KB
+export FORGE_MAX_LINE_LENGTH=4000
+```
+
+### HTTP and Network Issues
+
+#### Connection Timeouts
+
+<Warning>
+  The default read timeout is 900 seconds (15 minutes). Connection timeout is 30 seconds.
+</Warning>
+
+Adjust HTTP timeouts:
+
+```bash
+# .env
+FORGE_HTTP_CONNECT_TIMEOUT=60
+FORGE_HTTP_READ_TIMEOUT=1800
+```
+
+#### SSL/TLS Certificate Issues
+
+If you encounter certificate validation errors:
+
+1. **Add custom root certificates**:
+
+```bash
+export FORGE_HTTP_ROOT_CERT_PATHS=/path/to/cert1.pem,/path/to/cert2.crt
+```
+
+2. **Disable certificate validation** (development only):
+
+<Warning>
+  Setting `FORGE_HTTP_ACCEPT_INVALID_CERTS=true` disables SSL/TLS verification and can expose you to security risks. Only use in trusted development environments.
+</Warning>
+
+```bash
+export FORGE_HTTP_ACCEPT_INVALID_CERTS=true
+```
+
+#### Retry Configuration
+
+If you're experiencing frequent transient errors:
+
+```bash
+# .env
+FORGE_RETRY_INITIAL_BACKOFF_MS=2000
+FORGE_RETRY_BACKOFF_FACTOR=2
+FORGE_RETRY_MAX_ATTEMPTS=5
+FORGE_RETRY_STATUS_CODES=429,500,502,503,504
+```
+
+### MCP (Model Context Protocol) Issues
+
+#### MCP Server Connection Fails
+
+If your MCP server won't connect:
+
+1. **Verify server configuration**:
+
+```bash
+forge mcp list
+forge mcp get <server-name>
+```
+
+2. **Check server logs**: Run the MCP server command manually to see error messages
+
+3. **Validate JSON configuration**: Ensure `.mcp.json` is properly formatted
+
+4. **Check environment variables**: MCP servers may need specific environment variables
+
+#### MCP Tools Not Available
+
+If MCP tools don't appear in Forge:
+
+1. Restart Forge after adding MCP servers
+2. Verify the server is running correctly
+3. Check server output for errors
+
+### Git Operations Issues
+
+#### Git Operations Fail
+
+If git commands fail within Forge:
+
+1. Ensure git is installed and in your PATH
+2. Verify you have proper git credentials configured
+3. Check repository permissions
+4. For GitHub operations, ensure `gh` CLI is installed and authenticated
+
+### Shell Integration Issues
+
+#### ZSH Plugin Not Working
+
+If the ZSH plugin isn't functioning:
+
+1. **Verify installation**: Check that the plugin is loaded in your `.zshrc`
+2. **Reload shell**: Run `source ~/.zshrc`
+3. **Check FORGE_BIN**: Ensure it points to the correct forge executable:
+
+```bash
+export FORGE_BIN=forge
+```
+
+4. **Run doctor command**:
+
+```bash
+forge doctor
+```
+
+#### Theme Issues
+
+If the ZSH theme doesn't display correctly:
+
+1. **Check Nerd Font support**:
+
+```bash
+export NERD_FONT=1
+# or
+export USE_NERD_FONT=1
+```
+
+2. **Customize currency display**:
+
+```bash
+export FORGE_CURRENCY_SYMBOL="€"
+export FORGE_CURRENCY_CONVERSION_RATE=0.92
+```
+
+### Performance Issues
+
+#### Slow Search Operations
+
+If semantic search is slow:
+
+1. **Adjust search limits**:
+
+```bash
+export FORGE_SEM_SEARCH_LIMIT=100
+export FORGE_SEM_SEARCH_TOP_K=10
+```
+
+2. **Limit directory traversal depth** in `forge.yaml`:
+
+```yaml
+max_walker_depth: 3
+```
+
+#### High Memory Usage
+
+If Forge consumes too much memory:
+
+1. Reduce conversation history
+2. Limit max conversations:
+
+```bash
+export FORGE_MAX_CONVERSATIONS=50
+```
+
+3. Reduce search result limits
+
+### Logging and Debugging
+
+#### Enable Debug Logging
+
+For detailed debugging information:
+
+```bash
+export FORGE_LOG=forge=debug
+forge --verbose
+```
+
+#### Debug HTTP Requests
+
+To debug API communication:
+
+```bash
+export FORGE_DEBUG_REQUESTS=/tmp/forge-debug.json
+```
+
+#### Suppress Retry Errors
+
+If retry error messages are cluttering output:
+
+```bash
+export FORGE_SUPPRESS_RETRY_ERRORS=true
+```
+
+## Getting Help
+
+If you're still experiencing issues:
+
+1. **Check existing issues**: Visit [GitHub Issues](https://github.com/antinomyhq/forge/issues) to see if your problem has been reported
+2. **Join Discord**: Get community support on [Discord](https://discord.gg/kRZBPpkgwq)
+3. **Report a bug**: [Submit a bug report](https://github.com/antinomyhq/forge/issues/new/choose) with:
+   - Forge version (`forge --version`)
+   - Operating system and version
+   - Steps to reproduce
+   - Error logs with `--verbose` flag
+   - Your `forge.yaml` configuration (remove sensitive data)
+
+## Related Resources
+
+- [Configuration Guide](/configuration/overview)
+- [Environment Variables](/configuration/environment-variables)
+- [Provider Setup](/configuration/providers)
+- [FAQ](/resources/faq)

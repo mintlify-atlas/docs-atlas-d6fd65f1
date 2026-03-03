@@ -1,0 +1,122 @@
+---
+title: CLI Commands Overview
+description: Complete reference for Forge CLI commands and subcommands
+---
+
+Forge provides a comprehensive command-line interface for managing AI-enhanced terminal sessions, agents, providers, and more.
+
+## Command Structure
+
+All Forge commands follow a hierarchical structure:
+
+```bash
+forge [FLAGS] [SUBCOMMAND] [OPTIONS]
+```
+
+## Main Command
+
+Running `forge` without arguments starts an interactive AI session. See the [forge command](/commands/forge) for details.
+
+## Top-Level Commands
+
+<CardGroup cols={2}>
+  <Card title="Agent" icon="robot" href="/commands/agent">
+    Manage AI agents and list available agents
+  </Card>
+  
+  <Card title="Provider" icon="plug" href="/commands/provider">
+    Authenticate with API providers and manage credentials
+  </Card>
+  
+  <Card title="Config" icon="gear" href="/commands/config">
+    Get, set, or list configuration values
+  </Card>
+  
+  <Card title="Conversation" icon="messages" href="/commands/conversation">
+    Manage conversation history and state
+  </Card>
+  
+  <Card title="Workspace" icon="folder" href="/commands/workspace">
+    Manage workspaces for semantic search
+  </Card>
+  
+  <Card title="MCP" icon="server" href="/commands/mcp">
+    Manage Model Context Protocol servers
+  </Card>
+  
+  <Card title="Cmd" icon="terminal" href="/commands/cmd">
+    Run or list custom commands
+  </Card>
+  
+  <Card title="Commit" icon="git-alt" href="/commands/commit">
+    Generate AI-powered git commit messages
+  </Card>
+  
+  <Card title="Suggest" icon="lightbulb" href="/commands/suggest">
+    Get shell command suggestions from natural language
+  </Card>
+</CardGroup>
+
+## Utility Commands
+
+### Information Commands
+
+```bash
+forge info                    # Show configuration and environment status
+forge env                     # Display environment information
+forge banner                  # Display version banner
+forge list [RESOURCE]         # List various resources
+```
+
+### Shell Integration
+
+```bash
+forge setup                   # Setup ZSH integration
+forge doctor                  # Run diagnostics on shell environment
+forge zsh [SUBCOMMAND]        # Generate shell extension scripts
+```
+
+### Maintenance
+
+```bash
+forge update                  # Update forge to the latest version
+forge vscode install-extension # Install VS Code extension
+```
+
+## Global Flags
+
+Many commands support the `--porcelain` flag for machine-readable output:
+
+```bash
+forge list agent --porcelain
+forge info --porcelain
+```
+
+## Common Patterns
+
+### Using Conversation IDs
+
+Many commands support `--conversation-id` or `--cid` to work with specific conversations:
+
+```bash
+forge --cid 550e8400-e29b-41d4-a716-446655440000
+forge conversation show 550e8400-e29b-41d4-a716-446655440000
+```
+
+### Piped Input
+
+Forge supports piped input for various operations:
+
+```bash
+cat prompt.txt | forge
+git diff | forge commit --preview
+```
+
+### Output Formats
+
+Use `--porcelain` for machine-readable output that's stable across versions:
+
+```bash
+forge list agent --porcelain | jq
+forge info --porcelain
+```

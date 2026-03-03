@@ -1,0 +1,441 @@
+---
+title: Writing Tests
+description: Learn how to write comprehensive tests with Forge's assistance
+---
+
+# Writing Tests
+
+Forge helps you write high-quality tests quickly, following best practices and conventions for your specific technology stack.
+
+## Basic Test Generation
+
+Ask Forge to generate tests for your code:
+
+```
+> Write unit tests for the UserService class
+```
+
+Forge will:
+- Analyze the code to understand its behavior
+- Generate comprehensive tests covering:
+  - Happy path scenarios
+  - Edge cases
+  - Error conditions
+- Follow testing conventions for your language/framework
+- Include appropriate assertions and mocks
+
+<Tip>
+Include unit tests for all new functions as part of your development workflow. You can add this as a custom rule in `forge.yaml`.
+</Tip>
+
+## Test-Driven Development (TDD)
+
+Use Forge to practice TDD:
+
+<Steps>
+  <Step title="Write the test first">
+    ```
+    > I need a function that validates email addresses. Help me write the test first.
+    ```
+  </Step>
+  
+  <Step title="Run failing test">
+    Forge generates a test that defines expected behavior. Run it to see it fail.
+  </Step>
+  
+  <Step title="Implement the function">
+    ```
+    > Now implement the email validation function to make this test pass
+    ```
+  </Step>
+  
+  <Step title="Refactor">
+    Once tests pass, refactor the code while keeping tests green.
+  </Step>
+</Steps>
+
+## Testing Patterns and Best Practices
+
+### Three-Phase Test Pattern
+
+Forge follows the standard three-phase test pattern:
+
+```rust
+use pretty_assertions::assert_eq;
+
+fn test_user_creation() {
+    // Setup: Create test fixtures
+    let fixture = User::test().age(25).name("Alice");
+    
+    // Execute: Run the code under test
+    let actual = create_user(fixture);
+    
+    // Assert: Verify the expected result
+    let expected = User::default().age(25).name("Alice").id(1);
+    assert_eq!(actual, expected);
+}
+```
+
+<Tip>
+Always use the three discrete steps: setup, execute, assert. This makes tests easier to read and maintain.
+</Tip>
+
+### Using Fixtures
+
+Forge creates reusable test fixtures:
+
+```
+> Create a test fixture for the User model
+```
+
+Forge generates:
+- Generic, reusable test data
+- Builder pattern with `derive_setters`
+- Default values for required fields
+- Methods to customize specific fields
+
+### Descriptive Variable Names
+
+Use clear names like `fixture`, `actual`, and `expected`:
+
+```rust
+fn test_calculate_discount() {
+    let fixture = Order::test().total(100).discount_code("SAVE20");
+    let actual = calculate_discount(fixture);
+    let expected = 80;
+    assert_eq!(actual, expected);
+}
+```
+
+## Language-Specific Testing
+
+### Rust Testing
+
+Forge follows specific conventions for Rust:
+
+```
+> Write Rust tests for this service function
+```
+
+Forge ensures:
+- Tests are in the same file as source code
+- `pretty_assertions` is used for better error messages
+- `unwrap()` is used in tests (not production code)
+- `expect()` with messages for clarity when needed
+- Full object comparison with `assert_eq!`
+
+**Example**:
+```rust
+use pretty_assertions::assert_eq;
+
+#[test]
+fn test_user_validation() {
+    let fixture = User::test().age(15); // Below minimum age
+    let actual = validate_user(fixture).is_err();
+    assert!(actual, "Should reject users under 18");
+}
+```
+
+### JavaScript/TypeScript Testing
+
+For JavaScript projects:
+
+```
+> Write Jest tests for this React component
+```
+
+Forge generates:
+- Proper test setup with required imports
+- Mocks for dependencies
+- Async/await handling where needed
+- Component rendering and interaction tests
+
+### Python Testing
+
+```
+> Write pytest tests for this API endpoint
+```
+
+Forge creates:
+- Test fixtures with pytest decorators
+- Proper assertions using pytest features
+- Mock objects for external dependencies
+- Parameterized tests for multiple scenarios
+
+## Real-World Testing Scenarios
+
+### Scenario 1: Testing API Endpoints
+
+```
+> Write integration tests for the user registration endpoint
+```
+
+<Steps>
+  <Step title="Setup test environment">
+    Forge creates fixtures for request data and expected responses.
+  </Step>
+  
+  <Step title="Test success case">
+    Valid registration data should create a user and return success.
+  </Step>
+  
+  <Step title="Test error cases">
+    Invalid email, missing fields, duplicate users, etc.
+  </Step>
+  
+  <Step title="Verify side effects">
+    Check database state, emails sent, logs created.
+  </Step>
+</Steps>
+
+### Scenario 2: Testing React Components
+
+```
+> Write tests for the UserProfile component
+```
+
+Forge generates tests for:
+- Component rendering with different props
+- User interactions (clicks, form submissions)
+- State changes
+- API calls and loading states
+- Error handling and edge cases
+
+### Scenario 3: Testing Business Logic
+
+```
+> Write comprehensive tests for the pricing calculation service
+```
+
+Forge creates tests covering:
+- Basic calculations
+- Discount applications
+- Tax calculations
+- Edge cases (zero amounts, negative values)
+- Boundary conditions (minimum/maximum values)
+
+## Test Coverage and Completeness
+
+### Ensuring Complete Coverage
+
+```
+> Analyze test coverage for the authentication module and add missing tests
+```
+
+Forge will:
+- Identify untested code paths
+- Suggest additional test cases
+- Generate tests for missing scenarios
+- Highlight edge cases that need coverage
+
+### Edge Case Testing
+
+Forge excels at identifying edge cases:
+
+```
+> What edge cases should I test for this date parsing function?
+```
+
+Forge suggests tests for:
+- Null/undefined inputs
+- Empty strings
+- Invalid formats
+- Boundary dates (leap years, timezone changes)
+- Locale-specific issues
+
+<Tip>
+Ask Forge to review your tests and suggest additional edge cases you might have missed.
+</Tip>
+
+## Mocking and Test Doubles
+
+### Creating Mocks
+
+```
+> Create a mock for the external payment API
+```
+
+Forge generates:
+- Mock objects that match the real API interface
+- Configurable responses for different test scenarios
+- Verification methods to check mock calls
+
+### Dependency Injection for Testing
+
+```
+> Refactor this service to be more testable using dependency injection
+```
+
+Forge applies patterns that make testing easier:
+- Constructor injection
+- Interface-based dependencies
+- Configurable behavior for tests
+
+## Integration and E2E Testing
+
+### Integration Tests
+
+```
+> Write integration tests for the order processing workflow
+```
+
+Forge creates tests that:
+- Set up complete test environments
+- Test interactions between components
+- Verify end-to-end functionality
+- Clean up test data afterward
+
+### Database Testing
+
+```
+> Write tests for these database queries
+```
+
+Forge helps with:
+- Setting up test databases
+- Creating seed data
+- Running migrations
+- Cleaning up after tests
+- Testing transactions and rollbacks
+
+## Performance Testing
+
+```
+> Add performance benchmarks for this sorting algorithm
+```
+
+Forge generates:
+- Benchmark tests with various data sizes
+- Performance assertions
+- Comparison with baseline measurements
+- Memory usage tracking
+
+## Testing Best Practices
+
+1. **Test behavior, not implementation**: Focus on what code does, not how
+2. **One assertion per test**: Keep tests focused and specific
+3. **Use descriptive test names**: Name should explain what's being tested
+4. **Make tests independent**: Tests shouldn't depend on each other
+5. **Keep tests fast**: Unit tests should run in milliseconds
+6. **Use fixtures**: Create reusable test data
+7. **Test edge cases**: Don't just test the happy path
+
+<Tip>
+For Rust projects, always verify your tests by running `cargo insta test --accept` after writing or modifying tests.
+</Tip>
+
+## Test Maintenance
+
+### Updating Tests After Refactoring
+
+```
+> I refactored the UserService. Update the tests to match.
+```
+
+Forge will:
+- Analyze changes in the implementation
+- Update test setup to match new interfaces
+- Preserve test intent while adapting structure
+- Ensure all tests still pass
+
+### Fixing Failing Tests
+
+```
+> These tests are failing after my changes. Help me fix them.
+```
+
+Forge asks important questions:
+- Should the implementation change to match tests?
+- Or should tests update to match new behavior?
+- Are the tests revealing actual bugs?
+
+<Tip>
+If asked to fix failing tests, Forge will confirm whether to update the implementation or the tests themselves.
+</Tip>
+
+## Testing Anti-Patterns to Avoid
+
+### Don't: Test Implementation Details
+
+**Bad:**
+```javascript
+expect(component.state.counter).toBe(5);
+```
+
+**Good:**
+```javascript
+expect(screen.getByText('Count: 5')).toBeInTheDocument();
+```
+
+### Don't: Share State Between Tests
+
+**Bad:**
+```javascript
+let user; // Shared across tests
+test('creates user', () => { user = createUser(); });
+test('updates user', () => { updateUser(user); });
+```
+
+**Good:**
+```javascript
+test('creates user', () => {
+    const user = createUser();
+    expect(user).toBeDefined();
+});
+
+test('updates user', () => {
+    const user = createUser();
+    updateUser(user);
+    expect(user.updated).toBe(true);
+});
+```
+
+### Don't: Use Multiple Assertions for Parts
+
+Prefer full object comparison:
+
+**Bad:**
+```rust
+assert_eq!(actual.name, expected.name);
+assert_eq!(actual.age, expected.age);
+assert_eq!(actual.email, expected.email);
+```
+
+**Good:**
+```rust
+assert_eq!(actual, expected);
+```
+
+## Common Testing Commands
+
+| Task | Example Prompt |
+|------|---------------|
+| Write unit tests | `Write tests for the UserService class` |
+| Test coverage | `What edge cases am I missing for this function?` |
+| Create mock | `Create a mock for the database connection` |
+| Integration test | `Write an integration test for the checkout flow` |
+| Fix tests | `Help me fix these failing tests` |
+| TDD | `Write a test for a function that validates phone numbers` |
+
+## Verification After Writing Tests
+
+Always verify your tests work:
+
+```bash
+# For Rust projects
+cargo insta test --accept
+
+# For JavaScript projects
+npm test
+
+# For Python projects
+pytest
+```
+
+Forge can help you run these commands and interpret the results.
+
+## Next Steps
+
+- Learn about [Code Review](/guides/code-review) including test quality
+- Explore [Refactoring](/guides/refactoring) to improve testability
+- Review [Best Practices](/guides/best-practices) for development workflows

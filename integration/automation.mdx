@@ -1,0 +1,640 @@
+---
+title: 'CI/CD Automation'
+description: 'Implement automated testing, building, and deployment workflows with Forge'
+---
+
+## Overview
+
+Forge provides comprehensive CI/CD automation capabilities through GitHub Actions, supporting multi-platform builds, automated testing, release management, and multi-channel distribution.
+
+## Automated Testing
+
+### Unit and Integration Tests
+
+Forge runs comprehensive tests on every push and pull request:
+
+```yaml
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Setup Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Run Tests with Coverage
+        run: |
+          cargo install cargo-llvm-cov
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+```
+
+### Performance Benchmarking
+
+Automated performance tests ensure critical operations stay fast:
+
+```yaml
+zsh_rprompt_perf:
+  name: 'Performance: zsh rprompt'
+  runs-on: ubuntu-latest
+  steps:
+    - name: Run performance benchmark
+      run: './scripts/benchmark.sh --threshold 60 zsh rprompt'
+```
+
+This ensures the ZSH prompt renders in under 60ms.
+
+### Test Configuration
+
+<Steps>
+  <Step title="Configure Test Environment">
+    Set environment variables for tests:
+
+    ```yaml
+    env:
+      RUSTFLAGS: '-Dwarnings'
+      OPENROUTER_API_KEY: ${{secrets.OPENROUTER_API_KEY}}
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    ```yaml
+    - name: Setup Protobuf Compiler
+      uses: arduino/setup-protoc@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    ```
+  </Step>
+
+  <Step title="Run Test Suite">
+    ```yaml
+    - name: Run Tests
+      run: cargo test --all-features --workspace
+    ```
+  </Step>
+
+  <Step title="Generate Coverage Report">
+    ```yaml
+    - name: Upload Coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./lcov.info
+        token: ${{ secrets.CODECOV_TOKEN }}
+    ```
+  </Step>
+</Steps>
+
+## Release Automation
+
+### Draft Release Creation
+
+Forge automatically creates draft releases when code is pushed to main:
+
+```yaml
+draft_release:
+  needs:
+    - build
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  name: Draft Release
+  runs-on: ubuntu-latest
+  steps:
+    - name: Draft Release
+      uses: release-drafter/release-drafter@v6
+      with:
+        config-name: release-drafter.yml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Multi-Platform Builds
+
+Builds are automatically created for all supported platforms:
+
+<CodeGroup>
+```yaml Linux
+- binary_name: forge-x86_64-unknown-linux-musl
+  binary_path: target/x86_64-unknown-linux-musl/release/forge
+  cross: 'true'
+  os: ubuntu-latest
+  target: x86_64-unknown-linux-musl
+
+- binary_name: forge-aarch64-unknown-linux-musl
+  binary_path: target/aarch64-unknown-linux-musl/release/forge
+  cross: 'true'
+  os: ubuntu-latest
+  target: aarch64-unknown-linux-musl
+```
+
+```yaml macOS
+- binary_name: forge-x86_64-apple-darwin
+  binary_path: target/x86_64-apple-darwin/release/forge
+  cross: 'false'
+  os: macos-latest
+  target: x86_64-apple-darwin
+
+- binary_name: forge-aarch64-apple-darwin
+  binary_path: target/aarch64-apple-darwin/release/forge
+  cross: 'false'
+  os: macos-latest
+  target: aarch64-apple-darwin
+```
+
+```yaml Windows
+- binary_name: forge-x86_64-pc-windows-msvc.exe
+  binary_path: target/x86_64-pc-windows-msvc/release/forge.exe
+  cross: 'false'
+  os: windows-latest
+  target: x86_64-pc-windows-msvc
+
+- binary_name: forge-aarch64-pc-windows-msvc.exe
+  binary_path: target/aarch64-pc-windows-msvc/release/forge.exe
+  cross: 'false'
+  os: windows-latest
+  target: aarch64-pc-windows-msvc
+```
+
+```yaml Android
+- binary_name: forge-aarch64-linux-android
+  binary_path: target/aarch64-linux-android/release/forge
+  cross: 'true'
+  os: ubuntu-latest
+  target: aarch64-linux-android
+```
+</CodeGroup>
+
+### Build Process
+
+<Steps>
+  <Step title="Setup Cross-Compilation">
+    ```yaml
+    - name: Setup Cross Toolchain
+      if: ${{ matrix.cross == 'false' }}
+      uses: taiki-e/setup-cross-toolchain-action@v1
+      with:
+        target: ${{ matrix.target }}
+
+    - name: Add Rust target
+      if: ${{ matrix.cross == 'false' }}
+      run: rustup target add ${{ matrix.target }}
+    ```
+  </Step>
+
+  <Step title="Set Platform-Specific Flags">
+    ```yaml
+    - name: Set Rust Flags
+      if: '!(contains(matrix.target, ''-unknown-linux-'') || contains(matrix.target, ''-android''))'
+      run: echo "RUSTFLAGS=-C target-feature=+crt-static" >> $GITHUB_ENV
+    ```
+  </Step>
+
+  <Step title="Build Binary">
+    ```yaml
+    - name: Build Binary
+      uses: ClementTsang/cargo-action@v0.0.7
+      with:
+        command: build --release
+        args: '--target ${{ matrix.target }}'
+        use-cross: ${{ matrix.cross }}
+        cross-version: '0.2.5'
+      env:
+        APP_VERSION: ${{ needs.draft_release.outputs.crate_release_name }}
+    ```
+  </Step>
+
+  <Step title="Upload Artifacts">
+    ```yaml
+    - name: Copy Binary
+      run: cp ${{ matrix.binary_path }} ${{ matrix.binary_name }}
+
+    - name: Upload to Release
+      uses: xresloader/upload-to-github-release@v1
+      with:
+        release_id: ${{ needs.draft_release.outputs.crate_release_id }}
+        file: ${{ matrix.binary_name }}
+        overwrite: 'true'
+    ```
+  </Step>
+</Steps>
+
+## Distribution Automation
+
+### NPM Publishing
+
+Forge automatically publishes to NPM when a release is published:
+
+```yaml
+npm_release:
+  needs:
+    - build_release
+  name: npm_release
+  runs-on: ubuntu-latest
+  strategy:
+    matrix:
+      repository:
+        - antinomyhq/npm-code-forge
+        - antinomyhq/npm-forgecode
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: ${{ matrix.repository }}
+        ref: main
+        token: ${{ secrets.NPM_ACCESS }}
+
+    - name: Update NPM Package
+      run: './update-package.sh ${{ github.event.release.tag_name }}'
+      env:
+        AUTO_PUSH: 'true'
+        CI: 'true'
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+### Homebrew Formula Updates
+
+The Homebrew formula is automatically updated:
+
+```yaml
+homebrew_release:
+  needs:
+    - build_release
+  name: homebrew_release
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v6
+      with:
+        repository: antinomyhq/homebrew-code-forge
+        ref: main
+        token: ${{ secrets.HOMEBREW_ACCESS }}
+
+    - name: Update Homebrew Formula
+      run: |
+        GITHUB_TOKEN="${{ secrets.HOMEBREW_ACCESS }}" \
+        ./update-formula.sh ${{ github.event.release.tag_name }}
+```
+
+## Workflow Triggers
+
+### Pull Request Triggers
+
+```yaml
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+    branches:
+      - main
+```
+
+This runs CI on:
+- New pull requests
+- New commits to existing PRs
+- Reopened PRs
+- When labels are added
+
+### Push Triggers
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+```
+
+This runs CI on:
+- Pushes to main branch
+- Version tags (v1.0.0, v2.1.3, etc.)
+
+### Release Triggers
+
+```yaml
+on:
+  release:
+    types:
+      - published
+```
+
+This runs multi-channel distribution when a release is published.
+
+## Conditional Builds
+
+### Label-Based Builds
+
+Build all targets only when specifically requested:
+
+```yaml
+draft_release_pr:
+  if: |
+    github.event_name == 'pull_request' && 
+    contains(github.event.pull_request.labels.*.name, 'ci: build all targets')
+```
+
+To trigger full builds on a PR:
+
+<Steps>
+  <Step title="Add Label">
+    Add the `ci: build all targets` label to your pull request
+  </Step>
+
+  <Step title="Wait for Build">
+    GitHub Actions will automatically start building all platform targets
+  </Step>
+
+  <Step title="Download Artifacts">
+    Once complete, download binaries from the workflow artifacts
+  </Step>
+</Steps>
+
+### Branch Protection
+
+```yaml
+if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+```
+
+This ensures certain jobs only run on the main branch.
+
+## Workflow Dependencies
+
+Define job dependencies to control execution order:
+
+```yaml
+jobs:
+  build:
+    name: Build and Test
+    # ... build steps
+
+  draft_release:
+    needs:
+      - build  # Wait for build to complete
+    # ... release steps
+
+  build_release:
+    needs:
+      - draft_release  # Wait for draft to be created
+    # ... platform builds
+
+  npm_release:
+    needs:
+      - build_release  # Wait for binaries
+    # ... npm publish
+
+  homebrew_release:
+    needs:
+      - build_release  # Wait for binaries
+    # ... homebrew update
+```
+
+## Concurrency Control
+
+Prevent duplicate workflow runs:
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+This ensures:
+- Only one workflow runs per branch at a time
+- New pushes cancel in-progress runs
+- Resources are used efficiently
+
+## Custom Automation Scripts
+
+### Benchmark Script
+
+Create custom automation scripts for specific tasks:
+
+```bash scripts/benchmark.sh
+#!/bin/bash
+set -e
+
+THRESHOLD=${2:-100}
+COMMAND="${@:3}"
+
+echo "Running benchmark: $COMMAND"
+echo "Threshold: ${THRESHOLD}ms"
+
+# Run command multiple times and average
+TOTAL=0
+RUNS=10
+
+for i in $(seq 1 $RUNS); do
+  START=$(date +%s%3N)
+  $COMMAND > /dev/null 2>&1
+  END=$(date +%s%3N)
+  DURATION=$((END - START))
+  TOTAL=$((TOTAL + DURATION))
+done
+
+AVG=$((TOTAL / RUNS))
+
+echo "Average time: ${AVG}ms"
+
+if [ $AVG -gt $THRESHOLD ]; then
+  echo "❌ FAILED: Exceeded threshold of ${THRESHOLD}ms"
+  exit 1
+else
+  echo "✅ PASSED: Within threshold"
+  exit 0
+fi
+```
+
+Usage in workflow:
+
+```yaml
+- name: Run performance benchmark
+  run: './scripts/benchmark.sh --threshold 60 zsh rprompt'
+```
+
+### Update Scripts
+
+Automate package updates:
+
+```bash update-package.sh
+#!/bin/bash
+set -e
+
+VERSION=$1
+
+if [ -z "$VERSION" ]; then
+  echo "Usage: $0 <version>"
+  exit 1
+fi
+
+# Update package.json version
+npm version "$VERSION" --no-git-tag-version
+
+# Download new binaries
+for platform in linux-x64 linux-arm64 darwin-x64 darwin-arm64 win32-x64; do
+  curl -fsSL "https://github.com/forge/releases/download/$VERSION/forge-$platform" \
+    -o "bin/forge-$platform"
+  chmod +x "bin/forge-$platform"
+done
+
+# Publish to NPM
+if [ "$CI" = "true" ]; then
+  npm publish
+fi
+
+# Commit changes
+if [ "$AUTO_PUSH" = "true" ]; then
+  git add .
+  git commit -m "chore: update to $VERSION"
+  git push
+fi
+```
+
+## Monitoring and Notifications
+
+### Status Badges
+
+Add workflow status badges to your README:
+
+```markdown
+![CI](https://github.com/your-org/forge/workflows/ci/badge.svg)
+![Release](https://github.com/your-org/forge/workflows/release/badge.svg)
+```
+
+### Slack Notifications
+
+Notify on workflow completion:
+
+```yaml
+- name: Notify Slack
+  if: always()
+  uses: 8398a7/action-slack@v3
+  with:
+    status: ${{ job.status }}
+    text: 'Workflow ${{ github.workflow }} completed'
+    webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+### Email Notifications
+
+GitHub automatically sends emails for:
+- Failed workflow runs (if you're the author)
+- Workflow runs you've subscribed to
+- Repository notification settings
+
+## Best Practices
+
+### Caching Strategy
+
+<CardGroup cols={2}>
+  <Card title="Cargo Cache" icon="box">
+    Cache Cargo registry and dependencies:
+
+    ```yaml
+    - uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    ```
+  </Card>
+
+  <Card title="Build Cache" icon="hammer">
+    Cache build artifacts:
+
+    ```yaml
+    - uses: actions/cache@v4
+      with:
+        path: target
+        key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+    ```
+  </Card>
+</CardGroup>
+
+### Security
+
+- Use secrets for sensitive data
+- Restrict workflow permissions
+- Pin action versions
+- Review third-party actions
+
+```yaml
+permissions:
+  contents: read  # Minimal permissions by default
+
+jobs:
+  release:
+    permissions:
+      contents: write  # Only grant what's needed
+      pull-requests: write
+```
+
+### Error Handling
+
+```yaml
+- name: Build with error handling
+  run: |
+    set -e  # Exit on error
+    cargo build --release || {
+      echo "Build failed"
+      exit 1
+    }
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Workflow not triggering">
+    Check trigger configuration:
+
+    1. Verify branch names match
+    2. Check file location (must be in `.github/workflows/`)
+    3. Validate YAML syntax
+    4. Check branch protection rules
+  </Accordion>
+
+  <Accordion title="Build failures">
+    Common causes:
+
+    1. Missing dependencies
+    2. Incorrect Rust version
+    3. Platform-specific issues
+    4. Missing secrets
+
+    Debug by:
+    - Checking job logs
+    - Running locally with same commands
+    - Comparing with successful runs
+  </Accordion>
+
+  <Accordion title="Slow workflows">
+    Optimize with:
+
+    1. Caching dependencies
+    2. Parallelizing jobs
+    3. Using matrix builds
+    4. Reducing artifact size
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="GitHub Actions" icon="github" href="/integration/github-actions">
+    Learn about GitHub Actions integration
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Configure Forge settings
+  </Card>
+  <Card title="ZSH Plugin" icon="plug" href="/integration/zsh-plugin">
+    Set up local development environment
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get started with Forge
+  </Card>
+</CardGroup>

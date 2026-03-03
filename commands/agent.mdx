@@ -1,0 +1,109 @@
+---
+title: forge agent
+description: Manage AI agents and view available agents
+---
+
+The `agent` command group provides tools for managing and inspecting AI agents in Forge.
+
+## Usage
+
+```bash
+forge agent [SUBCOMMAND] [OPTIONS]
+```
+
+## Subcommands
+
+### list
+
+List all available agents.
+
+Alias: `ls`
+
+```bash
+forge agent list
+forge agent ls
+```
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format for scripting.
+  
+  ```bash
+  forge agent list --porcelain
+  ```
+</ParamField>
+
+## Examples
+
+### List All Agents
+
+```bash
+forge agent list
+```
+
+Example output:
+
+```
+Available Agents:
+
+  sage      - Technical expert for complex problem-solving
+  muse      - Creative assistant for writing and content
+  forge     - General-purpose development assistant
+  custom-1  - Your custom agent
+```
+
+### List Agents (Machine-Readable)
+
+```bash
+forge agent list --porcelain
+```
+
+Example output:
+
+```json
+{
+  "agents": [
+    {
+      "id": "sage",
+      "name": "Sage",
+      "description": "Technical expert for complex problem-solving",
+      "is_custom": false
+    },
+    {
+      "id": "muse",
+      "name": "Muse",
+      "description": "Creative assistant for writing and content",
+      "is_custom": false
+    }
+  ]
+}
+```
+
+### Using List Command Alias
+
+```bash
+forge list agent
+forge list agents
+```
+
+### Filter Custom Agents Only
+
+```bash
+forge list agent --custom
+```
+
+## Related Commands
+
+- `forge --agent <ID>` - Start a session with a specific agent
+- `forge list tool <AGENT>` - List tools available to a specific agent
+- `forge info` - View the currently active agent
+
+## Agent Configuration
+
+Agents are configured through YAML files. See the [Agent Configuration](/configuration/agents) guide for details on creating custom agents.
+
+## Notes
+
+- Agents can have different tools and capabilities
+- Custom agents are stored in `~/.config/forge/agents/`
+- Use `forge --agent <ID>` to start a session with a specific agent
+- The default agent is used when no agent is specified

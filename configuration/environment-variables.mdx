@@ -1,0 +1,505 @@
+---
+title: Environment Variables
+description: Complete reference for Forge environment variables
+---
+
+Forge supports environment variables for advanced configuration and fine-tuning. Set these in your `.env` file or system environment.
+
+## API Configuration
+
+<ParamField path="FORGE_API_URL" type="string" default="https://api.forgecode.dev">
+  Custom Forge API URL.
+
+  **Example:**
+  ```bash
+  FORGE_API_URL=https://api.forgecode.dev
+  ```
+</ParamField>
+
+<ParamField path="FORGE_WORKSPACE_SERVER_URL" type="string" default="https://api.forgecode.dev/">
+  URL for the workspace indexing server.
+
+  **Example:**
+  ```bash
+  FORGE_WORKSPACE_SERVER_URL=http://localhost:8080
+  ```
+</ParamField>
+
+## Retry Configuration
+
+<ParamField path="FORGE_RETRY_INITIAL_BACKOFF_MS" type="integer" default="1000">
+  Initial backoff time in milliseconds for retries.
+
+  **Example:**
+  ```bash
+  FORGE_RETRY_INITIAL_BACKOFF_MS=2000
+  ```
+</ParamField>
+
+<ParamField path="FORGE_RETRY_BACKOFF_FACTOR" type="number" default="2">
+  Multiplier for backoff time on each retry.
+
+  **Example:**
+  ```bash
+  FORGE_RETRY_BACKOFF_FACTOR=2
+  ```
+</ParamField>
+
+<ParamField path="FORGE_RETRY_MAX_ATTEMPTS" type="integer" default="3">
+  Maximum number of retry attempts.
+
+  **Example:**
+  ```bash
+  FORGE_RETRY_MAX_ATTEMPTS=5
+  ```
+</ParamField>
+
+<ParamField path="FORGE_RETRY_SUPPRESS_RETRY_ERRORS" type="boolean" default="false">
+  Suppress retry error messages.
+
+  **Example:**
+  ```bash
+  FORGE_RETRY_SUPPRESS_RETRY_ERRORS=true
+  ```
+</ParamField>
+
+<ParamField path="FORGE_RETRY_STATUS_CODES" type="string" default="429,500,502,503,504">
+  HTTP status codes to retry (comma-separated).
+
+  **Example:**
+  ```bash
+  FORGE_RETRY_STATUS_CODES=429,500,502
+  ```
+</ParamField>
+
+## HTTP Configuration
+
+### Connection Settings
+
+<ParamField path="FORGE_HTTP_CONNECT_TIMEOUT" type="integer" default="30">
+  Connection timeout in seconds.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_CONNECT_TIMEOUT=60
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_READ_TIMEOUT" type="integer" default="900">
+  Read timeout in seconds.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_READ_TIMEOUT=1800
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_POOL_IDLE_TIMEOUT" type="integer" default="90">
+  Connection pool idle timeout in seconds.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_POOL_IDLE_TIMEOUT=120
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_POOL_MAX_IDLE_PER_HOST" type="integer" default="5">
+  Maximum idle connections per host.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_POOL_MAX_IDLE_PER_HOST=10
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_MAX_REDIRECTS" type="integer" default="10">
+  Maximum redirects to follow.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_MAX_REDIRECTS=5
+  ```
+</ParamField>
+
+### TLS Configuration
+
+<ParamField path="FORGE_HTTP_TLS_BACKEND" type="string" default="default">
+  TLS backend to use: `default` or `rustls`.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_TLS_BACKEND=rustls
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_MIN_TLS_VERSION" type="string" default="1.2">
+  Minimum TLS version: `1.0`, `1.1`, `1.2`, or `1.3`.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_MIN_TLS_VERSION=1.2
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_MAX_TLS_VERSION" type="string" default="1.3">
+  Maximum TLS version: `1.0`, `1.1`, `1.2`, or `1.3`.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_MAX_TLS_VERSION=1.3
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_ACCEPT_INVALID_CERTS" type="boolean" default="false">
+  Accept invalid SSL certificates.
+
+  <Warning>
+    Disables certificate verification. Only use in development environments.
+  </Warning>
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_ACCEPT_INVALID_CERTS=true
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_ROOT_CERT_PATHS" type="string">
+  Paths to custom root certificate files (comma-separated). Supports PEM, CRT, CER formats.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_ROOT_CERT_PATHS=/path/to/cert1.pem,/path/to/cert2.crt
+  ```
+</ParamField>
+
+### Keep-Alive Configuration
+
+<ParamField path="FORGE_HTTP_KEEP_ALIVE_INTERVAL" type="integer" default="60">
+  Keep-alive interval in seconds. Use `none` or `disabled` to disable.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_KEEP_ALIVE_INTERVAL=30
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_KEEP_ALIVE_TIMEOUT" type="integer" default="10">
+  Keep-alive timeout in seconds.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_KEEP_ALIVE_TIMEOUT=20
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_KEEP_ALIVE_WHILE_IDLE" type="boolean" default="true">
+  Keep connections alive while idle.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_KEEP_ALIVE_WHILE_IDLE=false
+  ```
+</ParamField>
+
+### Advanced HTTP Settings
+
+<ParamField path="FORGE_HTTP_USE_HICKORY" type="boolean" default="false">
+  Use Hickory DNS resolver.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_USE_HICKORY=true
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HTTP_ADAPTIVE_WINDOW" type="boolean" default="true">
+  Enable HTTP/2 adaptive window.
+
+  **Example:**
+  ```bash
+  FORGE_HTTP_ADAPTIVE_WINDOW=false
+  ```
+</ParamField>
+
+## Tool Configuration
+
+<ParamField path="FORGE_TOOL_TIMEOUT" type="integer" default="300">
+  Maximum execution time in seconds for a tool before termination.
+
+  **Example:**
+  ```bash
+  FORGE_TOOL_TIMEOUT=600
+  ```
+</ParamField>
+
+<ParamField path="FORGE_MAX_IMAGE_SIZE" type="integer" default="262144">
+  Maximum image file size in bytes (default: 256 KB).
+
+  **Example:**
+  ```bash
+  FORGE_MAX_IMAGE_SIZE=524288  # 512 KB
+  ```
+</ParamField>
+
+<ParamField path="FORGE_DUMP_AUTO_OPEN" type="boolean" default="false">
+  Automatically open dump files in browser.
+
+  **Example:**
+  ```bash
+  FORGE_DUMP_AUTO_OPEN=true
+  ```
+</ParamField>
+
+<ParamField path="FORGE_DEBUG_REQUESTS" type="string">
+  Write debug HTTP request files to specified path (absolute or relative).
+
+  **Example:**
+  ```bash
+  FORGE_DEBUG_REQUESTS=/tmp/forge-debug.json
+  ```
+</ParamField>
+
+## System Configuration
+
+<ParamField path="FORGE_MAX_SEARCH_RESULT_BYTES" type="integer" default="10240">
+  Maximum bytes for search results (default: 10 KB).
+
+  **Example:**
+  ```bash
+  FORGE_MAX_SEARCH_RESULT_BYTES=20480
+  ```
+</ParamField>
+
+<ParamField path="FORGE_MAX_LINE_LENGTH" type="integer" default="2000">
+  Maximum characters per line for file read operations.
+
+  **Example:**
+  ```bash
+  FORGE_MAX_LINE_LENGTH=4000
+  ```
+</ParamField>
+
+<ParamField path="FORGE_STDOUT_MAX_LINE_LENGTH" type="integer" default="2000">
+  Maximum characters per line for shell output.
+
+  **Example:**
+  ```bash
+  FORGE_STDOUT_MAX_LINE_LENGTH=4000
+  ```
+</ParamField>
+
+<ParamField path="FORGE_HISTORY_FILE" type="string">
+  Custom path for Forge history file.
+
+  **Example:**
+  ```bash
+  FORGE_HISTORY_FILE=/path/to/custom/history
+  ```
+</ParamField>
+
+<ParamField path="FORGE_BANNER" type="string">
+  Custom banner text to display on startup.
+
+  **Example:**
+  ```bash
+  FORGE_BANNER="Welcome to My Forge Environment"
+  ```
+</ParamField>
+
+<ParamField path="FORGE_MAX_CONVERSATIONS" type="integer" default="100">
+  Maximum number of conversations to show in list.
+
+  **Example:**
+  ```bash
+  FORGE_MAX_CONVERSATIONS=200
+  ```
+</ParamField>
+
+<ParamField path="SHELL" type="string">
+  Shell to use for command execution (Unix/Linux/macOS).
+
+  **Example:**
+  ```bash
+  SHELL=/bin/zsh
+  ```
+</ParamField>
+
+<ParamField path="COMSPEC" type="string">
+  Command processor to use (Windows).
+
+  **Example:**
+  ```bash
+  COMSPEC=cmd.exe
+  ```
+</ParamField>
+
+## Semantic Search Configuration
+
+<ParamField path="FORGE_SEM_SEARCH_LIMIT" type="integer" default="200">
+  Maximum number of results from initial vector search.
+
+  **Example:**
+  ```bash
+  FORGE_SEM_SEARCH_LIMIT=300
+  ```
+</ParamField>
+
+<ParamField path="FORGE_SEM_SEARCH_TOP_K" type="integer" default="20">
+  Top-k parameter for relevance filtering during semantic search.
+
+  **Example:**
+  ```bash
+  FORGE_SEM_SEARCH_TOP_K=30
+  ```
+</ParamField>
+
+## Display Configuration
+
+<ParamField path="FORGE_CURRENCY_SYMBOL" type="string" default="$">
+  Currency symbol for cost display in ZSH theme.
+
+  **Example:**
+  ```bash
+  FORGE_CURRENCY_SYMBOL="€"
+  ```
+</ParamField>
+
+<ParamField path="FORGE_CURRENCY_CONVERSION_RATE" type="number" default="1.0">
+  Conversion rate for currency display.
+
+  **Example:**
+  ```bash
+  FORGE_CURRENCY_CONVERSION_RATE=0.85  # USD to EUR
+  ```
+</ParamField>
+
+<ParamField path="NERD_FONT" type="boolean">
+  Enable Nerd Font icons in ZSH theme. Auto-detected by default.
+
+  **Example:**
+  ```bash
+  NERD_FONT=1  # or "true" to enable
+  ```
+</ParamField>
+
+<ParamField path="USE_NERD_FONT" type="boolean">
+  Alternative variable for enabling Nerd Font icons (same as NERD_FONT).
+
+  **Example:**
+  ```bash
+  USE_NERD_FONT=0  # or "false" to disable
+  ```
+</ParamField>
+
+## ZSH Plugin Configuration
+
+<ParamField path="FORGE_BIN" type="string" default="forge">
+  Command to use for forge operations in the ZSH plugin.
+
+  **Example:**
+  ```bash
+  FORGE_BIN=forge
+  ```
+</ParamField>
+
+## Logging Configuration
+
+<ParamField path="FORGE_LOG" type="string">
+  Log filter level using standard tracing filter syntax.
+
+  **Default:**
+  - `forge=info` when tracking enabled
+  - `forge=debug` when tracking disabled
+
+  **Levels:**
+  - `forge=error` - Only errors
+  - `forge=warn` - Warnings and errors
+  - `forge=info` - Informational messages
+  - `forge=debug` - Debug information
+  - `forge=trace` - Detailed tracing
+
+  **Example:**
+  ```bash
+  FORGE_LOG=forge=debug
+  ```
+</ParamField>
+
+## Configuration Examples
+
+<CodeGroup>
+  ```bash Production Environment
+  # .env - Production configuration
+  
+  # API settings
+  FORGE_API_URL=https://api.forgecode.dev
+  
+  # Timeouts for stable connections
+  FORGE_HTTP_CONNECT_TIMEOUT=30
+  FORGE_HTTP_READ_TIMEOUT=900
+  
+  # Conservative retry settings
+  FORGE_RETRY_MAX_ATTEMPTS=3
+  FORGE_RETRY_INITIAL_BACKOFF_MS=1000
+  
+  # Error logging
+  FORGE_LOG=forge=info
+  ```
+
+  ```bash Development Environment
+  # .env - Development configuration
+  
+  # Local server
+  FORGE_WORKSPACE_SERVER_URL=http://localhost:8080
+  
+  # Longer timeouts for debugging
+  FORGE_HTTP_READ_TIMEOUT=1800
+  FORGE_TOOL_TIMEOUT=600
+  
+  # Debug logging
+  FORGE_LOG=forge=debug
+  FORGE_DEBUG_REQUESTS=./debug-requests.json
+  
+  # Auto-open dumps
+  FORGE_DUMP_AUTO_OPEN=true
+  ```
+
+  ```bash Performance Tuning
+  # .env - Optimized for speed
+  
+  # Aggressive retry
+  FORGE_RETRY_MAX_ATTEMPTS=5
+  FORGE_RETRY_INITIAL_BACKOFF_MS=500
+  FORGE_RETRY_BACKOFF_FACTOR=1.5
+  
+  # Connection pooling
+  FORGE_HTTP_POOL_MAX_IDLE_PER_HOST=10
+  FORGE_HTTP_POOL_IDLE_TIMEOUT=120
+  
+  # Larger buffers
+  FORGE_MAX_LINE_LENGTH=4000
+  FORGE_MAX_SEARCH_RESULT_BYTES=20480
+  ```
+
+  ```bash Custom Certificates
+  # .env - Corporate network with custom CA
+  
+  # TLS settings
+  FORGE_HTTP_MIN_TLS_VERSION=1.2
+  FORGE_HTTP_ROOT_CERT_PATHS=/etc/ssl/certs/corporate-ca.pem
+  
+  # Proxy settings (if needed)
+  HTTP_PROXY=http://proxy.corp.com:8080
+  HTTPS_PROXY=http://proxy.corp.com:8080
+  ```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="forge.yaml Reference" icon="arrow-right" href="/configuration/forge-yaml">
+    Configure model behavior and workflow
+  </Card>
+  <Card title="Custom Rules" icon="arrow-right" href="/configuration/custom-rules">
+    Define coding guidelines
+  </Card>
+</CardGroup>

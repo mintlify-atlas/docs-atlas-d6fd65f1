@@ -1,0 +1,315 @@
+---
+title: forge commit
+description: Generate AI-powered git commit messages
+---
+
+The `commit` command generates intelligent commit messages by analyzing your staged changes using AI.
+
+## Usage
+
+```bash
+forge commit [OPTIONS] [TEXT]...
+```
+
+## Options
+
+<ParamField path="--preview" type="boolean" default="false">
+  Preview the commit message without committing.
+  
+  ```bash
+  forge commit --preview
+  ```
+</ParamField>
+
+<ParamField path="--max-diff" type="number" default="100000">
+  Maximum git diff size in bytes (minimum: 5000). Limits the size of the git diff sent to the AI model. Large diffs are truncated to save tokens and reduce API costs.
+  
+  ```bash
+  forge commit --max-diff 50000
+  forge commit --max-diff 200000
+  ```
+</ParamField>
+
+<ParamField path="text" type="string[]" default="none">
+  Additional text to customize the commit message. Provide additional context or instructions for the AI to use when generating the commit message. Multiple words can be provided without quotes.
+  
+  ```bash
+  forge commit fix typo in readme
+  forge commit refactor user authentication
+  forge commit update dependencies
+  ```
+</ParamField>
+
+## Examples
+
+### Generate and Commit
+
+Generate a commit message and commit changes:
+
+```bash
+forge commit
+```
+
+Example output:
+
+```
+Analyzing staged changes...
+
+Generated commit message:
+─────────────────────────────
+Add user authentication middleware
+
+Implements JWT-based authentication for API routes.
+Adds middleware to verify tokens and protect endpoints.
+─────────────────────────────
+
+Commit these changes? [Y/n]: y
+✓ Changes committed
+```
+
+### Preview Without Committing
+
+Generate a commit message without committing:
+
+```bash
+forge commit --preview
+```
+
+Example output:
+
+```
+Analyzing staged changes...
+
+Generated commit message:
+─────────────────────────────
+Fix authentication bug in login endpoint
+
+Resolves issue where expired tokens were accepted.
+Adds proper token validation and error handling.
+─────────────────────────────
+
+(Preview mode - no commit made)
+```
+
+### Provide Context
+
+Add context to customize the message:
+
+```bash
+forge commit fix typo in documentation
+```
+
+Example output:
+
+```
+Analyzing staged changes...
+
+Generated commit message:
+─────────────────────────────
+Fix typo in documentation
+
+Corrects spelling error in API reference guide.
+─────────────────────────────
+```
+
+### With Custom Text
+
+```bash
+forge commit refactor user service for better performance
+```
+
+Example output:
+
+```
+Analyzing staged changes...
+
+Generated commit message:
+─────────────────────────────
+Refactor user service for better performance
+
+Optimizes database queries by adding proper indexes.
+Reduces response time by 40% in user lookup operations.
+─────────────────────────────
+```
+
+### Limit Diff Size
+
+For large changes, limit the diff size:
+
+```bash
+forge commit --max-diff 50000 --preview
+```
+
+Example output:
+
+```
+Analyzing staged changes...
+Note: Diff truncated to 50,000 bytes
+
+Generated commit message:
+─────────────────────────────
+Update dependencies and configuration
+
+Updates multiple package versions.
+Refreshes configuration files.
+─────────────────────────────
+
+(Preview mode - no commit made)
+```
+
+## Piped Input
+
+You can pipe a git diff directly:
+
+```bash
+git diff | forge commit --preview
+```
+
+Example output:
+
+```
+Analyzing provided diff...
+
+Generated commit message:
+─────────────────────────────
+Add error handling to API client
+
+Implements retry logic for network failures.
+Adds proper error messages for user feedback.
+─────────────────────────────
+
+(Preview mode - no commit made)
+```
+
+## Workflow Examples
+
+### Standard Workflow
+
+1. Make your changes
+2. Stage changes:
+   ```bash
+   git add .
+   ```
+3. Preview commit message:
+   ```bash
+   forge commit --preview
+   ```
+4. Commit if satisfied:
+   ```bash
+   forge commit
+   ```
+
+### Quick Commit
+
+```bash
+git add . && forge commit
+```
+
+### Preview and Edit
+
+```bash
+# Preview the message
+forge commit --preview
+
+# If you want to edit it manually
+git commit
+```
+
+### With Conventional Commits
+
+```bash
+forge commit feat: add user profile page
+forge commit fix: resolve authentication bug
+forge commit docs: update API documentation
+```
+
+## AI Analysis
+
+The AI analyzes:
+
+- Files changed
+- Lines added/removed
+- Code context
+- Commit patterns in your repository
+- Your custom text (if provided)
+
+The generated message includes:
+
+- Concise summary line
+- Detailed description (when appropriate)
+- Relevant context about the changes
+
+## Best Practices
+
+### Use Preview Mode
+
+Always preview first for important commits:
+
+```bash
+forge commit --preview
+```
+
+### Add Context for Clarity
+
+Provide context for better messages:
+
+```bash
+forge commit fix: handle edge case in date parsing
+```
+
+### Review Before Committing
+
+Always review the generated message and reject if it's not accurate.
+
+### Limit Diff Size for Large Changes
+
+For large changesets, use `--max-diff`:
+
+```bash
+forge commit --max-diff 50000
+```
+
+## Integration with Git
+
+### Stage All Changes
+
+```bash
+git add -A && forge commit
+```
+
+### Stage Specific Files
+
+```bash
+git add src/auth/*.ts && forge commit authentication changes
+```
+
+### Amend Last Commit
+
+```bash
+# Generate new message
+forge commit --preview > .git/commit-msg.txt
+
+# Amend with new message
+git commit --amend -F .git/commit-msg.txt
+```
+
+## Configuration
+
+No additional configuration needed. The command uses your active Forge model and provider.
+
+## Related Commands
+
+- `git add` - Stage changes before committing
+- `git status` - View changes before generating message
+- `git diff --staged` - Preview staged changes
+- `forge suggest` - Get shell command suggestions
+
+## Notes
+
+- Requires staged changes (`git add`)
+- Works with any Git repository
+- Uses your configured Forge model
+- Respects your repository's commit message style
+- `--max-diff` helps control API costs for large changes
+- Multiple words in custom text don't need quotes
+- Preview mode is useful for reviewing before committing

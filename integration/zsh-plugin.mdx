@@ -1,0 +1,359 @@
+---
+title: 'ZSH Plugin Setup'
+description: 'Install and configure the Forge ZSH plugin for intelligent command transformation and AI-powered terminal workflows'
+---
+
+## Overview
+
+The Forge ZSH plugin provides intelligent command transformation, file tagging, and conversation management directly in your terminal. It transforms `:command` syntax into Forge executions with automatic session management and context continuity.
+
+## Features
+
+- Smart command transformation with `:command` syntax
+- Agent selection with tab completion
+- Interactive file tagging using `@[filename]` syntax
+- Syntax highlighting for commands and files
+- Automatic conversation continuity across sessions
+- Interactive fuzzy finding for files and agents
+
+## Prerequisites
+
+Before installing the plugin, ensure you have these tools:
+
+<CardGroup cols={3}>
+  <Card title="fzf" icon="magnifying-glass">
+    Command-line fuzzy finder for interactive selections
+  </Card>
+  <Card title="fd" icon="file-magnifying-glass">
+    Fast file finder (alternative to find)
+  </Card>
+  <Card title="forge" icon="terminal">
+    The Forge CLI tool
+  </Card>
+</CardGroup>
+
+<Steps>
+  <Step title="Install Prerequisites">
+    Install the required dependencies for your operating system:
+
+    <CodeGroup>
+    ```bash macOS (Homebrew)
+    brew install fzf fd
+    ```
+
+    ```bash Ubuntu/Debian
+    sudo apt install fzf fd-find
+    ```
+
+    ```bash Arch Linux
+    sudo pacman -S fzf fd
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Automatic Setup">
+    The easiest way to install the Forge ZSH plugin is using the automatic setup:
+
+    ```bash
+    forge zsh setup
+    ```
+
+    This command will:
+    - Add the plugin configuration to your `~/.zshrc`
+    - Enable required ZSH plugins (zsh-autosuggestions, zsh-syntax-highlighting)
+    - Load the Forge plugin and theme
+    - Set up all necessary keybindings
+
+    The setup adds this block to your `~/.zshrc`:
+
+    ```bash
+    # !! Contents within this block are managed by 'forge zsh setup' !!
+    # !! Do not edit manually - changes will be overwritten !!
+
+    # Add required zsh plugins if not already present
+    if [[ ! " ${plugins[@]} " =~ " zsh-autosuggestions " ]]; then
+        plugins+=(zsh-autosuggestions)
+    fi
+    if [[ ! " ${plugins[@]} " =~ " zsh-syntax-highlighting " ]]; then
+        plugins+=(zsh-syntax-highlighting)
+    fi
+
+    # Load forge shell plugin (commands, completions, keybindings)
+    if [[ -z "$_FORGE_PLUGIN_LOADED" ]]; then
+        eval "$(forge zsh plugin)"
+    fi
+
+    # Load forge shell theme (prompt with AI context)
+    if [[ -z "$_FORGE_THEME_LOADED" ]]; then
+        eval "$(forge zsh theme)"
+    fi
+    ```
+  </Step>
+
+  <Step title="Manual Setup (Alternative)">
+    If you prefer manual installation, add this to your `~/.zshrc`:
+
+    ```bash
+    # Load Forge ZSH plugin
+    source /path/to/forge/shell-plugin/forge.plugin.zsh
+    ```
+
+    Or if using Oh My Zsh, add `forge` to your plugins array:
+
+    ```bash
+    plugins=(git zsh-autosuggestions zsh-syntax-highlighting forge)
+    ```
+  </Step>
+
+  <Step title="Reload Shell">
+    Apply the changes by reloading your shell:
+
+    ```bash
+    source ~/.zshrc
+    ```
+
+    Or simply open a new terminal window.
+  </Step>
+
+  <Step title="Verify Installation">
+    Test the plugin is working:
+
+    ```bash
+    : hello world
+    ```
+
+    You should see Forge respond to your message. Try using tab completion:
+
+    ```bash
+    :    # Press TAB to see available commands
+    @    # Press TAB to browse files
+    ```
+  </Step>
+</Steps>
+
+## Basic Usage
+
+### Starting Conversations
+
+Begin any command with `:` followed by your prompt:
+
+```bash
+: What's the current time?
+: Explain how Redis caching works
+```
+
+### Using Specific Agents
+
+Specify an agent by name after the colon:
+
+```bash
+:sage How does caching work in this system?
+:planner Create a deployment strategy
+```
+
+**Tip:** Type `:` and press TAB for interactive agent selection.
+
+### File Tagging
+
+Tag files in your commands using `@[filename]` syntax:
+
+```bash
+: Review this code @[src/main.rs]
+: Debug the issue in @[logs/error.log] @[config/app.yml]
+```
+
+**Tip:** Type `@` and press TAB to search and select files interactively.
+
+### Session Management
+
+<AccordionGroup>
+  <Accordion title="Start New Session">
+    Clear context and start fresh:
+
+    ```bash
+    :new  # or :n
+    ```
+
+    This clears the conversation ID and resets the session state.
+  </Accordion>
+
+  <Accordion title="Switch Conversations">
+    Browse and switch between conversations:
+
+    ```bash
+    :conversation  # or :c for interactive list
+    :conversation <id>  # Switch to specific conversation
+    :conversation -  # Toggle between current and previous (like cd -)
+    ```
+  </Accordion>
+
+  <Accordion title="Clone Conversations">
+    Create a copy of an existing conversation:
+
+    ```bash
+    :clone  # Interactive selection
+    :clone <conversation_id>  # Clone specific conversation
+    ```
+  </Accordion>
+
+  <Accordion title="View System Info">
+    Display system and project information:
+
+    ```bash
+    :info  # or :i
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Configuration
+
+Customize plugin behavior using environment variables in your `~/.zshrc`:
+
+```bash
+# Custom forge binary location
+export FORGE_BIN="/path/to/custom/forge"
+
+# Editor for :edit command
+export FORGE_EDITOR="vim"
+
+# Enable/disable automatic workspace sync
+export FORGE_SYNC_ENABLED="true"
+
+# Maximum diff size for commit message generation (bytes)
+export FORGE_MAX_COMMIT_DIFF="100000"
+
+# Currency symbol for cost display
+export FORGE_CURRENCY_SYMBOL="$"
+
+# Currency conversion rate
+export FORGE_CURRENCY_CONVERSION_RATE="1.0"
+
+# Enable Nerd Font icons (auto-detected by default)
+export NERD_FONT="1"
+```
+
+### Available Configuration Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FORGE_BIN` | `forge` | Path to forge executable |
+| `FORGE_EDITOR` | `$EDITOR` or `nano` | Editor command for `:edit` |
+| `FORGE_SYNC_ENABLED` | `true` | Enable automatic workspace sync |
+| `FORGE_MAX_COMMIT_DIFF` | `100000` | Max diff size for commits (bytes) |
+| `FORGE_CURRENCY_SYMBOL` | `$` | Currency symbol for cost display |
+| `FORGE_CURRENCY_CONVERSION_RATE` | `1.0` | Currency conversion rate |
+| `NERD_FONT` | auto-detected | Enable Nerd Font icons |
+
+## Keyboard Shortcuts
+
+The plugin registers these keybindings:
+
+- **Tab** (`^I`): Interactive completion for files and agents
+- **Enter** (`^M`, `^J`): Transform and execute commands
+- **Ctrl+C**: Interrupt running Forge commands
+
+## Advanced Features
+
+### Syntax Highlighting
+
+The plugin provides visual feedback:
+
+- Tagged files (`@[filename]`): Green bold
+- Agent commands (`:agent`): Yellow bold
+- Command text: White bold
+
+### Command History
+
+All transformed commands are saved to ZSH history:
+
+- Navigate with arrow keys
+- Search with `Ctrl+R`
+- Reuse complex commands with file tags
+
+### Codebase Indexing
+
+Sync your codebase for semantic search:
+
+```bash
+:sync
+```
+
+### Environment Diagnostics
+
+Run comprehensive diagnostics:
+
+```bash
+:doctor
+```
+
+This checks:
+- ZSH version and terminal info
+- Forge installation and version
+- Plugin and theme loading status
+- Dependencies (fzf, fd, bat)
+- Editor configuration
+- Nerd Font support
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Plugin not loading">
+    Ensure the plugin is sourced after Oh My Zsh initialization:
+
+    ```bash
+    # In ~/.zshrc
+    source $ZSH/oh-my-zsh.sh  # Oh My Zsh first
+    eval "$(forge zsh plugin)"  # Then Forge plugin
+    ```
+  </Accordion>
+
+  <Accordion title="Tab completion not working">
+    Check that fzf is installed and in your PATH:
+
+    ```bash
+    which fzf
+    which fd  # or fdfind on Ubuntu/Debian
+    ```
+  </Accordion>
+
+  <Accordion title="Syntax highlighting issues">
+    Install zsh-syntax-highlighting:
+
+    ```bash
+    # Oh My Zsh
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
+      ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+    # Then add to plugins in ~/.zshrc
+    plugins=(... zsh-syntax-highlighting)
+    ```
+  </Accordion>
+
+  <Accordion title="Commands not transforming">
+    Verify the plugin is loaded:
+
+    ```bash
+    echo $_FORGE_PLUGIN_LOADED
+    # Should output: 1
+    ```
+
+    If empty, the plugin isn't loaded. Check your `~/.zshrc` configuration.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="ZSH Theme" icon="palette" href="/integration/zsh-theme">
+    Customize your prompt with AI context
+  </Card>
+  <Card title="Shell Completions" icon="terminal" href="/integration/shell-completions">
+    Set up completions for other shells
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/forge-config">
+    Learn about Forge configuration options
+  </Card>
+  <Card title="Agents" icon="robot" href="/concepts/agents">
+    Explore available agents and their capabilities
+  </Card>
+</CardGroup>

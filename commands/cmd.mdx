@@ -1,0 +1,292 @@
+---
+title: forge cmd
+description: Run or list custom commands
+---
+
+The `cmd` command group (also accessible as `command` or `commands`) allows you to execute and manage custom commands defined in your Forge configuration.
+
+## Usage
+
+```bash
+forge cmd [SUBCOMMAND] [OPTIONS]
+forge command [SUBCOMMAND] [OPTIONS]  # Alias
+forge commands [SUBCOMMAND] [OPTIONS] # Alias
+```
+
+## Subcommands
+
+### list
+
+List all available custom commands.
+
+```bash
+forge cmd list [OPTIONS]
+```
+
+<ParamField path="--custom" type="boolean" default="false">
+  Shows only custom commands (excludes built-in commands).
+  
+  ```bash
+  forge cmd list --custom
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge cmd list --porcelain
+  ```
+</ParamField>
+
+<ParamField path="--conversation-id" type="uuid" default="none">
+  Conversation ID to execute the command within.
+  
+  Alias: `--cid`
+  
+  ```bash
+  forge cmd list --cid 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+### execute
+
+Execute a custom command.
+
+```bash
+forge cmd execute <NAME> [ARGS]...
+```
+
+<ParamField path="commands" type="string[]" required>
+  Name of the custom command to execute, followed by any arguments.
+  
+  ```bash
+  forge cmd execute mycommand
+  forge cmd execute deploy production
+  forge cmd execute test unit integration
+  ```
+</ParamField>
+
+<ParamField path="--conversation-id" type="uuid" default="none">
+  Conversation ID to execute the command within.
+  
+  Alias: `--cid`
+  
+  ```bash
+  forge cmd execute mycommand --cid 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge cmd execute mycommand --porcelain
+  ```
+</ParamField>
+
+## Examples
+
+### List All Commands
+
+```bash
+forge cmd list
+```
+
+Example output:
+
+```
+Available Commands:
+
+Name         Description
+deploy       Deploy application to specified environment
+test         Run test suite
+format       Format code using project standards
+lint         Lint codebase and fix issues
+build        Build project for production
+```
+
+### List Custom Commands Only
+
+```bash
+forge cmd list --custom
+```
+
+Example output:
+
+```
+Custom Commands:
+
+Name         Description
+deploy       Deploy application to specified environment
+format       Format code using project standards
+```
+
+### Execute a Command
+
+```bash
+forge cmd execute test
+```
+
+Example output:
+
+```
+Executing command: test
+
+Running test suite...
+✓ 47 tests passed
+```
+
+### Execute with Arguments
+
+```bash
+forge cmd execute deploy production
+```
+
+Example output:
+
+```
+Executing command: deploy production
+
+Deploying to production environment...
+✓ Deployment successful
+```
+
+### Execute with Multiple Arguments
+
+```bash
+forge cmd execute test unit integration
+```
+
+Example output:
+
+```
+Executing command: test unit integration
+
+Running unit tests... ✓
+Running integration tests... ✓
+```
+
+## Alternative Commands
+
+You can use various aliases:
+
+```bash
+forge command list
+forge commands list
+forge cmd list
+```
+
+```bash
+forge command execute mycommand
+forge commands execute mycommand
+forge cmd execute mycommand
+```
+
+You can also use the `list` command:
+
+```bash
+forge list cmd
+forge list command
+forge list commands
+```
+
+## Defining Custom Commands
+
+Custom commands are defined in your Forge configuration file.
+
+### User-Level Commands
+
+Define global commands in `~/.config/forge/commands.yaml`:
+
+```yaml
+commands:
+  deploy:
+    description: Deploy application to specified environment
+    script: |
+      #!/bin/bash
+      ENV=${1:-staging}
+      echo "Deploying to $ENV..."
+      npm run build
+      ./deploy.sh $ENV
+  
+  test:
+    description: Run test suite
+    script: |
+      #!/bin/bash
+      npm test
+```
+
+### Project-Level Commands
+
+Define project-specific commands in `./.forge/commands.yaml`:
+
+```yaml
+commands:
+  setup:
+    description: Setup development environment
+    script: |
+      #!/bin/bash
+      npm install
+      cp .env.example .env
+      docker-compose up -d
+  
+  format:
+    description: Format code using project standards
+    script: |
+      #!/bin/bash
+      npm run format
+      npm run lint -- --fix
+```
+
+## Command Scripts
+
+Custom command scripts:
+
+- Run in your shell environment
+- Have access to command arguments via `$1`, `$2`, etc.
+- Can use any shell commands or scripts
+- Support multi-line scripts
+- Can return exit codes
+
+### Example Command with Arguments
+
+```yaml
+commands:
+  git-branch:
+    description: Create and checkout a new git branch
+    script: |
+      #!/bin/bash
+      BRANCH_NAME=$1
+      if [ -z "$BRANCH_NAME" ]; then
+        echo "Usage: forge cmd execute git-branch <branch-name>"
+        exit 1
+      fi
+      git checkout -b "$BRANCH_NAME"
+```
+
+Usage:
+
+```bash
+forge cmd execute git-branch feature/new-feature
+```
+
+## Machine-Readable Output
+
+```bash
+forge cmd list --porcelain | jq '.commands[] | select(.is_custom == true)'
+```
+
+## Related Commands
+
+- `forge list command` - Alternative way to list commands
+- `forge suggest <PROMPT>` - Get AI-generated command suggestions
+
+## Notes
+
+- Project-level commands take precedence over user-level commands
+- Commands run in your current shell environment
+- Use `--custom` to filter out built-in commands
+- Commands can accept multiple arguments
+- Exit codes from scripts are preserved
+- Scripts have access to all environment variables

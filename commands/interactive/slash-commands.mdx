@@ -1,0 +1,349 @@
+---
+title: Slash Commands Reference
+description: Complete reference for all slash commands available in Forge's interactive mode
+---
+
+## Core Commands
+
+### Conversation Management
+
+#### `/new` (alias: `n`)
+
+Start a new conversation while preserving history.
+
+```
+/new
+```
+
+This creates a fresh conversation context while maintaining access to previous conversations through `/conversation`.
+
+#### `/conversation` or `/conversations` (alias: `c`)
+
+List and switch between all conversations for the active workspace.
+
+```
+/conversation
+```
+
+Displays an interactive list of conversations with timestamps and allows you to switch between them.
+
+#### `/compact`
+
+Compact the conversation context to reduce token usage.
+
+```
+/compact
+```
+
+Use this when approaching context limits. Forge will compress the conversation history while preserving important information.
+
+### Agent Switching
+
+#### `/forge` or `/act`
+
+Switch to Forge agent (implementation mode) with code changes enabled.
+
+```
+/forge
+> Implement a new login feature
+```
+
+#### `/muse` or `/plan`
+
+Switch to Muse agent (planning mode) without code changes.
+
+```
+/muse
+> Help me design the architecture for this feature
+```
+
+#### `/sage`
+
+Switch to Sage agent for systematic codebase exploration and analysis.
+
+```
+/sage
+> Analyze how authentication is implemented
+```
+
+#### `/help`
+
+Switch to Help agent for questions about Forge itself.
+
+```
+/help
+> How do I configure MCP servers?
+```
+
+#### `/agent` (alias: `a`)
+
+Interactively select and switch between available agents.
+
+```
+/agent
+```
+
+Displays a menu of all configured agents including custom agents from your workflow.
+
+### Configuration
+
+#### `/model` (alias: `m`)
+
+Switch to a different AI model.
+
+```
+/model
+```
+
+Displays an interactive list of available models for your current provider, showing context length and capabilities.
+
+#### `/provider` (alias: `p`)
+
+Switch to a different AI provider.
+
+```
+/provider
+```
+
+Shows all configured providers (OpenAI, Anthropic, etc.) and allows you to switch between them.
+
+#### `/login`
+
+Configure provider credentials interactively.
+
+```
+/login
+```
+
+Guides you through adding or updating provider API keys and credentials.
+
+#### `/logout`
+
+Remove provider credentials.
+
+```
+/logout
+```
+
+Removes stored credentials for the selected provider.
+
+### Information Commands
+
+#### `/info` (alias: `i`)
+
+Display system and session information.
+
+```
+/info
+```
+
+Shows current agent, model, provider, workspace, and other session details.
+
+#### `/env` (alias: `e`)
+
+Display environment configuration.
+
+```
+/env
+```
+
+Shows environment variables and configuration settings affecting Forge.
+
+#### `/usage`
+
+Display usage statistics including tokens and requests.
+
+```
+/usage
+```
+
+Shows token usage, API requests, and cost information for the current session.
+
+#### `/tools` (alias: `t`)
+
+List all available tools with descriptions and schema.
+
+```
+/tools
+```
+
+Displays all tools available to the AI agent, including built-in tools and MCP tools.
+
+### Git Operations
+
+#### `/commit`
+
+Generate an AI commit message and commit changes.
+
+```
+/commit
+```
+
+Analyzes staged changes and generates a meaningful commit message, then commits.
+
+**With max diff size:**
+
+```
+/commit 5000
+```
+
+Limits the diff size analyzed to 5000 bytes for very large changesets.
+
+<Note>
+  Forge analyzes your git diff to generate contextual commit messages. Make sure you have changes staged with `git add` before using this command.
+</Note>
+
+#### `/retry` (alias: `r`)
+
+Retry the last command without modifying context.
+
+```
+/retry
+```
+
+Useful when a command fails due to network issues or temporary errors.
+
+### Export and Debugging
+
+#### `/dump` (alias: `d`)
+
+Save the current conversation to a file.
+
+**JSON format (default):**
+
+```
+/dump
+```
+
+Saves conversation as JSON file in the current directory.
+
+**HTML format:**
+
+```
+/dump html
+```
+
+Saves conversation as a formatted HTML file for easy viewing in browsers.
+
+### Workspace Management
+
+#### `/index`
+
+Index the current workspace for semantic code search.
+
+```
+/index
+```
+
+Creates a semantic index of your codebase, enabling more intelligent code search and context retrieval.
+
+### Application Control
+
+#### `/update`
+
+Update Forge to the latest compatible version.
+
+```
+/update
+```
+
+Checks for and installs the latest version of Forge.
+
+#### `/exit`
+
+Exit Forge and return to your shell.
+
+```
+/exit
+```
+
+You can also use `Ctrl+D` to exit.
+
+## Shell Commands
+
+Commands starting with `!` are executed directly in your shell:
+
+```
+!git status
+!npm test
+!cargo build
+!ls -la
+```
+
+<Note>
+  Shell commands run in your current working directory and have access to your full shell environment.
+</Note>
+
+## Custom Commands
+
+Custom commands can be defined in your `forge.yaml`:
+
+```yaml
+commands:
+  - name: "refactor"
+    description: "Refactor selected code"
+    prompt: "Please refactor this code to improve readability"
+```
+
+Use them like built-in commands:
+
+```
+/refactor
+```
+
+## Agent Commands
+
+When you configure custom agents, Forge generates commands automatically:
+
+```
+/agent-custom-name     # 🤖 Switch to Custom Name agent
+/agent-data-analyst    # 🤖 Switch to Data Analyst agent
+```
+
+## Workflow Commands
+
+Workflow commands appear with the ⚙ prefix:
+
+```
+/deploy        # ⚙ Deploy the application
+/run-tests     # ⚙ Run test suite
+```
+
+## Command Aliases
+
+Many commands have shorter aliases for faster typing:
+
+| Command | Alias |
+|---------|-------|
+| `/new` | `n` |
+| `/info` | `i` |
+| `/env` | `e` |
+| `/model` | `m` |
+| `/provider` | `p` |
+| `/conversation` | `c` |
+| `/tools` | `t` |
+| `/dump` | `d` |
+| `/retry` | `r` |
+| `/agent` | `a` |
+
+## Command Completion
+
+Press `Tab` after typing `/` to see all available commands with descriptions. The completion menu shows:
+
+- Built-in system commands
+- Custom commands from `forge.yaml`
+- Agent switching commands
+- Workflow commands
+
+## Tips
+
+- Use `/info` to check your current configuration before making changes
+- Use `/compact` when you see warnings about context length
+- Combine shell commands with natural language: run `!npm test` then ask "what failed?"
+- Use `/dump html` to save important conversations for documentation
+- Set up custom commands for frequently used prompts
+
+## Next Steps
+
+- [Keyboard Shortcuts](/commands/interactive/keyboard-shortcuts) - Learn keyboard shortcuts for efficiency
+- [Overview](/commands/interactive/overview) - Understand interactive mode concepts

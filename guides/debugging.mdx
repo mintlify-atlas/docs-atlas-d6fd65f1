@@ -1,0 +1,190 @@
+---
+title: Debugging with Forge
+description: Learn how to effectively debug code using Forge's AI-powered assistance
+---
+
+# Debugging with Forge
+
+Forge provides intelligent debugging assistance to help you identify and fix issues in your codebase quickly. This guide covers practical workflows for debugging various types of problems.
+
+## Understanding Error Messages
+
+When you encounter an error, Forge can help analyze and explain what's happening.
+
+### Basic Error Analysis
+
+<Steps>
+  <Step title="Share the error message">
+    Copy the complete error message, including stack traces, and paste it into Forge:
+    ```
+    > I'm getting this error: "TypeError: Cannot read property 'map' of undefined". What might be causing it?
+    ```
+  </Step>
+  
+  <Step title="Provide context">
+    Forge will analyze the error in the context of your codebase and suggest potential causes based on your code.
+  </Step>
+  
+  <Step title="Review suggested solutions">
+    Forge will propose different solutions to fix the issue, explaining the trade-offs of each approach.
+  </Step>
+</Steps>
+
+<Tip>
+Include the file path and line number where the error occurs for more targeted debugging assistance.
+</Tip>
+
+## Debugging Workflows
+
+### Interactive Debugging Session
+
+Forge can guide you through a systematic debugging process:
+
+<Steps>
+  <Step title="Describe the problem">
+    Explain what you expected to happen versus what's actually happening:
+    ```
+    > The user authentication is failing silently. Users should see an error message but nothing appears.
+    ```
+  </Step>
+  
+  <Step title="Analyze the flow">
+    Forge will examine the authentication system and identify where the error handling might be breaking down.
+  </Step>
+  
+  <Step title="Inspect relevant code">
+    Forge will point you to specific files and line numbers (e.g., `src/services/auth.ts:142`) where issues are likely occurring.
+  </Step>
+  
+  <Step title="Implement fixes">
+    Forge can suggest and implement fixes with your approval, including proper error handling.
+  </Step>
+</Steps>
+
+### Runtime Issue Investigation
+
+When dealing with runtime errors or unexpected behavior:
+
+```
+> The application crashes when processing large files. Can you help me identify the bottleneck?
+```
+
+Forge will:
+- Analyze your file processing logic
+- Identify potential memory issues or infinite loops
+- Suggest optimizations and error handling improvements
+- Help implement safeguards like file size limits
+
+<Tip>
+Use Forge's verbose mode (`forge --verbose`) to see detailed logging during debugging sessions.
+</Tip>
+
+## Real-World Debugging Scenarios
+
+### Scenario 1: Null Reference Errors
+
+**Problem**: Your application throws null reference errors intermittently.
+
+<Steps>
+  <Step title="Identify the pattern">
+    Ask Forge to analyze when and where null references occur:
+    ```
+    > I'm getting null reference errors in UserProfile component. Can you find all places where user data might be null?
+    ```
+  </Step>
+  
+  <Step title="Review findings">
+    Forge will search through your codebase and identify all locations where null checks are missing.
+  </Step>
+  
+  <Step title="Add defensive checks">
+    Forge can help add proper null checks, default values, or optional chaining throughout your code.
+  </Step>
+</Steps>
+
+### Scenario 2: API Integration Issues
+
+**Problem**: API calls are failing but you're not sure why.
+
+```
+> API requests to /api/users are returning 500 errors. Help me debug the issue.
+```
+
+Forge will:
+- Examine your API endpoint implementation
+- Check request/response handling
+- Identify missing error handling or validation
+- Suggest logging improvements for better observability
+
+### Scenario 3: Performance Bottlenecks
+
+**Problem**: Your application is slow but you don't know where.
+
+<Steps>
+  <Step title="Describe the symptoms">
+    ```
+    > The dashboard takes 10+ seconds to load. What could be causing the slowdown?
+    ```
+  </Step>
+  
+  <Step title="Code analysis">
+    Forge will analyze your data fetching, rendering logic, and identify expensive operations.
+  </Step>
+  
+  <Step title="Optimization suggestions">
+    Forge suggests specific optimizations like lazy loading, memoization, or database query improvements.
+  </Step>
+</Steps>
+
+## Advanced Debugging Techniques
+
+### Using Restricted Mode for Security
+
+When debugging sensitive codebases, use restricted mode:
+
+```bash
+forge --restricted
+```
+
+This enables enhanced security while still providing debugging assistance.
+
+### Git Conflict Debugging
+
+When merge conflicts occur:
+
+```
+> I need to merge branch 'feature/user-profile' into main but there are conflicts
+```
+
+Forge can:
+- Explain the conflicting changes
+- Suggest the best way to reconcile differences
+- Help you understand the impact of each change
+
+<Tip>
+Always test your fixes after implementing debugging suggestions. Use `cargo insta test` for Rust projects or your project's test suite.
+</Tip>
+
+## Best Practices
+
+1. **Be specific**: Provide exact error messages, file paths, and line numbers
+2. **Share context**: Explain what you were trying to accomplish when the error occurred
+3. **Iterate**: Don't hesitate to ask follow-up questions if the first solution doesn't work
+4. **Verify fixes**: Always test the proposed fixes in your environment
+5. **Learn patterns**: Pay attention to common causes of errors Forge identifies
+
+## Common Debugging Commands
+
+| Task | Example Prompt |
+|------|---------------|
+| Analyze error | `What's causing this TypeError in auth.js:45?` |
+| Find bugs | `Review this function for potential bugs` |
+| Performance issue | `Why is this query so slow?` |
+| Memory leak | `Help me find memory leaks in this component` |
+| Logic error | `This calculation is wrong but I can't see why` |
+
+## Next Steps
+
+- Learn about [Code Review](/guides/code-review) workflows
+- Explore [Testing](/guides/testing) strategies with Forge
+- Review [Best Practices](/guides/best-practices) for effective AI-assisted development

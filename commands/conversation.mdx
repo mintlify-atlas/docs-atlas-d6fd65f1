@@ -1,0 +1,382 @@
+---
+title: forge conversation
+description: Manage conversation history and state
+---
+
+The `conversation` command group (also accessible as `session`) manages conversation history, allowing you to list, resume, export, and manipulate past AI conversations.
+
+## Usage
+
+```bash
+forge conversation [SUBCOMMAND] [OPTIONS]
+forge session [SUBCOMMAND] [OPTIONS]  # Alias
+```
+
+## Subcommands
+
+### list
+
+List all conversation history.
+
+```bash
+forge conversation list
+```
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge conversation list --porcelain
+  ```
+</ParamField>
+
+### new
+
+Create a new conversation.
+
+```bash
+forge conversation new
+```
+
+### dump
+
+Export a conversation as JSON or HTML.
+
+```bash
+forge conversation dump <ID> [OPTIONS]
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID to export.
+  
+  ```bash
+  forge conversation dump 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--html" type="boolean" default="false">
+  Export as HTML instead of JSON.
+  
+  ```bash
+  forge conversation dump 550e8400-e29b-41d4-a716-446655440000 --html
+  ```
+</ParamField>
+
+### compact
+
+Compact a conversation to reduce token usage by removing redundant context.
+
+```bash
+forge conversation compact <ID>
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID to compact.
+  
+  ```bash
+  forge conversation compact 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+### retry
+
+Retry the last command without modifying context.
+
+```bash
+forge conversation retry <ID>
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID to retry.
+  
+  ```bash
+  forge conversation retry 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+### resume
+
+Resume a conversation in interactive mode.
+
+```bash
+forge conversation resume <ID>
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID to resume.
+  
+  ```bash
+  forge conversation resume 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+### show
+
+Show the last assistant message from a conversation.
+
+```bash
+forge conversation show <ID> [OPTIONS]
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID.
+  
+  ```bash
+  forge conversation show 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--md" type="boolean" default="false">
+  Print raw markdown without rendering.
+  
+  ```bash
+  forge conversation show 550e8400-e29b-41d4-a716-446655440000 --md
+  ```
+</ParamField>
+
+### info
+
+Show conversation details.
+
+```bash
+forge conversation info <ID>
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID.
+  
+  ```bash
+  forge conversation info 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+### stats
+
+Show conversation statistics.
+
+```bash
+forge conversation stats <ID> [OPTIONS]
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID.
+  
+  ```bash
+  forge conversation stats 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge conversation stats 550e8400-e29b-41d4-a716-446655440000 --porcelain
+  ```
+</ParamField>
+
+### clone
+
+Clone a conversation with a new ID.
+
+```bash
+forge conversation clone <ID> [OPTIONS]
+```
+
+<ParamField path="id" type="uuid" required>
+  Conversation ID to clone.
+  
+  ```bash
+  forge conversation clone 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+<ParamField path="--porcelain" type="boolean" default="false">
+  Output in machine-readable format.
+  
+  ```bash
+  forge conversation clone 550e8400-e29b-41d4-a716-446655440000 --porcelain
+  ```
+</ParamField>
+
+### delete
+
+Delete a conversation permanently.
+
+```bash
+forge conversation delete <ID>
+```
+
+<ParamField path="id" type="string" required>
+  Conversation ID to delete.
+  
+  ```bash
+  forge conversation delete 550e8400-e29b-41d4-a716-446655440000
+  ```
+</ParamField>
+
+## Examples
+
+### List All Conversations
+
+```bash
+forge conversation list
+```
+
+Example output:
+
+```
+Conversation History:
+
+ID                                     Date        Messages  Agent
+550e8400-e29b-41d4-a716-446655440000  2024-01-15  42        sage
+660e9500-f39c-52e5-b827-557766551111  2024-01-14  18        muse
+770fa611-g49d-63f6-c938-668877662222  2024-01-13  27        forge
+```
+
+### Resume a Conversation
+
+```bash
+forge conversation resume 550e8400-e29b-41d4-a716-446655440000
+```
+
+Alternatively, use the shorthand:
+
+```bash
+forge --cid 550e8400-e29b-41d4-a716-446655440000
+```
+
+### Export as JSON
+
+```bash
+forge conversation dump 550e8400-e29b-41d4-a716-446655440000 > conversation.json
+```
+
+### Export as HTML
+
+```bash
+forge conversation dump 550e8400-e29b-41d4-a716-446655440000 --html > conversation.html
+```
+
+### Show Last Message
+
+```bash
+forge conversation show 550e8400-e29b-41d4-a716-446655440000
+```
+
+Get raw markdown:
+
+```bash
+forge conversation show 550e8400-e29b-41d4-a716-446655440000 --md
+```
+
+### View Statistics
+
+```bash
+forge conversation stats 550e8400-e29b-41d4-a716-446655440000
+```
+
+Example output:
+
+```
+Conversation Statistics:
+
+  Messages:        42
+  User messages:   21
+  AI messages:     21
+  Total tokens:    125,430
+  Estimated cost:  $0.87
+  Duration:        45 minutes
+  Agent:           sage
+  Model:           anthropic/claude-sonnet-4
+```
+
+### Clone a Conversation
+
+```bash
+forge conversation clone 550e8400-e29b-41d4-a716-446655440000
+```
+
+Example output:
+
+```
+✓ Conversation cloned
+  New ID: 770fa611-g49d-63f6-c938-668877662222
+```
+
+### Compact a Conversation
+
+Reduce token usage by removing redundant context:
+
+```bash
+forge conversation compact 550e8400-e29b-41d4-a716-446655440000
+```
+
+Example output:
+
+```
+✓ Conversation compacted
+  Removed 35,420 tokens
+  New size: 90,010 tokens
+```
+
+### Delete a Conversation
+
+```bash
+forge conversation delete 550e8400-e29b-41d4-a716-446655440000
+```
+
+Example output:
+
+```
+✓ Conversation deleted
+```
+
+## Alternative Commands
+
+You can use `session` as an alias:
+
+```bash
+forge session list
+forge session resume 550e8400-e29b-41d4-a716-446655440000
+forge session show 550e8400-e29b-41d4-a716-446655440000
+```
+
+You can also use the `list` command:
+
+```bash
+forge list conversation
+forge list session
+```
+
+## Machine-Readable Output
+
+Many conversation commands support `--porcelain` for scripting:
+
+```bash
+forge conversation list --porcelain | jq '.conversations[] | select(.agent == "sage")'
+forge conversation stats 550e8400-e29b-41d4-a716-446655440000 --porcelain
+```
+
+## Storage Location
+
+Conversations are stored in:
+
+```
+~/.local/share/forge/conversations/
+```
+
+Each conversation is stored as a JSON file named with its UUID.
+
+## Related Commands
+
+- `forge --cid <ID>` - Resume a conversation
+- `forge info --cid <ID>` - Show info for a specific conversation
+- `forge` - Start a new conversation
+
+## Notes
+
+- Conversation IDs are UUIDs (e.g., `550e8400-e29b-41d4-a716-446655440000`)
+- Use `compact` to reduce token usage in long conversations
+- Exported HTML includes syntax highlighting and formatting
+- `clone` creates an independent copy with a new ID
+- `retry` is useful when the AI response was incomplete or incorrect

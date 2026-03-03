@@ -1,0 +1,403 @@
+---
+title: Installation
+description: Get Forge installed and configured in minutes with multiple installation methods
+---
+
+## Quick Install
+
+The fastest way to install Forge is using our installation script:
+
+```bash
+curl -fsSL https://forgecode.dev/cli | sh
+```
+
+This script automatically:
+- Detects your operating system and architecture
+- Downloads the appropriate binary
+- Installs Forge to your system
+- Sets up necessary permissions
+
+<Note>
+  The installation script supports macOS, Linux, and Windows (via WSL).
+</Note>
+
+## Installation Methods
+
+<Tabs>
+  <Tab title="Curl (Recommended)">
+    The recommended installation method for all platforms:
+
+    ```bash
+    curl -fsSL https://forgecode.dev/cli | sh
+    ```
+
+    <Steps>
+      <Step title="Download and run installer">
+        The script will download the latest release and install it automatically.
+      </Step>
+      
+      <Step title="Verify installation">
+        ```bash
+        forge --version
+        ```
+      </Step>
+
+      <Step title="Configure provider">
+        On first run, Forge will guide you through setting up your AI provider:
+        ```bash
+        forge provider login
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="From Source">
+    Build Forge from source if you want the latest development version:
+
+    <Warning>
+      Building from source requires Rust 1.92 or later.
+    </Warning>
+
+    ```bash
+    # Clone the repository
+    git clone https://github.com/antinomyhq/forge.git
+    cd forge
+
+    # Build release binary
+    cargo build --release
+
+    # The binary will be at target/release/forge
+    # Copy it to your PATH, for example:
+    sudo cp target/release/forge /usr/local/bin/
+    ```
+
+    <Steps>
+      <Step title="Install Rust">
+        If you don't have Rust installed:
+        ```bash
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+        ```
+      </Step>
+
+      <Step title="Clone and build">
+        ```bash
+        git clone https://github.com/antinomyhq/forge.git
+        cd forge
+        cargo build --release
+        ```
+      </Step>
+
+      <Step title="Install binary">
+        ```bash
+        sudo cp target/release/forge /usr/local/bin/
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Package Managers">
+    Installation via package managers (coming soon):
+
+    ```bash Homebrew (macOS)
+    # Coming soon
+    brew install forge
+    ```
+
+    ```bash Cargo
+    # Coming soon
+    cargo install forge-cli
+    ```
+
+    <Info>
+      Package manager support is under development. Use the curl installer for now.
+    </Info>
+  </Tab>
+</Tabs>
+
+## Provider Setup
+
+After installing Forge, you need to configure an AI provider. Forge supports multiple providers including OpenAI, Anthropic, Google Vertex AI, and more.
+
+### Interactive Configuration
+
+The easiest way to configure providers is using the interactive login:
+
+```bash
+forge provider login
+```
+
+This command will:
+1. Show you a list of available providers
+2. Prompt for required credentials (API keys, tokens, etc.)
+3. Securely store credentials in file-based storage
+4. Validate the configuration
+
+<Steps>
+  <Step title="Run provider login">
+    ```bash
+    forge provider login
+    ```
+  </Step>
+
+  <Step title="Select your provider">
+    Choose from the list of supported providers:
+    - OpenAI
+    - Anthropic
+    - Google Vertex AI
+    - OpenRouter
+    - Cerebras
+    - And more...
+  </Step>
+
+  <Step title="Enter credentials">
+    Provide your API key or authentication token when prompted.
+  </Step>
+
+  <Step title="Verify setup">
+    ```bash
+    forge info
+    ```
+    This shows your current configuration and active provider.
+  </Step>
+</Steps>
+
+### Supported Providers
+
+<AccordionGroup>
+  <Accordion title="OpenAI" icon="openai">
+    Configure OpenAI for access to GPT models:
+
+    ```bash
+    forge provider login
+    # Select OpenAI and enter your API key
+    ```
+
+    Then set your preferred model:
+    ```bash
+    forge config set model o3-mini-high
+    ```
+
+    Get your API key from [platform.openai.com](https://platform.openai.com).
+  </Accordion>
+
+  <Accordion title="Anthropic" icon="robot">
+    Configure Anthropic for Claude models:
+
+    ```bash
+    forge provider login
+    # Select Anthropic and enter your API key
+    ```
+
+    Set the model:
+    ```bash
+    forge config set model claude-3.7-sonnet
+    ```
+
+    Get your API key from [console.anthropic.com](https://console.anthropic.com).
+  </Accordion>
+
+  <Accordion title="Google Vertex AI" icon="google">
+    Configure Google Vertex AI for Gemini and Claude models:
+
+    <Steps>
+      <Step title="Install and authenticate with gcloud">
+        ```bash
+        gcloud auth login
+        gcloud config set project YOUR_PROJECT_ID
+        ```
+      </Step>
+
+      <Step title="Get authentication token">
+        ```bash
+        gcloud auth print-access-token
+        ```
+      </Step>
+
+      <Step title="Configure Forge">
+        ```bash
+        forge provider login
+        # Select Google Vertex AI
+        # Enter your project ID, location, and auth token
+        ```
+      </Step>
+
+      <Step title="Set model">
+        ```bash
+        forge config set model google/gemini-2.5-pro
+        ```
+      </Step>
+    </Steps>
+
+    Available models:
+    - Gemini: `gemini-2.5-pro`, `gemini-2.0-flash`
+    - Claude: `claude-sonnet-4@20250514`
+  </Accordion>
+
+  <Accordion title="OpenRouter" icon="route">
+    Access multiple models through a single API:
+
+    ```bash
+    forge provider login
+    # Select OpenRouter and enter your API key
+    ```
+
+    Get your API key from [openrouter.ai](https://openrouter.ai).
+  </Accordion>
+
+  <Accordion title="Other Providers" icon="ellipsis">
+    Forge supports many other providers:
+    - **Cerebras**: High-performance inference
+    - **Groq**: Fast LLM inference
+    - **x.ai**: Grok models
+    - **Amazon Bedrock**: Via Bedrock Access Gateway
+    - **OpenAI-compatible**: Any OpenAI API-compatible endpoint
+
+    Use `forge list provider` to see all available providers.
+  </Accordion>
+</AccordionGroup>
+
+## Verify Installation
+
+After installation and configuration, verify everything is working:
+
+<CodeGroup>
+
+```bash Check Version
+forge --version
+```
+
+```bash Check Configuration
+forge info
+```
+
+```bash List Providers
+forge list provider
+```
+
+```bash List Models
+forge list model
+```
+
+```bash Test Interactive Mode
+forge
+```
+
+</CodeGroup>
+
+## Shell Integration (Optional)
+
+Enhance your terminal experience with Forge's ZSH integration:
+
+```bash
+forge setup
+```
+
+This command:
+- Installs the ZSH plugin for command shortcuts
+- Sets up the ZSH theme with model/cost display
+- Configures keyboard shortcuts
+- Enables natural language command transformation
+
+<Note>
+  Shell integration is currently available for ZSH. Bash and Fish support coming soon.
+</Note>
+
+### What You Get
+
+- **Command shortcuts**: Type `# your natural language command` and press Enter
+- **Visual feedback**: See current model and conversation cost in your prompt
+- **Keyboard shortcuts**: Quick access to Forge commands
+- **Tab completion**: Auto-complete for all Forge commands
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start Guide"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Learn the basics and start your first session
+  </Card>
+  <Card
+    title="Configure Providers"
+    icon="gear"
+    href="/essentials/providers"
+  >
+    Deep dive into provider configuration
+  </Card>
+  <Card
+    title="Shell Integration"
+    icon="terminal"
+    href="/essentials/shell-integration"
+  >
+    Set up ZSH plugin and theme
+  </Card>
+  <Card
+    title="Command Reference"
+    icon="book"
+    href="/api-reference/cli"
+  >
+    Explore all available commands
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found: forge">
+    The installation directory is not in your PATH.
+
+    **Solution**: Add the installation directory to your PATH:
+    ```bash
+    echo 'export PATH="$HOME/.forge/bin:$PATH"' >> ~/.zshrc
+    source ~/.zshrc
+    ```
+  </Accordion>
+
+  <Accordion title="Provider authentication failed">
+    Invalid API key or token.
+
+    **Solution**: Verify your credentials and re-run:
+    ```bash
+    forge provider logout
+    forge provider login
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied">
+    The binary doesn't have execute permissions.
+
+    **Solution**: Make the binary executable:
+    ```bash
+    chmod +x /path/to/forge
+    ```
+  </Accordion>
+
+  <Accordion title="SSL/TLS certificate errors">
+    Certificate verification issues.
+
+    **Solution**: Check system time and update CA certificates:
+    ```bash
+    # macOS
+    brew upgrade ca-certificates
+
+    # Linux (Ubuntu/Debian)
+    sudo apt-get update && sudo apt-get install ca-certificates
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Updating Forge
+
+Keep Forge up to date with the latest features and improvements:
+
+```bash
+forge update
+```
+
+This command checks for the latest release and prompts you to install it.
+
+<Tip>
+  Use `forge update --no-confirm` to skip the confirmation prompt.
+</Tip>

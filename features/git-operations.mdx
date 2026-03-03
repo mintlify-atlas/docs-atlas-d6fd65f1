@@ -1,0 +1,532 @@
+---
+title: Git Operations
+description: AI-assisted git workflows including commit message generation and conflict resolution
+icon: git-alt
+---
+
+Forge provides intelligent git integration that helps with commit messages, branch management, pull requests, and conflict resolution. It understands your changes contextually and generates professional git operations automatically.
+
+## Overview
+
+Forge's git integration:
+
+- **Generates commit messages** from staged changes
+- **Creates pull request descriptions** with context
+- **Resolves merge conflicts** with AI assistance
+- **Analyzes branch changes** for comprehensive reviews
+- **Follows conventions** like Conventional Commits
+
+<Card title="Key Benefit" icon="sparkles">
+  Never write another generic "fix stuff" commit message. Forge analyzes your changes and generates descriptive, conventional commit messages automatically.
+</Card>
+
+## Commit Message Generation
+
+### Basic Usage
+
+<Tabs>
+  <Tab title="ZSH Plugin">
+    ```bash
+    # Stage your changes
+    git add .
+    
+    # Generate and commit with AI message
+    : Generate a commit message and commit the changes
+    ```
+  </Tab>
+  
+  <Tab title="CLI Command">
+    ```bash
+    # Generate message only (preview)
+    forge git commit-message
+    
+    # Generate and commit
+    forge git commit
+    ```
+  </Tab>
+  
+  <Tab title="From Diff">
+    ```bash
+    # Generate from piped diff
+    git diff | forge git commit-message
+    
+    # Specify max diff size (100KB)
+    git diff | forge git commit-message --max-diff-size 100000
+    ```
+  </Tab>
+</Tabs>
+
+### How It Works
+
+When you generate a commit message, Forge:
+
+1. **Captures context**:
+   - Staged or unstaged changes (git diff)
+   - Current branch name
+   - Recent commit messages (last 20)
+   - Additional context if provided
+
+2. **Analyzes changes**:
+   - Identifies modified files and functions
+   - Understands the nature of changes
+   - Recognizes patterns (feature, fix, refactor)
+
+3. **Generates message**:
+   - Follows Conventional Commits format
+   - Summarizes changes concisely
+   - Focuses on "why" not just "what"
+   - Adapts to your project's style
+
+4. **Commits properly**:
+   - Sets you as the author (from git config)
+   - Sets ForgeCode as the committer
+   - Properly attributes the commit to both
+
+### Commit Format
+
+Forge generates commits following Conventional Commits:
+
+```
+type(scope): brief description
+
+- Detailed explanation of changes
+- Why the changes were made
+- Impact on the system
+```
+
+**Examples:**
+
+```
+feat(auth): add JWT token refresh mechanism
+
+- Implement automatic token refresh before expiry
+- Add refresh token rotation for security
+- Handle refresh failures with user re-authentication
+```
+
+```
+fix(api): resolve race condition in user session handling
+
+- Add mutex lock for concurrent session access
+- Prevent duplicate session creation
+- Fixes issue where users occasionally logged out unexpectedly
+```
+
+```
+refactor(database): optimize query performance for user lookups
+
+- Replace N+1 queries with batch loading
+- Add database indexes for email and username
+- Reduces average lookup time from 200ms to 15ms
+```
+
+### Configuration
+
+Control commit message generation:
+
+```bash
+# Maximum diff size in bytes (default: unlimited)
+export FORGE_MAX_COMMIT_DIFF=100000
+
+# For shell plugin
+export FORGE_MAX_COMMIT_DIFF=100000
+```
+
+**Why limit diff size?**
+- Large diffs can exceed model context limits
+- Truncation focuses on most important changes
+- Improves generation speed and quality
+
+### Adding Context
+
+Provide additional context for better messages:
+
+<CodeGroup>
+  ```bash Interactive
+  : Generate commit message for these auth changes
+  : Context: Implementing OAuth2 flow for third-party login
+  ```
+  
+  ```bash CLI Flag
+  forge git commit --additional-context "Fixing critical security vulnerability"
+  ```
+</CodeGroup>
+
+## Pull Request Workflows
+
+### Creating Pull Requests
+
+Forge integrates with GitHub CLI (`gh`) for PR creation:
+
+```bash
+# In your feature branch
+: Create a pull request for this branch
+```
+
+Forge will:
+1. Analyze all commits since branching from main/master
+2. Review the full diff of changes
+3. Generate comprehensive PR description
+4. Create the PR using `gh pr create`
+
+### PR Description Format
+
+```markdown
+## Summary
+
+- Brief overview of changes
+- Key features or fixes added
+- Impact on existing functionality
+
+## Motivation and Context
+
+Explanation of why these changes were needed and the problem they solve.
+
+## Testing Performed
+
+- Unit tests added/updated
+- Integration tests verified
+- Manual testing scenarios
+
+## Breaking Changes
+
+List any breaking changes and migration steps (if applicable).
+```
+
+### Updating PR Descriptions
+
+Use custom commands to update PR descriptions:
+
+```bash
+# Using the github-pr-description command
+forge -c commands/github-pr-description.md
+```
+
+This command:
+- Analyzes current PR changes
+- Generates updated description
+- Updates the PR using `gh` CLI
+
+## Merge Conflict Resolution
+
+Get AI assistance with merge conflicts:
+
+<Tabs>
+  <Tab title="Interactive Resolution">
+    ```bash
+    # After merge conflict occurs
+    git merge feature-branch
+    # CONFLICT in src/app.rs
+    
+    # Get help from Forge
+    : Help me resolve git conflicts in @[src/app.rs]
+    ```
+    
+    Forge will:
+    - Analyze both versions
+    - Understand the conflicting changes
+    - Suggest resolution strategy
+    - Explain trade-offs
+  </Tab>
+  
+  <Tab title="Explain Conflicts">
+    ```bash
+    # Understand what's conflicting
+    : Explain the merge conflicts and differences
+    ```
+    
+    Get detailed explanation:
+    - What changed in each branch
+    - Why conflicts occurred
+    - Which changes to keep
+    - Potential side effects
+  </Tab>
+</Tabs>
+
+## Branch Analysis
+
+Analyze branch changes before merging:
+
+```bash
+# Review all changes in current branch
+: Review the current branch changes
+
+# Compare with main branch
+: Compare this branch with main and summarize differences
+
+# Identify potential issues
+: Check for any breaking changes in this branch
+```
+
+## Git Workflow Patterns
+
+### Feature Development
+
+```bash
+# Start feature branch
+git checkout -b feature/new-caching
+
+# Make changes and stage
+git add .
+
+# Generate good commit message
+: Generate commit message for these caching changes
+forge git commit
+
+# Continue development with context
+: Add tests for the caching layer @[tests/cache_test.rs]
+
+# Prepare for PR
+: Create a pull request explaining the caching improvements
+```
+
+### Bug Fixes
+
+```bash
+# Create fix branch
+git checkout -b fix/auth-token-expiry
+
+# Make changes
+vim src/auth/token.rs
+
+# Commit with proper format
+git add src/auth/token.rs
+forge git commit
+# Generates: "fix(auth): resolve token expiry check bug"
+
+# Create PR with details
+: Create PR explaining this bug fix and its impact
+```
+
+### Refactoring
+
+```bash
+# Stage refactored code
+git add src/database/
+
+# Generate refactor commit
+forge git commit
+# Generates: "refactor(database): improve query builder architecture"
+
+# Review changes
+: Review the refactoring changes and check for issues
+```
+
+## Advanced Features
+
+### Commit Attribution
+
+Forge properly sets git authorship:
+
+```bash
+# Author: Your Name <your@email.com>  (from git config)
+# Committer: ForgeCode <noreply@forgecode.dev>
+```
+
+This gives credit to both you and Forge:
+- **Author**: Who wrote the changes (you)
+- **Committer**: Who created the commit (ForgeCode)
+
+### Co-authored Commits
+
+For team workflows, include co-authors:
+
+```bash
+: Generate commit message
+: Add co-author: Jane Doe <jane@example.com>
+```
+
+### Working with Staged vs Unstaged
+
+Forge intelligently handles both:
+
+```bash
+# Staged changes take priority
+git add src/important.rs
+forge git commit  # Only commits staged files
+
+# Unstaged changes as fallback
+# (no staged files)
+forge git commit  # Analyzes unstaged, suggests staging
+```
+
+### Diff Truncation
+
+For large changes:
+
+```bash
+# Truncate to 50KB
+forge git commit-message --max-diff-size 50000
+
+# Forge will:
+# 1. Truncate at character boundary
+# 2. Focus on most important changes
+# 3. Generate message from available context
+```
+
+## Git Commands Reference
+
+<CodeGroup>
+  ```bash Commit Message
+  forge git commit-message
+  forge git commit-message --max-diff-size 100000
+  git diff | forge git commit-message
+  ```
+  
+  ```bash Commit
+  forge git commit
+  forge git commit --additional-context "Security fix"
+  ```
+  
+  ```bash PR Creation
+  # Via interaction
+  : Create a pull request for this branch
+  
+  # Direct with gh CLI
+  gh pr create --title "feat: new feature" --body "$(forge git pr-description)"
+  ```
+</CodeGroup>
+
+## Best Practices
+
+<Steps>
+  <Step title="Atomic Commits">
+    Stage related changes together:
+    
+    ```bash
+    # Good: Related changes
+    git add src/auth/*.rs tests/auth_test.rs
+    forge git commit
+    
+    # Bad: Unrelated changes
+    git add .  # Everything including unrelated files
+    forge git commit
+    ```
+  </Step>
+  
+  <Step title="Review Generated Messages">
+    Always review before committing:
+    
+    ```bash
+    # Preview first
+    forge git commit-message
+    
+    # If good, commit
+    forge git commit
+    
+    # Or edit manually
+    git commit -m "$(forge git commit-message | edit)"
+    ```
+  </Step>
+  
+  <Step title="Provide Context">
+    Add context for better messages:
+    
+    ```bash
+    # Good
+    : Generate commit for this security fix
+    : Context: Addresses CVE-2024-1234
+    
+    # Better
+    forge git commit --additional-context "Fixes CVE-2024-1234 by validating input"
+    ```
+  </Step>
+  
+  <Step title="Follow Project Conventions">
+    Forge learns from your commit history:
+    
+    ```bash
+    # Your project uses specific prefixes
+    # Forge will adapt to patterns like:
+    # [JIRA-123] feat: description
+    # 🎨 style: description
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No changes to commit error">
+    ```bash
+    # Ensure you have changes
+    git status
+    
+    # Stage changes
+    git add <files>
+    
+    # Or commit all tracked changes
+    git add -u
+    forge git commit
+    ```
+  </Accordion>
+  
+  <Accordion title="Generated message is too generic">
+    - Provide additional context with `--additional-context`
+    - Make more focused, atomic commits
+    - Check that meaningful changes are staged
+    - Verify diff is not truncated too aggressively
+  </Accordion>
+  
+  <Accordion title="Commit fails with git error">
+    ```bash
+    # Check git config
+    git config user.name
+    git config user.email
+    
+    # Set if missing
+    git config --global user.name "Your Name"
+    git config --global user.email "your@email.com"
+    ```
+  </Accordion>
+  
+  <Accordion title="PR creation fails">
+    - Install GitHub CLI: `brew install gh`
+    - Authenticate: `gh auth login`
+    - Verify you're in a git repository with remote
+    - Check you're on a branch (not detached HEAD)
+  </Accordion>
+</AccordionGroup>
+
+## Integration Examples
+
+### With Custom Commands
+
+Create a complete git workflow command:
+
+```markdown
+---
+name: prepare-pr
+description: Prepare branch for pull request
+---
+
+1. Run tests and linting
+2. Stage all changes: `git add .`
+3. Generate and create commit with descriptive message
+4. Push branch to remote
+5. Create pull request with comprehensive description
+6. Add reviewers based on CODEOWNERS
+```
+
+### With Shell Integration
+
+Streamlined git workflow:
+
+```bash
+# Make changes
+vim src/feature.rs
+
+# Quick commit
+: Stage and commit these changes
+
+# Push and create PR
+: Push to remote and create pull request
+
+# All in one conversation context
+```
+
+## Related Features
+
+- [Shell Integration](/features/shell-integration) - Git operations via `:` commands
+- [Custom Commands](/features/custom-commands) - Automate git workflows
+- [Multi-Agent Workflows](/features/multi-agent-workflows) - Orchestrate complex git operations
