@@ -1,0 +1,197 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Forge",
+  "projectDescription": "AI-enhanced terminal development environment that integrates multiple LLM providers for intelligent coding assistance.",
+  "theme": "aspen",
+  "primaryColor": "#FF6B35",
+  "lightColor": "#FFB84D",
+  "darkColor": "#D64933",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/interactive-mode",
+              "concepts/agents",
+              "concepts/workflows",
+              "concepts/conversations",
+              "concepts/model-context-protocol"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/overview",
+              "configuration/providers",
+              "configuration/forge-yaml",
+              "configuration/environment-variables",
+              "configuration/custom-rules"
+            ]
+          },
+          {
+            "group": "Providers",
+            "pages": [
+              "providers/overview",
+              "providers/openrouter",
+              "providers/anthropic",
+              "providers/openai",
+              "providers/vertex-ai",
+              "providers/aws-bedrock",
+              "providers/custom-providers"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/semantic-search",
+              "features/custom-commands",
+              "features/shell-integration",
+              "features/git-operations",
+              "features/multi-agent-workflows"
+            ]
+          },
+          {
+            "group": "Advanced Usage",
+            "pages": [
+              "advanced/mcp-servers",
+              "advanced/custom-agents",
+              "advanced/sandboxes",
+              "advanced/conversation-management",
+              "advanced/data-processing"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/debugging",
+              "guides/code-review",
+              "guides/refactoring",
+              "guides/testing",
+              "guides/best-practices"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Command Reference",
+        "groups": [
+          {
+            "group": "CLI Commands",
+            "pages": [
+              "commands/overview",
+              "commands/forge",
+              "commands/agent",
+              "commands/provider",
+              "commands/config",
+              "commands/conversation",
+              "commands/workspace",
+              "commands/mcp",
+              "commands/cmd",
+              "commands/commit",
+              "commands/suggest"
+            ]
+          },
+          {
+            "group": "Interactive Commands",
+            "pages": [
+              "commands/interactive/overview",
+              "commands/interactive/slash-commands",
+              "commands/interactive/keyboard-shortcuts"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Integration",
+        "groups": [
+          {
+            "group": "Shell Integration",
+            "pages": [
+              "integration/zsh-plugin",
+              "integration/zsh-theme",
+              "integration/shell-completions"
+            ]
+          },
+          {
+            "group": "Editor Integration",
+            "pages": [
+              "integration/vscode"
+            ]
+          },
+          {
+            "group": "CI/CD",
+            "pages": [
+              "integration/github-actions",
+              "integration/automation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/troubleshooting",
+              "resources/faq",
+              "resources/contributing",
+              "resources/changelog",
+              "resources/community"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-provider AI support (Claude, GPT, Gemini, Grok, DeepSeek, and 300+ models)",
+    "Interactive terminal-based development environment",
+    "Semantic code search with workspace indexing",
+    "Model Context Protocol (MCP) for extensible tool integration",
+    "Multi-agent workflows for complex tasks",
+    "Custom commands and slash commands",
+    "Git integration with AI-powered commit messages",
+    "Shell integration with ZSH plugin and theme",
+    "Conversation management and history",
+    "Configurable via forge.yaml with custom rules"
+  ],
+  "publicApiSurface": [
+    "forge - Main interactive mode",
+    "forge --prompt - Direct prompt execution",
+    "forge provider login - Configure AI providers",
+    "forge provider logout - Remove provider credentials",
+    "forge provider list - List available providers",
+    "forge agent list - List available agents",
+    "forge config get - Get configuration values",
+    "forge config set - Set configuration values",
+    "forge config list - List all configuration",
+    "forge conversation list - List conversation history",
+    "forge conversation show - Show conversation details",
+    "forge conversation delete - Delete conversations",
+    "forge workspace sync - Index workspace for semantic search",
+    "forge workspace list - List indexed workspaces",
+    "forge mcp add - Add MCP server",
+    "forge mcp remove - Remove MCP server",
+    "forge mcp list - List MCP servers",
+    "forge cmd list - List custom commands",
+    "forge cmd execute - Execute custom command",
+    "forge commit - Generate AI commit messages",
+    "forge suggest - Suggest shell commands from natural language",
+    "forge info - Show configuration and status",
+    "forge update - Update to latest version",
+    "forge setup - Setup ZSH integration",
+    "forge doctor - Run diagnostics"
+  ]
+}
